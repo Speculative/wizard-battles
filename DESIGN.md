@@ -20,12 +20,14 @@ The central design principle is **legibility over optimality** — the fights sh
 - **[src/world.ts](src/world.ts)** — owns contestants + spells; drives per-frame updates; resolves contestant-vs-contestant collisions; holds a reference to the camera (used by status displays for billboarding).
 - **[src/arena.ts](src/arena.ts)** — builds the floor + two rear walls + wireframe prism edges + gridlines.
 - **[src/kinematics.ts](src/kinematics.ts)** — `KinematicBody` class: position, velocity, intent; integrates acceleration toward intent with turn-rate cap, friction when idle, max-speed clamp.
-- **[src/statusDisplay.ts](src/statusDisplay.ts)** — HP / vigor / stamina bars billboarded to the camera, rendered above each contestant.
+- **[src/statusDisplay.ts](src/statusDisplay.ts)** — HP + stamina bars billboarded to the camera, rendered above each contestant.
 - **[src/materials.ts](src/materials.ts)** — shared toon gradient map; inverted-hull outline helper.
 - **[src/contestants/contestant.ts](src/contestants/contestant.ts)** — `Contestant` interface (mesh, position, velocity, facing, radius, hp, alive, update).
-- **[src/contestants/basicWizard.ts](src/contestants/basicWizard.ts)** — first concrete contestant. Holds a kinematic body, a state machine (see below), stamina + vigor, engagement-range oscillation, facing with strafe tax, committed lateral dodges, charged-fireball casts, status display, speed trail.
+- **[src/contestants/basicWizard.ts](src/contestants/basicWizard.ts)** — first concrete contestant. Holds a kinematic body, a state machine (see below), stamina, engagement-range oscillation, facing with strafe tax, committed lateral dodges, charged-fireball casts with predictive aiming, status display, speed trail.
 - **[src/spells/spell.ts](src/spells/spell.ts)** — `Spell` interface (mesh, position, velocity, caster, dead, update).
-- **[src/spells/fireball.ts](src/spells/fireball.ts)** — straight-line projectile, damage on collision; supports `frozen` mode during its caster's charge window, released with `setVelocityFromDirection` on cast completion.
+- **[src/spells/fireball.ts](src/spells/fireball.ts)** — four-layer fiery projectile with sphere-node trail. Supports `frozen` mode during caster's charge window; `setPosition` for caster-relative positioning during charge; `setVelocityFromDirection` on release. Spawns an `Explosion` and a `ParticleBurst` on impact.
+- **[src/spells/explosion.ts](src/spells/explosion.ts)** — short-lived expanding-sphere visual effect. Pure cosmetic; no damage.
+- **[src/spells/particleBurst.ts](src/spells/particleBurst.ts)** — `THREE.Points`-based particle system (single draw call). Soft circular texture built once via canvas, shared across bursts.
 - **[src/config.ts](src/config.ts)** — arena and camera constants.
 
 ## Rendering notes
@@ -35,9 +37,11 @@ The central design principle is **legibility over optimality** — the fights sh
 - **Shadows:** single `SpotLight` above-front-right of arena center casts shadows on the floor *and walls*. Uses `BasicShadowMap` — `PCFSoftShadowMap` and `PCFShadowMap` are broken/deprecated in Three.js r184 and don't render at all. Higher shadow map resolution (2048) compensates for the resulting aliasing.
 - **Flat arena surfaces:** floor + walls are `MeshStandardMaterial` with high `emissive` so they read as uniform color despite being lit. The non-emissive `color` component is what makes shadows visible. Walls tilt slightly more emissive than the floor (80%/20% vs 65%/35%) because their light-facing angle is glancier — without the bias they'd read darker than the floor.
 - **Prism edges:** `LineSegments` with `polygonOffset` on walls/floor so edges sit in a depth-buffer gap — no z-fighting, still correctly occluded by contestants crossing in front.
-- **Speed trails:** short fading-color `THREE.Line` behind each wizard during sprint and dodge, sampled at 30 ms intervals.
-- **Status bars:** plane meshes above each wizard, quaternion-copied from the camera each frame for billboarding; `depthTest: false` + `renderOrder: 10` so bars render over everything.
-- **Charging visual:** while a wizard is in the `charging` state, its fireball exists as a spell instance with `frozen = true`, positioned each frame in front of the caster along the aim direction. On release, the fireball receives a fresh velocity toward the target's current position.
+- **Speed trails:** short fading-color `THREE.Line` behind each wizard during sprint and dodge, sampled at 30 ms intervals. Buffer wipes cleanly on state transitions (prevents "stuck anchor" artifacts). Fade removes from the tail, not the head, so the trail recedes into the wizard instead of staying pinned at sprint origin.
+- **Status bars:** plane meshes above each wizard, quaternion-copied from the camera each frame for billboarding; `depthTest: false` + `renderOrder: 10` so bars render over everything. HP on top, stamina below.
+- **Charging visual:** while a wizard is in the `charging` state, its fireball exists as a spell instance with `frozen = true`, positioned each frame via `Fireball.setPosition(...)` in front of the caster along the aim direction. On release, the fireball receives a fresh velocity from `computeAimDirection` (predictive lead + decaying Gaussian noise).
+- **Fireball appearance:** four nested spheres with size 55% → 135% of base radius, forming a color gradient from warm-orange core (solid, normal-blended) through orange / red-orange / deep red additive halos. Saturated oranges rather than whites — whitish cores were reading as off-model. Short trail of pooled additive-blended sphere nodes sampled every 25 ms, fading with a quadratic falloff.
+- **Explosion effect:** on fireball impact (hit target, wall, or floor — not on lifetime-expiration), spawns a short-lived `Explosion` (expanding orange+red sphere) plus a `ParticleBurst`. Burst uses `THREE.Points` with a canvas-generated soft radial texture (orange → dark red → transparent), additive-blended, 28 particles with random 3D velocities, upward bias, gravity pulling them back down over ~0.55 s.
 
 ## Movement & Physics
 
@@ -90,14 +94,13 @@ Committed lateral bursts, not sprints. Triggered when an enemy projectile is ins
 
 Costs stamina proportional to duration used; has a cooldown + minimum stamina to start. Ends in `recovering` (brief motionless tail) so dodges are real commits, not free reactions.
 
-### Endurance: stamina + vigor
+### Endurance: stamina only (for now)
 
-Two-tier system, both visualized as bars above each contestant:
+Single short-term resource: **stamina** (0–3.0) drains on sprint and dodge; regens when not. Empty stamina while sprinting → forced `recovering`. Resets at match start.
 
-- **Stamina** (short-term, 0–3.0): drains on sprint and dodge; regens when not. Empty → forced `recovering`. Resets on match end.
-- **Vigor** (long-term, 0–1.0): drains slowly per match (~1% per second); scales `maxSpeed` down to ~55% as it approaches zero. Wizards tire as matches go on.
+We originally had a second long-term "vigor" axis that slowly drained and scaled `maxSpeed` down over a match. It produced the degenerate failure mode of all fights collapsing into dodge-duels once vigor got low (sprint speed dropped with vigor, dodge impulse didn't → dodges became relatively better). Removed; can reintroduce later if a multi-match or tournament mechanic needs it.
 
-Visualization: vigor fills the left portion of the lower bar (70% of bar width max), stamina is tacked onto the right end of the current vigor fill (30% of bar width max). Both sit in a shared background envelope.
+Visualization: two stacked bars above each wizard. HP on top (green → red), stamina below (orange).
 
 ### Engagement-range oscillation (temporary hack, pre-tactic layer)
 
@@ -196,13 +199,13 @@ Log which axis drove each decision — useful for tuning and for the commentary 
 
 ### Learning arc (legible, within-match, persistable across matches)
 
-1. **Aim improvement.** Predictive aiming (lead target based on velocity) with Gaussian noise on angle. Decay σ with shots fired. Early shots miss wide, later shots hit.
-2. **Opponent modeling.** Log opponent's reaction distribution per spell type. Bias spell selection toward spells the opponent handles worst.
-3. **Habit formation.** Nudge *tactic* scores on success/failure, small learning rate. Signature moves emerge within a match, reputations across matches.
+1. **Aim improvement** — *implemented*. Predictive lead (quadratic solve: projectile speed vs target velocity) with Gaussian angle noise via Box-Muller; σ decays exponentially from 0.2 rad toward 0.02 rad with decay constant 25 shots fired. Resolved at release time, not charge start, so the charge commits before the solution is computed. See `BasicWizard.computeAimDirection`.
+2. **Opponent modeling.** Log opponent's reaction distribution per spell type. Bias spell selection toward spells the opponent handles worst. *Deferred.*
+3. **Habit formation.** Nudge *tactic* scores on success/failure, small learning rate. Signature moves emerge within a match, reputations across matches. *Deferred — needs tactic layer first.*
 
 ### Prediction
 
-Aiming uses **predictive** targeting (aim where target will be at projectile arrival), not reactive (aim at current position). Biggest single factor in whether the AI looks smart. Start with linear extrapolation from velocity; upgrade later if needed.
+Aiming uses **predictive** targeting (aim where target will be at projectile arrival), not reactive (aim at current position). Biggest single factor in whether the AI looks smart. Current implementation uses linear extrapolation from target velocity; fine for now. Falls back to aim-at-current-position when target is faster than projectile (no real solution to the lead quadratic).
 
 ### Where ML belongs
 
@@ -226,32 +229,35 @@ ML stays *out* of the decision layer — hand-authored utility is more legible a
 
 - Kinematic body + ground physics (accel, friction, turn rate)
 - Movement states (idle, walking, running, sprinting, dodging, charging, recovering) with per-state stats
-- Stamina (short-term) + vigor (long-term) resources
+- Stamina (short-term) resource — vigor was removed after degenerate-dodge-loop failure mode
 - Facing vector on `Contestant`; attention-driven facing on `BasicWizard`; strafe tax on speed
 - Committed lateral dodges with closest-approach threat filter, stamina-scaled duration, post-dodge recovery
+- Sprint commits movement direction; facing can glance off-axis within a 75° cone
 - Charged fireball casts (pre-cast window where the spell follows the caster, released on state exit)
-- Status bars (HP, vigor + stamina) billboarded above each wizard
+- Predictive aiming with decaying Gaussian noise (quadratic lead solve, σ decays with shots fired)
+- Engagement-range oscillation (temporary hack to break duel lock; will be subsumed by tactic layer)
+- Sprint triggered by large deviation from preferred range, not just absolute distance to target
+- Status bars (HP + stamina) billboarded above each wizard
 - Speed trails during sprint / dodge
-- Engagement-range oscillation (temporary hack to break duel lock; replaced by tactic layer eventually)
+- Fireball visual polish: four-layer orange gradient, trail, impact explosion, `THREE.Points` particle burst (POC confirming the Points pipeline works end-to-end)
 
 ### Next
 
-Predictive aiming is the single biggest legibility lever and should land before tactics — fights look much smarter when wizards lead targets. After that, the tactic layer is the next big leap; once it lands, a lot of the current ad-hoc behavior (range oscillation, sprint triggers, charge gating) collapses into proper tactic choices.
+Tactic layer is the next big leap. Once it lands, a lot of the current ad-hoc behavior (range oscillation, sprint triggers, charge gating) collapses into proper tactic choices.
 
-1. **Predictive aiming with decaying noise.** Linear extrapolation of target velocity + projectile speed to compute lead position. Add Gaussian angular noise; decay σ with shots-fired count to produce the in-match learning arc.
-2. **Tactic catalog** (6–12 named tactics, entry/continuation conditions, action pools).
-3. **Tactic-level utility scoring** with commitment timers and interrupt list. Subsumes engagement-range hack.
-4. **Per-tactic action selection.**
-5. **Steering behaviors at the control layer** (seek/flee/separate/pursue as reusable primitives rather than bespoke logic inside `BasicWizard`).
-6. **Personality vector** wired into tactic and action scoring.
-7. **Projectile kinematics for physical projectiles** (distinct from magical spells; levitated terrain etc.).
-8. **Predicted self-position helper** (forward-sim given current velocity + action). Generalize the one-off dodge-filter version into a reusable AI helper.
-9. **Commitment-cost term** usable by action-selection utility.
-10. **Reaction-time delay** on AI stimulus response *(likely requires an event queue — defer the design)*.
-11. **Per-contestant persistence** (habit weights on tactics, opponent models, aim skill).
-12. **Opponent reaction modeling.**
-13. **Jumps** + airborne state + air control (when the vertical axis starts to matter).
-14. *(Later)* MAP-Elites for personality generation.
-15. *(Later)* Learned trajectory predictor.
-16. *(Optional)* LLM commentary over event log.
+1. **Tactic catalog** (6–12 named tactics, entry/continuation conditions, action pools).
+2. **Tactic-level utility scoring** with commitment timers and interrupt list. Subsumes engagement-range hack.
+3. **Per-tactic action selection.**
+4. **Steering behaviors at the control layer** (seek/flee/separate/pursue as reusable primitives rather than bespoke logic inside `BasicWizard`).
+5. **Personality vector** wired into tactic and action scoring.
+6. **Projectile kinematics for physical projectiles** (distinct from magical spells; levitated terrain etc.).
+7. **Predicted self-position helper** (forward-sim given current velocity + action). Generalize the one-off dodge-filter version into a reusable AI helper.
+8. **Commitment-cost term** usable by action-selection utility.
+9. **Reaction-time delay** on AI stimulus response *(likely requires an event queue — defer the design)*.
+10. **Per-contestant persistence** (habit weights on tactics, opponent models, aim skill).
+11. **Opponent reaction modeling.**
+12. **Jumps** + airborne state + air control (when the vertical axis starts to matter).
+13. *(Later)* MAP-Elites for personality generation.
+14. *(Later)* Learned trajectory predictor.
+15. *(Optional)* LLM commentary over event log.
 

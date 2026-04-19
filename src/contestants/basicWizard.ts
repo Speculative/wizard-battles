@@ -1,10 +1,16 @@
 import * as THREE from "three";
 import type { Contestant } from "./contestant";
 import type { World } from "../world";
-import { Fireball } from "../spells/fireball";
+import { Fireball, FIREBALL_SPEED } from "../spells/fireball";
 import { getToonGradient, makeOutline } from "../materials";
 import { KinematicBody, type MovementStats } from "../kinematics";
 import { StatusDisplay } from "../statusDisplay";
+
+function gaussian(): number {
+  const u = 1 - Math.random();
+  const v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
 
 const RADIUS = 22;
 const FLOAT_HEIGHT = RADIUS * 1.5;
@@ -15,6 +21,10 @@ const PROJECTILE_RADIUS_ESTIMATE = 12;
 const SPRINT_CLOSE_RANGE_MIN = 320;
 const FIRE_COOLDOWN = 1.4;
 const CHARGE_DURATION = 0.45;
+
+const AIM_NOISE_SIGMA_MAX = 0.2;
+const AIM_NOISE_SIGMA_MIN = 0.02;
+const AIM_NOISE_DECAY_SHOTS = 25;
 
 const PREF_RANGE_MIN = 120;
 const PREF_RANGE_MAX = 380;
@@ -36,14 +46,11 @@ const DODGE_MIN_STAMINA = 0.6;
 const DODGE_COOLDOWN = 1.2;
 const DODGE_RECOVERY_DURATION = 0.35;
 
-const VIGOR_MAX = 1.0;
-const VIGOR_DRAIN_PER_SEC = 0.01;
-const VIGOR_MIN_SCALE = 0.55;
-
 const TRAIL_SAMPLE_INTERVAL = 0.03;
 const TRAIL_MAX_SAMPLES = 10;
 
 const FACING_TURN_RATE = Math.PI * 2.5;
+const SPRINT_FACING_CONE = (Math.PI * 5) / 12;
 
 const STRAFE_SIDE_SCALE = 0.6;
 const STRAFE_BACK_SCALE = 0.4;
@@ -117,11 +124,11 @@ export class BasicWizard implements Contestant {
   private state: MovementState = "running";
   private stateTimer = 0;
   private stamina = STAMINA_MAX;
-  private vigor = VIGOR_MAX;
   private cooldown = Math.random() * FIRE_COOLDOWN;
   private turnTimer = 0;
   private chargedFireball: Fireball | null = null;
   private chargeTarget: Contestant | null = null;
+  private shotsFired = 0;
   private dodgeCooldown = 0;
   private readonly dodgeDir = new THREE.Vector3();
   private preferredRange = PREF_RANGE_MIN + Math.random() * (PREF_RANGE_MAX - PREF_RANGE_MIN);
@@ -135,6 +142,7 @@ export class BasicWizard implements Contestant {
   private readonly trailGeo: THREE.BufferGeometry;
   private trailSampleTimer = 0;
   private trailCount = 0;
+  private trailSampling = false;
   private readonly trailBaseColor: THREE.Color;
   private trailAttached = false;
   private readonly status = new StatusDisplay();
@@ -228,7 +236,6 @@ export class BasicWizard implements Contestant {
       return;
     }
 
-    this.vigor = Math.max(0, this.vigor - VIGOR_DRAIN_PER_SEC * dt);
     this.dodgeCooldown = Math.max(0, this.dodgeCooldown - dt);
 
     this.turnTimer -= dt;
@@ -284,15 +291,19 @@ export class BasicWizard implements Contestant {
 
     const isDodging = this.state === "dodging";
     const intent = isDodging ? this.dodgeDir : this.desiredDir;
-    const commitMove = this.state === "sprinting";
-    const facingIntent =
-      isDodging || !commitMove
-        ? this.computeFacingIntent(intent, nearest)
-        : intent;
+    let facingIntent = this.computeFacingIntent(intent, nearest);
+    if (this.state === "sprinting") {
+      facingIntent = this.clampToCone(
+        facingIntent,
+        this.body.velocity,
+        SPRINT_FACING_CONE,
+        intent
+      );
+    }
     this.updateFacing(dt, facingIntent);
 
     const baseMaxSpeed = this.body.stats.maxSpeed;
-    if (!isDodging) {
+    if (!isDodging && this.state !== "sprinting") {
       this.body.stats.maxSpeed = baseMaxSpeed * this.strafeScale(intent);
     }
 
@@ -313,7 +324,6 @@ export class BasicWizard implements Contestant {
     this.updateCombat(dt, world, nearest);
     this.status.update(
       this.hp / 100,
-      this.vigor,
       this.stamina / STAMINA_MAX,
       this.body.position,
       RADIUS * 1.8,
@@ -368,6 +378,32 @@ export class BasicWizard implements Contestant {
     return moveIntent;
   }
 
+  private clampToCone(
+    desired: THREE.Vector3,
+    reference: THREE.Vector3,
+    maxAngle: number,
+    fallback: THREE.Vector3
+  ): THREE.Vector3 {
+    const refLen = Math.hypot(reference.x, reference.z);
+    if (refLen < 1e-3) return fallback;
+    const rx = reference.x / refLen;
+    const rz = reference.z / refLen;
+    const dLen = Math.hypot(desired.x, desired.z);
+    if (dLen < 1e-3) return new THREE.Vector3(rx, 0, rz);
+    const dx = desired.x / dLen;
+    const dz = desired.z / dLen;
+    const dot = rx * dx + rz * dz;
+    const clamped = Math.max(-1, Math.min(1, dot));
+    const angle = Math.acos(clamped);
+    if (angle <= maxAngle) return new THREE.Vector3(dx, 0, dz);
+    const cross = rx * dz - rz * dx;
+    const sign = cross >= 0 ? 1 : -1;
+    const rot = maxAngle * sign;
+    const cos = Math.cos(rot);
+    const sin = Math.sin(rot);
+    return new THREE.Vector3(rx * cos - rz * sin, 0, rx * sin + rz * cos);
+  }
+
   private strafeScale(moveIntent: THREE.Vector3): number {
     const iLen = Math.hypot(moveIntent.x, moveIntent.z);
     if (iLen < 1e-3) return 1;
@@ -405,7 +441,14 @@ export class BasicWizard implements Contestant {
   }
 
   private updateTrail(dt: number): void {
-    if (this.state === "sprinting" || this.state === "dodging") {
+    const sampling = this.state === "sprinting" || this.state === "dodging";
+    if (sampling !== this.trailSampling) {
+      this.trailCount = 0;
+      this.trailSampleTimer = 0;
+      this.trailSampling = sampling;
+      this.rewriteTrailFromFront();
+    }
+    if (sampling) {
       this.trailSampleTimer -= dt;
       if (this.trailSampleTimer <= 0) {
         this.trailSampleTimer = TRAIL_SAMPLE_INTERVAL;
@@ -415,11 +458,21 @@ export class BasicWizard implements Contestant {
       this.trailSampleTimer -= dt;
       if (this.trailSampleTimer <= 0) {
         this.trailSampleTimer = TRAIL_SAMPLE_INTERVAL;
-        this.trailCount = Math.max(0, this.trailCount - 1);
-        this.rewriteTrailFromFront();
+        this.shiftTrailTail();
       }
     }
     this.trail.visible = this.trailCount > 1;
+  }
+
+  private shiftTrailTail(): void {
+    if (this.trailCount <= 0) return;
+    for (let i = 1; i < this.trailCount; i++) {
+      this.trailPositions[(i - 1) * 3] = this.trailPositions[i * 3];
+      this.trailPositions[(i - 1) * 3 + 1] = this.trailPositions[i * 3 + 1];
+      this.trailPositions[(i - 1) * 3 + 2] = this.trailPositions[i * 3 + 2];
+    }
+    this.trailCount--;
+    this.rewriteTrailFromFront();
   }
 
   private pushTrailSample(): void {
@@ -474,8 +527,9 @@ export class BasicWizard implements Contestant {
       return;
     }
 
+    const rangeGap = Math.abs(distToTarget - this.preferredRange);
     const wantsSprint =
-      distToTarget > SPRINT_CLOSE_RANGE_MIN &&
+      (distToTarget > SPRINT_CLOSE_RANGE_MIN || rangeGap > 180) &&
       this.stamina > SPRINT_MIN_STAMINA_TO_START;
 
     if (this.state === "sprinting") {
@@ -510,14 +564,7 @@ export class BasicWizard implements Contestant {
   private setState(next: MovementState): void {
     if (this.state === next) return;
     this.state = next;
-    const base = STATE_STATS[next];
-    const scale = VIGOR_MIN_SCALE + (1 - VIGOR_MIN_SCALE) * this.vigor;
-    this.body.stats = {
-      maxSpeed: base.maxSpeed * scale,
-      acceleration: base.acceleration,
-      friction: base.friction,
-      turnRate: base.turnRate,
-    };
+    this.body.stats = { ...STATE_STATS[next] };
   }
 
   private updateCombat(
@@ -529,12 +576,11 @@ export class BasicWizard implements Contestant {
       const aim = this.chargeTarget
         ? this.chargeTarget.position.clone().sub(this.body.position).normalize()
         : this.desiredDir;
-      this.chargedFireball.position.set(
+      this.chargedFireball.setPosition(
         this.body.position.x + aim.x * (this.radius + 6),
         this.body.position.y + 8,
         this.body.position.z + aim.z * (this.radius + 6)
       );
-      this.chargedFireball.mesh.position.copy(this.chargedFireball.position);
       if (this.state !== "charging") {
         this.releaseCharge();
       }
@@ -559,13 +605,62 @@ export class BasicWizard implements Contestant {
     const target = this.chargeTarget;
     if (!fb) return;
     if (target) {
-      const dir = target.position.clone().sub(this.body.position);
-      fb.setVelocityFromDirection(dir);
+      const aim = this.computeAimDirection(target);
+      fb.setVelocityFromDirection(aim);
+      this.shotsFired++;
     }
     fb.frozen = false;
     this.chargedFireball = null;
     this.chargeTarget = null;
     this.cooldown = FIRE_COOLDOWN;
+  }
+
+  private computeAimDirection(target: Contestant): THREE.Vector3 {
+    const dx = target.position.x - this.body.position.x;
+    const dz = target.position.z - this.body.position.z;
+    const vx = target.velocity.x;
+    const vz = target.velocity.z;
+    const s = FIREBALL_SPEED;
+    const a = vx * vx + vz * vz - s * s;
+    const b = 2 * (dx * vx + dz * vz);
+    const c = dx * dx + dz * dz;
+
+    let leadX = dx;
+    let leadZ = dz;
+    if (Math.abs(a) < 1e-6) {
+      if (Math.abs(b) > 1e-6) {
+        const t = -c / b;
+        if (t > 0) {
+          leadX = dx + vx * t;
+          leadZ = dz + vz * t;
+        }
+      }
+    } else {
+      const disc = b * b - 4 * a * c;
+      if (disc >= 0) {
+        const sq = Math.sqrt(disc);
+        const t1 = (-b - sq) / (2 * a);
+        const t2 = (-b + sq) / (2 * a);
+        let t = Infinity;
+        if (t1 > 0) t = t1;
+        if (t2 > 0 && t2 < t) t = t2;
+        if (Number.isFinite(t)) {
+          leadX = dx + vx * t;
+          leadZ = dz + vz * t;
+        }
+      }
+    }
+
+    const sigma =
+      AIM_NOISE_SIGMA_MIN +
+      (AIM_NOISE_SIGMA_MAX - AIM_NOISE_SIGMA_MIN) *
+        Math.exp(-this.shotsFired / AIM_NOISE_DECAY_SHOTS);
+    const noise = gaussian() * sigma;
+    const cos = Math.cos(noise);
+    const sin = Math.sin(noise);
+    const rx = leadX * cos - leadZ * sin;
+    const rz = leadX * sin + leadZ * cos;
+    return new THREE.Vector3(rx, 0, rz);
   }
 
   private enforceArenaBounds(world: World): void {
