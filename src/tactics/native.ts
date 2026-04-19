@@ -1,7 +1,6 @@
 import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
 import type { SpellFactory } from "../spells/spell";
-import { SuppressDodgeHandler } from "../handlers/suppressDodge";
 import { NoteOpponentChargingHandler } from "../handlers/noteOpponentCharging";
 import { OpponentChargingDetector } from "../events/opponentCharging";
 import type { EventDetector } from "../events/event";
@@ -27,7 +26,12 @@ import {
   steerToward,
   surfaceDistance,
 } from "./helpers";
-import type { CastController, Tactic, TacticOutput } from "./tactic";
+import type {
+  CastController,
+  DodgePolicy,
+  Tactic,
+  TacticOutput,
+} from "./tactic";
 import { STATIONARY } from "./tactic";
 import type { Vec2 } from "../steering";
 
@@ -82,9 +86,11 @@ function orbitOutput(
     z: selfPos.z - enemyPos.z,
   };
   const tangent: Vec2 = { x: -toSelf.z * dir, z: toSelf.x * dir };
+  const gap = Math.abs(dist - preferredRange);
+  const angularWeight = 0.4 * Math.max(0, 1 - gap / Math.max(1, band));
   let candidates = sampleRingAroundEnemy(self, enemy, preferredRange, 24);
   candidates = scoreByRangeMatch(candidates, self, enemy, preferredRange, band, 0.5);
-  candidates = scoreByAngularPreference(candidates, enemyPos, tangent, 0.4);
+  candidates = scoreByAngularPreference(candidates, enemyPos, tangent, angularWeight);
   candidates = scoreByReachability(candidates, self, 0.25, 300);
   candidates = scoreByWallClearance(candidates, 1.8, 140);
   candidates = scoreByArenaCenter(candidates, 0.3);
@@ -268,17 +274,11 @@ export class BaitAndSwitch implements Tactic {
 
 // --- Signature tactics ---
 
-type DuelistPhase = "close" | "strike";
-
 export class DuelistCharge implements Tactic {
   readonly id = "duelist";
-  readonly minDwell = 3.5;
-  readonly handlers: Handler[] = [new SuppressDodgeHandler()];
-  private phase: DuelistPhase = "close";
-  private strikeTimer = 0;
-  private static readonly STRIKE_SURFACE_DIST = 50;
-  private static readonly RESET_SURFACE_DIST = 90;
-  private static readonly STRIKE_STALL_SECONDS = 5;
+  readonly minDwell = 2.0;
+  private static readonly ARRIVAL_SURFACE_DIST = 55;
+  private static readonly APPROACH_RING = 30;
 
   score(self: Contestant, world: World): number {
     const enemy = nearestEnemy(self, world);
@@ -288,65 +288,80 @@ export class DuelistCharge implements Tactic {
     return 0.75 * hp * enemyWounded;
   }
 
-  currentPhaseId(): string {
-    return this.phase;
+  dodgePolicy(): DodgePolicy {
+    return "never";
   }
 
-  update(dt: number, self: Contestant, world: World): TacticOutput {
+  update(_dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
-    if (!enemy) {
-      this.phase = "close";
-      this.strikeTimer = 0;
-      return idleOutput();
-    }
-    const dist = surfaceDistance(self, enemy);
-    if (this.phase === "close" && dist <= DuelistCharge.STRIKE_SURFACE_DIST) {
-      this.phase = "strike";
-      this.strikeTimer = 0;
-    } else if (
-      this.phase === "strike" &&
-      dist > DuelistCharge.RESET_SURFACE_DIST
-    ) {
-      this.phase = "close";
-      this.strikeTimer = 0;
-    }
-    if (this.phase === "strike") this.strikeTimer += dt;
-
-    if (this.phase === "close") {
-      let candidates = sampleRingAroundEnemy(
-        self,
-        enemy,
-        DuelistCharge.STRIKE_SURFACE_DIST * 0.6,
-        16
-      );
-      candidates = scoreByReachability(candidates, self, 0.8, 400);
-      candidates = scoreByWallClearance(candidates, 1.2, 120);
-      candidates = scoreAwayFromProjectiles(candidates, self, world, 0.5, 180);
-      const best = pickBest(candidates);
-      const moveIntent: Vec2 = best
-        ? steerToward(self, best.pos)
-        : directionTo(self, enemy);
-      return {
-        moveIntent,
-        paceHint: "sprint",
-        facingIntent: faceContestant(self, enemy),
-      };
-    }
+    if (!enemy) return idleOutput();
+    let candidates = sampleRingAroundEnemy(
+      self,
+      enemy,
+      DuelistCharge.APPROACH_RING,
+      16
+    );
+    candidates = scoreByReachability(candidates, self, 0.8, 400);
+    candidates = scoreByWallClearance(candidates, 1.2, 120);
+    candidates = scoreAwayFromProjectiles(candidates, self, world, 0.5, 180);
+    const best = pickBest(candidates);
+    const moveIntent: Vec2 = best
+      ? steerToward(self, best.pos)
+      : directionTo(self, enemy);
     return {
-      moveIntent: directionTo(self, enemy),
-      paceHint: "walk",
+      moveIntent,
+      paceHint: "sprint",
       facingIntent: faceContestant(self, enemy),
     };
   }
 
-  shouldYield(_self: Contestant, world: World): string | null {
-    const enemy = nearestEnemy(_self, world);
+  shouldYield(self: Contestant, world: World): string | null {
+    const enemy = nearestEnemy(self, world);
     if (!enemy) return "no-enemy";
-    if (
-      this.phase === "strike" &&
-      this.strikeTimer >= DuelistCharge.STRIKE_STALL_SECONDS
-    ) {
-      return "strike-stall";
+    if (surfaceDistance(self, enemy) <= DuelistCharge.ARRIVAL_SURFACE_DIST) {
+      return "arrived";
+    }
+    return null;
+  }
+}
+
+export class CloseQuarters implements Tactic {
+  readonly id = "closequarters";
+  readonly minDwell = 1.0;
+  private readonly dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private static readonly RANGE = 35;
+  private static readonly BAND = 20;
+  private static readonly YIELD_OUT_OF_RANGE = 150;
+
+  score(self: Contestant, world: World): number {
+    const enemy = nearestEnemy(self, world);
+    if (!enemy) return 0;
+    const dist = surfaceDistance(self, enemy);
+    const closeBias =
+      dist <= 80 ? 1 : Math.max(0, 1 - (dist - 80) / 70);
+    const hp = hp01(self) > 0.3 ? 1 : 0.5;
+    return 1.1 * closeBias * hp;
+  }
+
+  update(_dt: number, self: Contestant, world: World): TacticOutput {
+    const enemy = nearestEnemy(self, world);
+    if (!enemy) return idleOutput();
+    return orbitOutput(
+      self,
+      enemy,
+      world,
+      CloseQuarters.RANGE,
+      CloseQuarters.BAND,
+      this.dir,
+      "walk"
+    );
+  }
+
+  shouldYield(self: Contestant, world: World): string | null {
+    const enemy = nearestEnemy(self, world);
+    if (!enemy) return "no-enemy";
+    if (surfaceDistance(self, enemy) > CloseQuarters.YIELD_OUT_OF_RANGE) {
+      return "out-of-range";
     }
     return null;
   }
@@ -357,7 +372,6 @@ export class DuelistCharge implements Tactic {
     world: World,
     caster: CastController
   ): void {
-    if (this.phase !== "strike") return;
     if (caster.isCharging()) return;
     const enemy = nearestEnemy(self, world);
     if (!enemy) return;
@@ -465,7 +479,6 @@ type AntiMagePhase = "approach" | "cast" | "rush";
 export class AntiMageZone implements Tactic {
   readonly id = "antimage";
   readonly minDwell = 1.0;
-  readonly handlers: Handler[] = [new SuppressDodgeHandler()];
   private lastCastAt = 0;
   private phase: AntiMagePhase = "approach";
   private static readonly CAST_SURFACE_RANGE = 180;
@@ -486,6 +499,19 @@ export class AntiMageZone implements Tactic {
 
   currentPhaseId(): string {
     return this.phase;
+  }
+
+  dodgePolicy(): DodgePolicy {
+    return this.phase === "approach" ? "always" : "never";
+  }
+
+  shouldYield(self: Contestant, world: World): string | null {
+    const enemy = nearestEnemy(self, world);
+    if (!enemy) return "no-enemy";
+    if (this.phase === "rush" && surfaceDistance(self, enemy) <= 55) {
+      return "rush-arrived";
+    }
+    return null;
   }
 
   update(_dt: number, self: Contestant, world: World): TacticOutput {

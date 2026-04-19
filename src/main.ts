@@ -11,6 +11,7 @@ import {
   Retreat,
   BaitAndSwitch,
   DuelistCharge,
+  CloseQuarters,
   Sniper,
   Turtle,
   Scrapper,
@@ -30,6 +31,7 @@ gfx.scene.add(buildArena());
 function redRoster(): RosterEntry[] {
   return [
     { tactic: new DuelistCharge(), bias: 1.6 },
+    { tactic: new CloseQuarters(), bias: 1.5 },
     { tactic: new AntiMageZone(), bias: 1.4 },
     { tactic: new Pressure(), bias: 1.0 },
     { tactic: new Orbit(), bias: 0.8 },

@@ -351,7 +351,14 @@ export class BasicWizard implements Contestant {
     let interruptReason: string | null = null;
     for (const c of changes) {
       if (c.type === "forceMovementState" && c.state === "dodging") {
-        this.tryEnterDodge(c.direction);
+        const policy = activeTactic.dodgePolicy?.() ?? "always";
+        if (policy === "never") {
+          console.log(
+            `${this.id} ${activeTactic.id} policy blocked dodge`
+          );
+        } else {
+          this.tryEnterDodge(c.direction);
+        }
       } else if (c.type === "observe") {
         activeTactic.onObserve?.(c.key, c.value);
       } else if (c.type === "interrupt") {

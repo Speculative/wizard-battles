@@ -13,6 +13,8 @@ export function isStationary(v: Vec2): boolean {
 
 export type PaceHint = "walk" | "run" | "sprint" | "hold";
 
+export type DodgePolicy = "always" | "never";
+
 export interface TacticOutput {
   moveIntent: Vec2;
   paceHint: PaceHint;
@@ -49,6 +51,7 @@ export interface Tactic {
   onObserve?(key: string, value: unknown): void;
   currentPhaseId?(): string | undefined;
   shouldYield?(self: Contestant, world: World): string | null;
+  dodgePolicy?(): DodgePolicy;
 }
 
 export interface RosterEntry {
