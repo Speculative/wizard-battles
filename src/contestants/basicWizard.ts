@@ -14,12 +14,7 @@ import type {
   TacticOutput,
 } from "../tactics/tactic";
 import { isStationary } from "../tactics/tactic";
-import {
-  sampleBestDirection,
-  toVector3,
-  type Vec2,
-  type SampleDebug,
-} from "../steering";
+import { toVector3, type Vec2 } from "../steering";
 import { ProjectileIncomingDetector } from "../events/projectileIncoming";
 import type { EventDetector } from "../events/event";
 import type { Handler } from "../handlers/handler";
@@ -63,10 +58,6 @@ const TRAIL_MAX_SAMPLES = 10;
 
 const FACING_TURN_RATE = Math.PI * 2.5;
 const SPRINT_FACING_CONE = (Math.PI * 5) / 12;
-
-const SAMPLE_WALL_HORIZON = 140;
-const SAMPLE_INTENT_WEIGHT = 1.0;
-const SAMPLE_WALL_WEIGHT = 1.8;
 
 const STRAFE_SIDE_SCALE = 0.6;
 const STRAFE_BACK_SCALE = 0.4;
@@ -209,16 +200,6 @@ export class BasicWizard implements Contestant {
     this.components.delete(key.id);
   }
   private debugLogTimer = 0;
-  private readonly sampleDebug: SampleDebug = {
-    intentX: 0,
-    intentZ: 0,
-    pickedX: 0,
-    pickedZ: 0,
-    intentWallPenalty: 0,
-    pickedWallPenalty: 0,
-    pickedAlignment: 1,
-    nearestWallDist: 0,
-  };
   private readonly tacticSelector: TacticSelector;
   private readonly trail: THREE.Line;
   private readonly trailPositions: Float32Array;
@@ -477,22 +458,7 @@ export class BasicWizard implements Contestant {
       this.moveScratch.set(0, 0, 0);
       return this.moveScratch;
     }
-    const pos: Vec2 = { x: this.body.position.x, z: this.body.position.z };
-    const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
-    const refined = sampleBestDirection(
-      {
-        pos,
-        speed,
-        intent,
-        bounds: world.bounds,
-        wallHorizon: SAMPLE_WALL_HORIZON,
-        intentWeight: SAMPLE_INTENT_WEIGHT,
-        wallWeight: SAMPLE_WALL_WEIGHT,
-      },
-      16,
-      this.sampleDebug
-    );
-    toVector3(refined, this.moveScratch);
+    toVector3(intent, this.moveScratch);
     return this.moveScratch;
   }
 

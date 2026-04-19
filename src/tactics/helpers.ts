@@ -1,10 +1,16 @@
 import type { Contestant } from "../contestants/contestant";
 import type { SpellFactory } from "../spells/spell";
 import type { World } from "../world";
-import { circle, seek, type Vec2 } from "../steering";
-import type { CastController, PaceHint } from "./tactic";
+import { type Vec2 } from "../steering";
+import type { PaceHint } from "./tactic";
 import { STATIONARY } from "./tactic";
 import type { SelectionContext } from "../spells/selection";
+import { ARENA } from "../config";
+
+export interface Candidate {
+  pos: Vec2;
+  score: number;
+}
 
 export interface WizardAccessors {
   stamina01?: () => number;
@@ -82,58 +88,11 @@ export function directionFromTo(from: Vec2, to: Vec2): Vec2 {
   return { x: dx / len, z: dz / len };
 }
 
-function posOf(c: Contestant): Vec2 {
-  return { x: c.position.x, z: c.position.z };
-}
-
-export function orbit(
-  self: Contestant,
-  target: Contestant,
-  preferredSurfaceRange: number,
-  band: number,
-  dir: -1 | 1
-): Vec2 {
-  const centerRange = preferredSurfaceRange + self.radius + target.radius;
-  return circle(posOf(self), posOf(target), centerRange, dir, band);
-}
-
-export function closeTo(
-  self: Contestant,
-  target: Contestant,
-  minSurfaceDist: number
-): Vec2 {
-  const surf = surfaceDistance(self, target);
-  if (surf <= minSurfaceDist) return STATIONARY;
-  return seek(posOf(self), posOf(target));
-}
-
-export function backOffFrom(
-  self: Contestant,
-  target: Contestant,
-  minSurfaceDist: number
-): Vec2 {
-  const surf = surfaceDistance(self, target);
-  if (surf >= minSurfaceDist) return STATIONARY;
-  const s = seek(posOf(self), posOf(target));
-  return { x: -s.x, z: -s.z };
-}
-
-export function holdPosition(): Vec2 {
-  return STATIONARY;
-}
-
 export function faceContestant(self: Contestant, other: Contestant): Vec2 {
-  return directionFromTo(posOf(self), posOf(other));
-}
-
-export function faceVector(v: Vec2): Vec2 {
-  const len = Math.hypot(v.x, v.z);
-  if (len < 1e-4) return STATIONARY;
-  return { x: v.x / len, z: v.z / len };
-}
-
-export function holdFacing(): Vec2 {
-  return STATIONARY;
+  return directionFromTo(
+    { x: self.position.x, z: self.position.z },
+    { x: other.position.x, z: other.position.z }
+  );
 }
 
 export function paceForRange(
@@ -148,13 +107,204 @@ export function paceForRange(
   return "hold";
 }
 
-export function tryRequestCastIfReady(
-  caster: CastController,
-  factory: SpellFactory,
-  target: Contestant | null,
-  aim: Vec2
-): boolean {
-  if (caster.isCharging()) return false;
-  if (!caster.isReady(factory)) return false;
-  return caster.requestCast(factory, target, aim);
+// --- Candidate sampling ---
+
+export function sampleRing(
+  center: Vec2,
+  radius: number,
+  count = 24,
+  angleOffset = 0
+): Candidate[] {
+  const out: Candidate[] = [];
+  for (let i = 0; i < count; i++) {
+    const a = angleOffset + (i / count) * Math.PI * 2;
+    out.push({
+      pos: {
+        x: center.x + Math.cos(a) * radius,
+        z: center.z + Math.sin(a) * radius,
+      },
+      score: 0,
+    });
+  }
+  return out;
+}
+
+export function sampleRingAroundEnemy(
+  self: Contestant,
+  enemy: Contestant,
+  preferredSurfaceRange: number,
+  count = 24
+): Candidate[] {
+  const centerRange = preferredSurfaceRange + self.radius + enemy.radius;
+  return sampleRing(
+    { x: enemy.position.x, z: enemy.position.z },
+    centerRange,
+    count
+  );
+}
+
+export function singleCandidate(pos: Vec2): Candidate[] {
+  return [{ pos, score: 0 }];
+}
+
+// --- Scoring combinators ---
+
+export function score(
+  candidates: Candidate[],
+  fn: (c: Candidate) => number
+): Candidate[] {
+  for (const c of candidates) c.score += fn(c);
+  return candidates;
+}
+
+export function scoreByWallClearance(
+  candidates: Candidate[],
+  weight = 1.8,
+  horizon = 140,
+  bounds: { width: number; depth: number } = ARENA
+): Candidate[] {
+  const halfW = bounds.width / 2;
+  const halfD = bounds.depth / 2;
+  return score(candidates, (c) => {
+    const d = Math.min(
+      halfW - c.pos.x,
+      halfW + c.pos.x,
+      halfD - c.pos.z,
+      halfD + c.pos.z
+    );
+    if (d >= horizon) return 0;
+    const closeness = Math.max(0, 1 - d / horizon);
+    return -weight * closeness * closeness * closeness;
+  });
+}
+
+export function scoreByArenaCenter(
+  candidates: Candidate[],
+  weight = 0.25,
+  bounds: { width: number; depth: number } = ARENA
+): Candidate[] {
+  const halfW = bounds.width / 2;
+  const halfD = bounds.depth / 2;
+  const maxDist = Math.hypot(halfW, halfD);
+  return score(candidates, (c) => {
+    const d = Math.hypot(c.pos.x, c.pos.z);
+    return weight * (1 - d / maxDist);
+  });
+}
+
+export function scoreByReachability(
+  candidates: Candidate[],
+  self: Contestant,
+  weight = 0.1,
+  falloff = 300
+): Candidate[] {
+  const sx = self.position.x;
+  const sz = self.position.z;
+  return score(candidates, (c) => {
+    const d = Math.hypot(c.pos.x - sx, c.pos.z - sz);
+    return -weight * Math.min(1, d / falloff);
+  });
+}
+
+export function scoreByAngularPreference(
+  candidates: Candidate[],
+  center: Vec2,
+  preferredDir: Vec2,
+  weight = 0.35
+): Candidate[] {
+  const pLen = Math.hypot(preferredDir.x, preferredDir.z);
+  if (pLen < 1e-4) return candidates;
+  const px = preferredDir.x / pLen;
+  const pz = preferredDir.z / pLen;
+  return score(candidates, (c) => {
+    const dx = c.pos.x - center.x;
+    const dz = c.pos.z - center.z;
+    const len = Math.hypot(dx, dz);
+    if (len < 1e-4) return 0;
+    return weight * ((dx / len) * px + (dz / len) * pz);
+  });
+}
+
+export function scoreByRangeMatch(
+  candidates: Candidate[],
+  self: Contestant,
+  enemy: Contestant,
+  preferredSurfaceRange: number,
+  band: number,
+  weight = 0.5
+): Candidate[] {
+  const target = preferredSurfaceRange + self.radius + enemy.radius;
+  const ex = enemy.position.x;
+  const ez = enemy.position.z;
+  return score(candidates, (c) => {
+    const d = Math.hypot(c.pos.x - ex, c.pos.z - ez);
+    const gap = Math.abs(d - target);
+    if (gap <= band) return weight;
+    return weight * Math.max(0, 1 - (gap - band) / Math.max(1, band));
+  });
+}
+
+export function scoreAwayFromProjectiles(
+  candidates: Candidate[],
+  self: Contestant,
+  world: World,
+  weight = 0.6,
+  horizon = 180
+): Candidate[] {
+  interface Threat {
+    sx: number;
+    sz: number;
+    vx: number;
+    vz: number;
+    speed: number;
+  }
+  const threats: Threat[] = [];
+  for (const s of world.spells) {
+    if (s.caster === self) continue;
+    if (s.metadata.kind !== "projectile") continue;
+    const speed = Math.hypot(s.velocity.x, s.velocity.z);
+    if (speed < 1e-3) continue;
+    threats.push({
+      sx: s.position.x,
+      sz: s.position.z,
+      vx: s.velocity.x / speed,
+      vz: s.velocity.z / speed,
+      speed,
+    });
+  }
+  if (threats.length === 0) return candidates;
+  return score(candidates, (c) => {
+    let penalty = 0;
+    for (const t of threats) {
+      const dx = c.pos.x - t.sx;
+      const dz = c.pos.z - t.sz;
+      const along = dx * t.vx + dz * t.vz;
+      if (along < 0) continue;
+      const perp = Math.hypot(
+        dx - along * t.vx,
+        dz - along * t.vz
+      );
+      if (perp > horizon) continue;
+      const closeness = 1 - perp / horizon;
+      penalty += closeness * closeness;
+    }
+    return -weight * penalty;
+  });
+}
+
+export function pickBest(candidates: Candidate[]): Candidate | null {
+  if (candidates.length === 0) return null;
+  let best = candidates[0];
+  for (let i = 1; i < candidates.length; i++) {
+    if (candidates[i].score > best.score) best = candidates[i];
+  }
+  return best;
+}
+
+export function steerToward(self: Contestant, dest: Vec2): Vec2 {
+  const dx = dest.x - self.position.x;
+  const dz = dest.z - self.position.z;
+  const len = Math.hypot(dx, dz);
+  if (len < 8) return STATIONARY;
+  return { x: dx / len, z: dz / len };
 }

@@ -11,16 +11,25 @@ import {
   faceContestant,
   hp01,
   nearestEnemy,
-  orbit,
   paceForRange,
+  pickBest,
+  sampleRingAroundEnemy,
+  scoreAwayFromProjectiles,
+  scoreByAngularPreference,
+  scoreByArenaCenter,
+  scoreByRangeMatch,
+  scoreByReachability,
+  scoreByWallClearance,
   selectionContext,
   shotsFired,
   spellbook,
   stamina01,
+  steerToward,
   surfaceDistance,
 } from "./helpers";
 import type { CastController, Tactic, TacticOutput } from "./tactic";
 import { STATIONARY } from "./tactic";
+import type { Vec2 } from "../steering";
 
 function directionTo(self: Contestant, enemy: Contestant): {
   x: number;
@@ -59,14 +68,31 @@ function tryDefaultCast(
 function orbitOutput(
   self: Contestant,
   enemy: Contestant,
+  world: World,
   preferredRange: number,
   band: number,
   dir: 1 | -1,
   paceOverride?: TacticOutput["paceHint"]
 ): TacticOutput {
   const dist = surfaceDistance(self, enemy);
+  const enemyPos: Vec2 = { x: enemy.position.x, z: enemy.position.z };
+  const selfPos: Vec2 = { x: self.position.x, z: self.position.z };
+  const toSelf: Vec2 = {
+    x: selfPos.x - enemyPos.x,
+    z: selfPos.z - enemyPos.z,
+  };
+  const tangent: Vec2 = { x: -toSelf.z * dir, z: toSelf.x * dir };
+  let candidates = sampleRingAroundEnemy(self, enemy, preferredRange, 24);
+  candidates = scoreByRangeMatch(candidates, self, enemy, preferredRange, band, 0.5);
+  candidates = scoreByAngularPreference(candidates, enemyPos, tangent, 0.4);
+  candidates = scoreByReachability(candidates, self, 0.25, 300);
+  candidates = scoreByWallClearance(candidates, 1.8, 140);
+  candidates = scoreByArenaCenter(candidates, 0.3);
+  candidates = scoreAwayFromProjectiles(candidates, self, world, 0.6, 180);
+  const best = pickBest(candidates);
+  const moveIntent: Vec2 = best ? steerToward(self, best.pos) : STATIONARY;
   return {
-    moveIntent: orbit(self, enemy, preferredRange, band, dir),
+    moveIntent,
     paceHint: paceOverride ?? paceForRange(dist, preferredRange, band),
     facingIntent: faceContestant(self, enemy),
   };
@@ -93,7 +119,7 @@ export class Pressure implements Tactic {
   update(_dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
     if (!enemy) return idleOutput();
-    return orbitOutput(self, enemy, Pressure.RANGE, Pressure.BAND, this.dir);
+    return orbitOutput(self, enemy, world, Pressure.RANGE, Pressure.BAND, this.dir);
   }
   maybeCast = tryDefaultCast;
 }
@@ -114,7 +140,7 @@ export class Kite implements Tactic {
   update(_dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
     if (!enemy) return idleOutput();
-    return orbitOutput(self, enemy, Kite.RANGE, Kite.BAND, this.dir);
+    return orbitOutput(self, enemy, world, Kite.RANGE, Kite.BAND, this.dir);
   }
   maybeCast = tryDefaultCast;
 }
@@ -132,7 +158,7 @@ export class Orbit implements Tactic {
   update(_dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
     if (!enemy) return idleOutput();
-    return orbitOutput(self, enemy, Orbit.RANGE, Orbit.BAND, this.dir);
+    return orbitOutput(self, enemy, world, Orbit.RANGE, Orbit.BAND, this.dir);
   }
   maybeCast = tryDefaultCast;
 }
@@ -154,7 +180,7 @@ export class Ambush implements Tactic {
   update(_dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
     if (!enemy) return idleOutput();
-    return orbitOutput(self, enemy, Ambush.RANGE, Ambush.BAND, this.dir, "walk");
+    return orbitOutput(self, enemy, world, Ambush.RANGE, Ambush.BAND, this.dir, "walk");
   }
   maybeCast = tryDefaultCast;
 }
@@ -178,7 +204,7 @@ export class Retreat implements Tactic {
   update(_dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
     if (!enemy) return idleOutput();
-    return orbitOutput(self, enemy, Retreat.RANGE, Retreat.BAND, this.dir);
+    return orbitOutput(self, enemy, world, Retreat.RANGE, Retreat.BAND, this.dir);
   }
   maybeCast = tryDefaultCast;
 }
@@ -230,6 +256,7 @@ export class BaitAndSwitch implements Tactic {
     return orbitOutput(
       self,
       enemy,
+      world,
       range,
       BaitAndSwitch.BAND,
       this.flipSign
@@ -286,8 +313,21 @@ export class DuelistCharge implements Tactic {
     if (this.phase === "strike") this.strikeTimer += dt;
 
     if (this.phase === "close") {
+      let candidates = sampleRingAroundEnemy(
+        self,
+        enemy,
+        DuelistCharge.STRIKE_SURFACE_DIST * 0.6,
+        16
+      );
+      candidates = scoreByReachability(candidates, self, 0.8, 400);
+      candidates = scoreByWallClearance(candidates, 1.2, 120);
+      candidates = scoreAwayFromProjectiles(candidates, self, world, 0.5, 180);
+      const best = pickBest(candidates);
+      const moveIntent: Vec2 = best
+        ? steerToward(self, best.pos)
+        : directionTo(self, enemy);
       return {
-        moveIntent: directionTo(self, enemy),
+        moveIntent,
         paceHint: "sprint",
         facingIntent: faceContestant(self, enemy),
       };
@@ -349,7 +389,7 @@ export class Sniper implements Tactic {
   update(_dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
     if (!enemy) return idleOutput();
-    return orbitOutput(self, enemy, Sniper.RANGE, Sniper.BAND, this.dir);
+    return orbitOutput(self, enemy, world, Sniper.RANGE, Sniper.BAND, this.dir);
   }
   maybeCast = tryDefaultCast;
 }
@@ -370,7 +410,7 @@ export class Turtle implements Tactic {
   update(_dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
     if (!enemy) return idleOutput();
-    return orbitOutput(self, enemy, Turtle.RANGE, Turtle.BAND, this.dir);
+    return orbitOutput(self, enemy, world, Turtle.RANGE, Turtle.BAND, this.dir);
   }
   maybeCast = tryDefaultCast;
 }
@@ -410,6 +450,7 @@ export class Scrapper implements Tactic {
     return orbitOutput(
       self,
       enemy,
+      world,
       this.chaoticRange,
       Scrapper.BAND,
       this.flip,
@@ -483,17 +524,14 @@ export class AntiMageZone implements Tactic {
         facingIntent: faceContestant(self, enemy),
       };
     }
-    return {
-      moveIntent: orbit(
-        self,
-        enemy,
-        AntiMageZone.APPROACH_SURFACE_RANGE,
-        AntiMageZone.APPROACH_BAND,
-        1
-      ),
-      paceHint: "hold",
-      facingIntent: faceContestant(self, enemy),
-    };
+    return orbitOutput(
+      self,
+      enemy,
+      world,
+      AntiMageZone.APPROACH_SURFACE_RANGE,
+      AntiMageZone.APPROACH_BAND,
+      1
+    );
   }
 
   maybeCast(
