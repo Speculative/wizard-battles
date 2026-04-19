@@ -248,8 +248,10 @@ export class DuelistCharge implements Tactic {
   readonly minDwell = 3.5;
   readonly handlers: Handler[] = [new SuppressDodgeHandler()];
   private phase: DuelistPhase = "close";
+  private strikeTimer = 0;
   private static readonly STRIKE_SURFACE_DIST = 50;
   private static readonly RESET_SURFACE_DIST = 90;
+  private static readonly STRIKE_STALL_SECONDS = 5;
 
   score(self: Contestant, world: World): number {
     const enemy = nearestEnemy(self, world);
@@ -263,21 +265,25 @@ export class DuelistCharge implements Tactic {
     return this.phase;
   }
 
-  update(_dt: number, self: Contestant, world: World): TacticOutput {
+  update(dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
     if (!enemy) {
       this.phase = "close";
+      this.strikeTimer = 0;
       return idleOutput();
     }
     const dist = surfaceDistance(self, enemy);
     if (this.phase === "close" && dist <= DuelistCharge.STRIKE_SURFACE_DIST) {
       this.phase = "strike";
+      this.strikeTimer = 0;
     } else if (
       this.phase === "strike" &&
       dist > DuelistCharge.RESET_SURFACE_DIST
     ) {
       this.phase = "close";
+      this.strikeTimer = 0;
     }
+    if (this.phase === "strike") this.strikeTimer += dt;
 
     if (this.phase === "close") {
       return {
@@ -291,6 +297,18 @@ export class DuelistCharge implements Tactic {
       paceHint: "walk",
       facingIntent: faceContestant(self, enemy),
     };
+  }
+
+  shouldYield(_self: Contestant, world: World): string | null {
+    const enemy = nearestEnemy(_self, world);
+    if (!enemy) return "no-enemy";
+    if (
+      this.phase === "strike" &&
+      this.strikeTimer >= DuelistCharge.STRIKE_STALL_SECONDS
+    ) {
+      return "strike-stall";
+    }
+    return null;
   }
 
   maybeCast(

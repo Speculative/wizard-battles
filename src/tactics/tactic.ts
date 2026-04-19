@@ -48,6 +48,7 @@ export interface Tactic {
   ): void;
   onObserve?(key: string, value: unknown): void;
   currentPhaseId?(): string | undefined;
+  shouldYield?(self: Contestant, world: World): string | null;
 }
 
 export interface RosterEntry {

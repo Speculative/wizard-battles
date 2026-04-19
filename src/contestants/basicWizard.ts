@@ -24,6 +24,8 @@ import { ProjectileIncomingDetector } from "../events/projectileIncoming";
 import type { EventDetector } from "../events/event";
 import type { Handler } from "../handlers/handler";
 import { LateralDodgeHandler } from "../handlers/lateralDodge";
+import { LowHPCrossedDetector } from "../events/lowHPCrossed";
+import { InterruptOnLowHPHandler } from "../handlers/interruptOnLowHP";
 import { runPipeline } from "../handlers/pipeline";
 import type { ComponentKey } from "../components";
 import { Charging, Dodging, Recovering } from "../components";
@@ -180,8 +182,15 @@ export class BasicWizard implements Contestant {
   private dodgeCooldown = 0;
   private readonly dodgeDir = new THREE.Vector3();
   private readonly projectileDetector = new ProjectileIncomingDetector();
-  private readonly detectors: EventDetector[] = [this.projectileDetector];
-  private readonly handlers: Handler[] = [new LateralDodgeHandler()];
+  private readonly lowHPDetector = new LowHPCrossedDetector(0.4);
+  private readonly detectors: EventDetector[] = [
+    this.projectileDetector,
+    this.lowHPDetector,
+  ];
+  private readonly handlers: Handler[] = [
+    new LateralDodgeHandler(),
+    new InterruptOnLowHPHandler(),
+  ];
   private readonly components = new Map<string, unknown>();
   private readonly castController: WizardCastController;
   private currentMoveIntent: Vec2 = { x: 0, z: 0 };
@@ -343,7 +352,7 @@ export class BasicWizard implements Contestant {
 
     this.tacticSelector.updateDormantObservations(this, world);
     this.tacticSelector.update(dt, this, world);
-    const activeTactic = this.tacticSelector.currentTactic;
+    let activeTactic = this.tacticSelector.currentTactic;
 
     const mergedDetectors = activeTactic.detectors
       ? [...activeTactic.detectors, ...this.detectors]
@@ -358,12 +367,25 @@ export class BasicWizard implements Contestant {
       handlers: mergedHandlers,
     });
 
+    let interruptReason: string | null = null;
     for (const c of changes) {
       if (c.type === "forceMovementState" && c.state === "dodging") {
         this.tryEnterDodge(c.direction);
       } else if (c.type === "observe") {
         activeTactic.onObserve?.(c.key, c.value);
+      } else if (c.type === "interrupt") {
+        interruptReason = c.reason;
       }
+    }
+    if (interruptReason !== null) {
+      this.tacticSelector.forceRescore(this, world, interruptReason);
+      activeTactic = this.tacticSelector.currentTactic;
+    }
+
+    const yieldReason = activeTactic.shouldYield?.(this, world) ?? null;
+    if (yieldReason !== null) {
+      this.tacticSelector.forceRescore(this, world, `yield:${yieldReason}`);
+      activeTactic = this.tacticSelector.currentTactic;
     }
 
     const output: TacticOutput = activeTactic.update(dt, this, world);

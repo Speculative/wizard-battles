@@ -52,29 +52,16 @@ export class TacticSelector {
     }
   }
 
+  forceRescore(self: Contestant, world: World, reason: string): void {
+    console.log(`${this.label} interrupt: ${reason}`);
+    this.rescore(self, world);
+  }
+
   update(dt: number, self: Contestant, world: World): void {
     this.dwellLeft -= dt;
     this.evalTimer -= dt;
     if (this.evalTimer <= 0 && this.dwellLeft <= 0) {
-      this.evalTimer = EVAL_INTERVAL;
-      let best = this.current;
-      let bestScore = -Infinity;
-      for (const entry of this.roster) {
-        const raw = entry.tactic.score(self, world);
-        const jitter = 1 + (Math.random() * 2 - 1) * RANDOM_JITTER;
-        const score = raw * entry.bias * jitter;
-        if (score > bestScore) {
-          bestScore = score;
-          best = entry.tactic;
-        }
-      }
-      if (best !== this.current) {
-        const prev = this.current.id;
-        this.current = best;
-        this.dwellLeft = best.minDwell;
-        this.lastPhaseId = best.currentPhaseId?.();
-        console.log(`${this.label} ${prev} -> ${best.id}`);
-      }
+      this.rescore(self, world);
     }
 
     const phaseId = this.current.currentPhaseId?.();
@@ -83,6 +70,30 @@ export class TacticSelector {
         `${this.label} ${this.current.id} phase ${this.lastPhaseId ?? "-"} -> ${phaseId ?? "-"}`
       );
       this.lastPhaseId = phaseId;
+    }
+  }
+
+  private rescore(self: Contestant, world: World): void {
+    this.evalTimer = EVAL_INTERVAL;
+    let best = this.current;
+    let bestScore = -Infinity;
+    for (const entry of this.roster) {
+      const raw = entry.tactic.score(self, world);
+      const jitter = 1 + (Math.random() * 2 - 1) * RANDOM_JITTER;
+      const score = raw * entry.bias * jitter;
+      if (score > bestScore) {
+        bestScore = score;
+        best = entry.tactic;
+      }
+    }
+    if (best !== this.current) {
+      const prev = this.current.id;
+      this.current = best;
+      this.dwellLeft = best.minDwell;
+      this.lastPhaseId = best.currentPhaseId?.();
+      console.log(`${this.label} ${prev} -> ${best.id}`);
+    } else {
+      this.dwellLeft = best.minDwell;
     }
   }
 }

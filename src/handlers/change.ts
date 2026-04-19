@@ -3,6 +3,7 @@ import type * as THREE from "three";
 export type Change =
   | ForceMovementStateChange
   | ObserveChange
+  | InterruptChange
   | NoOpChange;
 
 export interface ForceMovementStateChange {
@@ -16,6 +17,12 @@ export interface ObserveChange {
   type: "observe";
   key: string;
   value: unknown;
+  priority: HandlerTier;
+}
+
+export interface InterruptChange {
+  type: "interrupt";
+  reason: string;
   priority: HandlerTier;
 }
 
