@@ -6,21 +6,17 @@ import { BasicWizard } from "./contestants/basicWizard";
 import {
   Pressure,
   Kite,
+  Orbit,
   Ambush,
   Retreat,
   BaitAndSwitch,
-} from "./tactics/common";
-import {
+  DuelistCharge,
   Sniper,
   Turtle,
   Scrapper,
-} from "./tactics/signature";
-import { Orbit, DuelistCharge, AntiMageZone } from "./tactics/native";
-import type { RosterEntry } from "./tactics/plan";
-import { LegacyTacticShim } from "./tactics/legacyShim";
-import type { Tactic as LegacyTactic } from "./tactics/tactic";
-
-const shim = (t: LegacyTactic): LegacyTacticShim => new LegacyTacticShim(t);
+  AntiMageZone,
+} from "./tactics/native";
+import type { RosterEntry } from "./tactics/tactic";
 import { FireballFactory } from "./spells/fireball";
 import { MeleeFactory } from "./spells/meleeAttack";
 import { ProjectileSlowFieldFactory } from "./spells/projectileSlowField";
@@ -35,35 +31,35 @@ function redRoster(): RosterEntry[] {
   return [
     { tactic: new DuelistCharge(), bias: 1.6 },
     { tactic: new AntiMageZone(), bias: 1.4 },
-    { tactic: shim(new Pressure()), bias: 1.0 },
+    { tactic: new Pressure(), bias: 1.0 },
     { tactic: new Orbit(), bias: 0.8 },
-    { tactic: shim(new Retreat()), bias: 0.7 },
+    { tactic: new Retreat(), bias: 0.7 },
   ];
 }
 
 function blueRoster(): RosterEntry[] {
   return [
-    { tactic: shim(new Sniper()), bias: 1.6 },
-    { tactic: shim(new Ambush()), bias: 1.3 },
-    { tactic: shim(new Kite()), bias: 1.2 },
-    { tactic: shim(new Retreat()), bias: 0.9 },
+    { tactic: new Sniper(), bias: 1.6 },
+    { tactic: new Ambush(), bias: 1.3 },
+    { tactic: new Kite(), bias: 1.2 },
+    { tactic: new Retreat(), bias: 0.9 },
   ];
 }
 
 function greenRoster(): RosterEntry[] {
   return [
-    { tactic: shim(new Turtle()), bias: 1.5 },
-    { tactic: shim(new Retreat()), bias: 1.3 },
+    { tactic: new Turtle(), bias: 1.5 },
+    { tactic: new Retreat(), bias: 1.3 },
     { tactic: new Orbit(), bias: 1 },
-    { tactic: shim(new Kite()), bias: 0.9 },
+    { tactic: new Kite(), bias: 0.9 },
   ];
 }
 
 function yellowRoster(): RosterEntry[] {
   return [
-    { tactic: shim(new Scrapper()), bias: 1.6 },
-    { tactic: shim(new BaitAndSwitch()), bias: 1.3 },
-    { tactic: shim(new Pressure()), bias: 1 },
+    { tactic: new Scrapper(), bias: 1.6 },
+    { tactic: new BaitAndSwitch(), bias: 1.3 },
+    { tactic: new Pressure(), bias: 1 },
     { tactic: new Orbit(), bias: 0.8 },
   ];
 }

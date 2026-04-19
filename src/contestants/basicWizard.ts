@@ -6,14 +6,14 @@ import type { Spell, SpellFactory } from "../spells/spell";
 import { getToonGradient, makeOutline } from "../materials";
 import { KinematicBody, type MovementStats } from "../kinematics";
 import { StatusDisplay } from "../statusDisplay";
-import { TacticSelector } from "../tactics/planSelector";
+import { TacticSelector } from "../tactics/selector";
 import type {
   CastController,
   PaceHint,
   RosterEntry,
   TacticOutput,
-} from "../tactics/plan";
-import { isStationary } from "../tactics/plan";
+} from "../tactics/tactic";
+import { isStationary } from "../tactics/tactic";
 import {
   sampleBestDirection,
   toVector3,

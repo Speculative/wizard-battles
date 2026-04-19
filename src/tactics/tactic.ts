@@ -1,26 +1,35 @@
 import type { Contestant } from "../contestants/contestant";
 import type { EventDetector } from "../events/event";
 import type { Handler } from "../handlers/handler";
-import type { SpellSelector } from "../spells/selection";
+import type { SpellFactory } from "../spells/spell";
+import type { Vec2 } from "../steering";
+import type { World } from "../world";
 
-export interface TacticContext {
-  self: Contestant;
-  enemy: Contestant | null;
-  distToEnemy: number;
-  stamina01: number;
-  hp01: number;
-  shotsFired: number;
+export const STATIONARY: Vec2 = Object.freeze({ x: 0, z: 0 });
+
+export function isStationary(v: Vec2): boolean {
+  return v === STATIONARY || (v.x === 0 && v.z === 0);
 }
 
-export interface Directives {
-  preferredRange: number;
-  rangeBand: number;
-  chargeEagerness: number;
-  dodgeEagerness: number;
-  circleDir: -1 | 0 | 1;
-  ambushMode: boolean;
-  forceSprint?: boolean;
-  selectSpell?: SpellSelector;
+export type PaceHint = "walk" | "run" | "sprint" | "hold";
+
+export interface TacticOutput {
+  moveIntent: Vec2;
+  paceHint: PaceHint;
+  facingIntent: Vec2;
+}
+
+export interface CastController {
+  requestCast(
+    factory: SpellFactory,
+    target: Contestant | null,
+    aim: Vec2
+  ): boolean;
+  cancelCharging(): void;
+  updateAim(target: Contestant | null, aim: Vec2): void;
+  isCharging(): boolean;
+  currentFactory(): SpellFactory | null;
+  isReady(factory: SpellFactory): boolean;
 }
 
 export interface Tactic {
@@ -28,20 +37,18 @@ export interface Tactic {
   readonly minDwell: number;
   readonly detectors?: EventDetector[];
   readonly handlers?: Handler[];
-  score(ctx: TacticContext): number;
-  directives(ctx: TacticContext): Directives;
-  onObserve?(key: string, value: unknown): void;
-  liveDirectives?(base: Directives, ctx: TacticContext): Directives;
-}
 
-export const DEFAULT_DIRECTIVES: Directives = {
-  preferredRange: 250,
-  rangeBand: 80,
-  chargeEagerness: 1,
-  dodgeEagerness: 1,
-  circleDir: 0,
-  ambushMode: false,
-};
+  score(self: Contestant, world: World): number;
+  update(dt: number, self: Contestant, world: World): TacticOutput;
+  maybeCast?(
+    dt: number,
+    self: Contestant,
+    world: World,
+    caster: CastController
+  ): void;
+  onObserve?(key: string, value: unknown): void;
+  currentPhaseId?(): string | undefined;
+}
 
 export interface RosterEntry {
   tactic: Tactic;

@@ -2,8 +2,51 @@ import type { Contestant } from "../contestants/contestant";
 import type { SpellFactory } from "../spells/spell";
 import type { World } from "../world";
 import { circle, seek, type Vec2 } from "../steering";
-import type { CastController } from "./plan";
-import { STATIONARY } from "./plan";
+import type { CastController, PaceHint } from "./tactic";
+import { STATIONARY } from "./tactic";
+import type { SelectionContext } from "../spells/selection";
+
+export interface WizardAccessors {
+  stamina01?: () => number;
+  hp01?: () => number;
+  getShotsFired?: () => number;
+  getSpellbook?: () => readonly SpellFactory[];
+  getReadyAt?: () => Map<SpellFactory, number>;
+}
+
+export function stamina01(self: Contestant): number {
+  const w = self as Contestant & WizardAccessors;
+  return w.stamina01 ? w.stamina01() : 1;
+}
+
+export function hp01(self: Contestant): number {
+  const w = self as Contestant & WizardAccessors;
+  return w.hp01 ? w.hp01() : self.hp / 100;
+}
+
+export function shotsFired(self: Contestant): number {
+  const w = self as Contestant & WizardAccessors;
+  return w.getShotsFired ? w.getShotsFired() : 0;
+}
+
+export function spellbook(self: Contestant): readonly SpellFactory[] {
+  const w = self as Contestant & WizardAccessors;
+  return w.getSpellbook ? w.getSpellbook() : [];
+}
+
+export function selectionContext(
+  self: Contestant,
+  target: Contestant
+): SelectionContext {
+  const w = self as Contestant & WizardAccessors;
+  return {
+    self,
+    target,
+    distToTarget: surfaceDistance(self, target),
+    readyAt: w.getReadyAt ? w.getReadyAt() : new Map(),
+    nowSeconds: performance.now() / 1000,
+  };
+}
 
 export function nearestEnemy(self: Contestant, world: World): Contestant | null {
   let best: Contestant | null = null;
@@ -91,6 +134,18 @@ export function faceVector(v: Vec2): Vec2 {
 
 export function holdFacing(): Vec2 {
   return STATIONARY;
+}
+
+export function paceForRange(
+  surfaceDist: number,
+  preferredRange: number,
+  band: number,
+  sprintOutsideGap = 100
+): PaceHint {
+  const gap = Math.abs(surfaceDist - preferredRange);
+  if (gap > sprintOutsideGap) return "sprint";
+  if (gap < band + 20) return "walk";
+  return "hold";
 }
 
 export function tryRequestCastIfReady(
