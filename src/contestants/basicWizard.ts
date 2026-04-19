@@ -5,6 +5,20 @@ import { Fireball, FIREBALL_SPEED } from "../spells/fireball";
 import { getToonGradient, makeOutline } from "../materials";
 import { KinematicBody, type MovementStats } from "../kinematics";
 import { StatusDisplay } from "../statusDisplay";
+import { TacticSelector } from "../tactics/selector";
+import type {
+  Directives,
+  RosterEntry,
+  TacticContext,
+} from "../tactics/tactic";
+import { DEFAULT_DIRECTIVES } from "../tactics/tactic";
+import {
+  circle,
+  sampleBestDirection,
+  toVector3,
+  type Vec2,
+  type SampleDebug,
+} from "../steering";
 
 function gaussian(): number {
   const u = 1 - Math.random();
@@ -18,19 +32,12 @@ const DODGE_SENSE_RADIUS = 160;
 const DODGE_ANGLE_COS = 0.85;
 const DODGE_SAFETY_MARGIN = 22;
 const PROJECTILE_RADIUS_ESTIMATE = 12;
-const SPRINT_CLOSE_RANGE_MIN = 320;
 const FIRE_COOLDOWN = 1.4;
 const CHARGE_DURATION = 0.45;
 
 const AIM_NOISE_SIGMA_MAX = 0.2;
 const AIM_NOISE_SIGMA_MIN = 0.02;
 const AIM_NOISE_DECAY_SHOTS = 25;
-
-const PREF_RANGE_MIN = 120;
-const PREF_RANGE_MAX = 380;
-const PREF_RANGE_SWITCH_MIN = 3.5;
-const PREF_RANGE_SWITCH_MAX = 8;
-const RANGE_DEADBAND = 35;
 
 const STAMINA_MAX = 3.0;
 const STAMINA_SPRINT_DRAIN = 1.0;
@@ -51,6 +58,10 @@ const TRAIL_MAX_SAMPLES = 10;
 
 const FACING_TURN_RATE = Math.PI * 2.5;
 const SPRINT_FACING_CONE = (Math.PI * 5) / 12;
+
+const SAMPLE_WALL_HORIZON = 140;
+const SAMPLE_INTENT_WEIGHT = 1.0;
+const SAMPLE_WALL_WEIGHT = 1.8;
 
 const STRAFE_SIDE_SCALE = 0.6;
 const STRAFE_BACK_SCALE = 0.4;
@@ -108,6 +119,7 @@ export interface BasicWizardOptions {
   id: string;
   color: number;
   start: THREE.Vector3;
+  roster: RosterEntry[];
 }
 
 export class BasicWizard implements Contestant {
@@ -131,11 +143,19 @@ export class BasicWizard implements Contestant {
   private shotsFired = 0;
   private dodgeCooldown = 0;
   private readonly dodgeDir = new THREE.Vector3();
-  private preferredRange = PREF_RANGE_MIN + Math.random() * (PREF_RANGE_MAX - PREF_RANGE_MIN);
-  private rangeTimer =
-    PREF_RANGE_SWITCH_MIN +
-    Math.random() * (PREF_RANGE_SWITCH_MAX - PREF_RANGE_SWITCH_MIN);
-  private readonly circleSign = Math.random() < 0.5 ? 1 : -1;
+  private readonly defaultCircleSign: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private readonly sampleDebug: SampleDebug = {
+    intentX: 0,
+    intentZ: 0,
+    pickedX: 0,
+    pickedZ: 0,
+    intentWallPenalty: 0,
+    pickedWallPenalty: 0,
+    pickedAlignment: 1,
+    nearestWallDist: 0,
+  };
+  private readonly tacticSelector: TacticSelector;
+  private directives: Directives = { ...DEFAULT_DIRECTIVES };
   private readonly trail: THREE.Line;
   private readonly trailPositions: Float32Array;
   private readonly trailColors: Float32Array;
@@ -159,6 +179,16 @@ export class BasicWizard implements Contestant {
     this.id = opts.id;
     this.body = new KinematicBody({ ...STATE_STATS.running }, opts.start);
     this.body.position.y = FLOAT_HEIGHT;
+    const initialCtx: TacticContext = {
+      self: this,
+      enemy: null,
+      distToEnemy: Infinity,
+      stamina01: 1,
+      hp01: 1,
+      shotsFired: 0,
+    };
+    this.tacticSelector = new TacticSelector(opts.roster, initialCtx, opts.id);
+    this.directives = this.tacticSelector.directives;
 
     const sphereGeo = new THREE.SphereGeometry(RADIUS, 24, 24);
     const bodyMesh = new THREE.Mesh(
@@ -245,23 +275,27 @@ export class BasicWizard implements Contestant {
       this.turnTimer = 0.8 + Math.random() * 1.6;
     }
 
-    const dodgeIntent = this.computeDodge(world);
     const nearest = this.pickTarget(world);
     const distToTarget = nearest
       ? nearest.position.distanceTo(this.body.position)
       : Infinity;
 
-    this.rangeTimer -= dt;
-    if (this.rangeTimer <= 0) {
-      this.preferredRange =
-        PREF_RANGE_MIN + Math.random() * (PREF_RANGE_MAX - PREF_RANGE_MIN);
-      this.rangeTimer =
-        PREF_RANGE_SWITCH_MIN +
-        Math.random() * (PREF_RANGE_SWITCH_MAX - PREF_RANGE_SWITCH_MIN);
-    }
+    const ctx: TacticContext = {
+      self: this,
+      enemy: nearest,
+      distToEnemy: distToTarget,
+      stamina01: this.stamina / STAMINA_MAX,
+      hp01: this.hp / 100,
+      shotsFired: this.shotsFired,
+    };
+    this.tacticSelector.update(dt, ctx);
+    this.directives = this.tacticSelector.directives;
+
+    const dodgeIntent =
+      this.directives.dodgeEagerness > 0.05 ? this.computeDodge(world) : null;
 
     if (nearest) {
-      this.computeEngageIntent(nearest, distToTarget, this.desiredDir);
+      this.computeEngageIntent(nearest, distToTarget, world, this.desiredDir);
     }
 
     if (
@@ -333,30 +367,39 @@ export class BasicWizard implements Contestant {
 
   private computeEngageIntent(
     target: Contestant,
-    dist: number,
+    _dist: number,
+    world: World,
     out: THREE.Vector3
   ): void {
-    const dx = target.position.x - this.body.position.x;
-    const dz = target.position.z - this.body.position.z;
-    if (dist < 1e-3) return;
-    const nx = dx / dist;
-    const nz = dz / dist;
-    const tx = -nz * this.circleSign;
-    const tz = nx * this.circleSign;
-    const diff = dist - this.preferredRange;
-    let radial: number;
-    if (Math.abs(diff) < RANGE_DEADBAND) {
-      radial = 0;
-    } else {
-      const over = Math.abs(diff) - RANGE_DEADBAND;
-      const mag = Math.min(1, over / 60);
-      radial = diff > 0 ? mag : -mag;
-    }
-    const tangential = Math.sqrt(Math.max(0, 1 - radial * radial));
-    const rx = nx * radial + tx * tangential;
-    const rz = nz * radial + tz * tangential;
-    const len = Math.hypot(rx, rz);
-    if (len > 1e-3) out.set(rx / len, 0, rz / len);
+    const pos: Vec2 = { x: this.body.position.x, z: this.body.position.z };
+    const sign =
+      this.directives.circleDir !== 0
+        ? this.directives.circleDir
+        : this.defaultCircleSign;
+
+    const rawIntent = circle(
+      pos,
+      { x: target.position.x, z: target.position.z },
+      this.directives.preferredRange,
+      sign,
+      this.directives.rangeBand
+    );
+
+    const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
+    const refined = sampleBestDirection(
+      {
+        pos,
+        speed,
+        intent: rawIntent,
+        bounds: world.bounds,
+        wallHorizon: SAMPLE_WALL_HORIZON,
+        intentWeight: SAMPLE_INTENT_WEIGHT,
+        wallWeight: SAMPLE_WALL_WEIGHT,
+      },
+      16,
+      this.sampleDebug
+    );
+    toVector3(refined, out);
   }
 
   private computeFacingIntent(
@@ -527,9 +570,11 @@ export class BasicWizard implements Contestant {
       return;
     }
 
-    const rangeGap = Math.abs(distToTarget - this.preferredRange);
+    const rangeGap = Math.abs(distToTarget - this.directives.preferredRange);
+    const canSprint = !this.directives.ambushMode;
     const wantsSprint =
-      (distToTarget > SPRINT_CLOSE_RANGE_MIN || rangeGap > 180) &&
+      canSprint &&
+      rangeGap > 100 &&
       this.stamina > SPRINT_MIN_STAMINA_TO_START;
 
     if (this.state === "sprinting") {
@@ -612,7 +657,8 @@ export class BasicWizard implements Contestant {
     fb.frozen = false;
     this.chargedFireball = null;
     this.chargeTarget = null;
-    this.cooldown = FIRE_COOLDOWN;
+    const eag = Math.max(0.1, this.directives.chargeEagerness);
+    this.cooldown = FIRE_COOLDOWN / eag;
   }
 
   private computeAimDirection(target: Contestant): THREE.Vector3 {
@@ -690,7 +736,8 @@ export class BasicWizard implements Contestant {
   }
 
   private computeDodge(world: World): THREE.Vector3 | null {
-    let bestDist = DODGE_SENSE_RADIUS;
+    const senseRadius = DODGE_SENSE_RADIUS * this.directives.dodgeEagerness;
+    let bestDist = senseRadius;
     let bestSpell: typeof world.spells[number] | null = null;
     const p = this.body.position;
     const u = this.body.velocity;
@@ -703,7 +750,7 @@ export class BasicWizard implements Contestant {
       const toMeX = p.x - s.position.x;
       const toMeZ = p.z - s.position.z;
       const toMeLen = Math.hypot(toMeX, toMeZ);
-      if (toMeLen < 1e-3 || toMeLen > DODGE_SENSE_RADIUS) continue;
+      if (toMeLen < 1e-3 || toMeLen > senseRadius) continue;
       const cos =
         (s.velocity.x * toMeX + s.velocity.z * toMeZ) / (vLen * toMeLen);
       if (cos < DODGE_ANGLE_COS) continue;

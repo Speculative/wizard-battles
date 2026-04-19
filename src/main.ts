@@ -3,6 +3,16 @@ import { GameRenderer } from "./renderer";
 import { buildArena } from "./arena";
 import { World } from "./world";
 import { BasicWizard } from "./contestants/basicWizard";
+import {
+  Pressure,
+  Kite,
+  Orbit,
+  Ambush,
+  Retreat,
+  BaitAndSwitch,
+} from "./tactics/common";
+import { DuelistCharge, Sniper, Turtle, Scrapper } from "./tactics/signature";
+import type { RosterEntry } from "./tactics/tactic";
 
 const canvas = document.getElementById("arena") as HTMLCanvasElement;
 const gfx = new GameRenderer(canvas);
@@ -10,11 +20,48 @@ const world = new World(gfx.scene, gfx.camera);
 
 gfx.scene.add(buildArena());
 
+function redRoster(): RosterEntry[] {
+  return [
+    { tactic: new DuelistCharge(), bias: 1.6 },
+    { tactic: new Pressure(), bias: 1.3 },
+    { tactic: new Orbit(), bias: 0.8 },
+    { tactic: new Retreat(), bias: 0.7 },
+  ];
+}
+
+function blueRoster(): RosterEntry[] {
+  return [
+    { tactic: new Sniper(), bias: 1.6 },
+    { tactic: new Ambush(), bias: 1.3 },
+    { tactic: new Kite(), bias: 1.2 },
+    { tactic: new Retreat(), bias: 0.9 },
+  ];
+}
+
+function greenRoster(): RosterEntry[] {
+  return [
+    { tactic: new Turtle(), bias: 1.5 },
+    { tactic: new Retreat(), bias: 1.3 },
+    { tactic: new Orbit(), bias: 1 },
+    { tactic: new Kite(), bias: 0.9 },
+  ];
+}
+
+function yellowRoster(): RosterEntry[] {
+  return [
+    { tactic: new Scrapper(), bias: 1.6 },
+    { tactic: new BaitAndSwitch(), bias: 1.3 },
+    { tactic: new Pressure(), bias: 1 },
+    { tactic: new Orbit(), bias: 0.8 },
+  ];
+}
+
 world.addContestant(
   new BasicWizard({
     id: "red",
     color: 0xff2244,
     start: new THREE.Vector3(-300, 0, -150),
+    roster: redRoster(),
   })
 );
 world.addContestant(
@@ -22,6 +69,7 @@ world.addContestant(
     id: "blue",
     color: 0x2266ff,
     start: new THREE.Vector3(300, 0, 150),
+    roster: blueRoster(),
   })
 );
 world.addContestant(
@@ -29,6 +77,7 @@ world.addContestant(
     id: "green",
     color: 0x22cc55,
     start: new THREE.Vector3(-300, 0, 200),
+    roster: greenRoster(),
   })
 );
 world.addContestant(
@@ -36,6 +85,7 @@ world.addContestant(
     id: "yellow",
     color: 0xffdd22,
     start: new THREE.Vector3(300, 0, -200),
+    roster: yellowRoster(),
   })
 );
 

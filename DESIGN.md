@@ -22,8 +22,10 @@ The central design principle is **legibility over optimality** — the fights sh
 - **[src/kinematics.ts](src/kinematics.ts)** — `KinematicBody` class: position, velocity, intent; integrates acceleration toward intent with turn-rate cap, friction when idle, max-speed clamp.
 - **[src/statusDisplay.ts](src/statusDisplay.ts)** — HP + stamina bars billboarded to the camera, rendered above each contestant.
 - **[src/materials.ts](src/materials.ts)** — shared toon gradient map; inverted-hull outline helper.
+- **[src/steering.ts](src/steering.ts)** — pure-function steering primitives (`seek`, `flee`, `arrive`, `pursue`, `evade`, `circle`, `wallRepulsion`) returning `Vec2` desired-velocities, plus `sampleBestDirection` which scores 16 directions around an intent and picks the best accounting for wall clearance.
+- **[src/tactics/](src/tactics/)** — AI tactic layer. `tactic.ts` defines the `Tactic` interface, `Directives` shape, `TacticContext`, `RosterEntry`. `common.ts` holds six shared tactics (Pressure, Kite, Orbit, Ambush, Retreat, BaitAndSwitch). `signature.ts` holds four wizard-signature tactics (DuelistCharge, Sniper, Turtle, Scrapper). `selector.ts` scores a roster each second with random jitter and commits to the winner for its minimum dwell.
 - **[src/contestants/contestant.ts](src/contestants/contestant.ts)** — `Contestant` interface (mesh, position, velocity, facing, radius, hp, alive, update).
-- **[src/contestants/basicWizard.ts](src/contestants/basicWizard.ts)** — first concrete contestant. Holds a kinematic body, a state machine (see below), stamina, engagement-range oscillation, facing with strafe tax, committed lateral dodges, charged-fireball casts with predictive aiming, status display, speed trail.
+- **[src/contestants/basicWizard.ts](src/contestants/basicWizard.ts)** — first concrete contestant. Holds a kinematic body, a state machine (see below), stamina, a `TacticSelector` driving live directives, facing with strafe tax, committed lateral dodges, charged-fireball casts with predictive aiming, status display, speed trail. Engage intent comes from `circle(...)` shaped by current directives and refined by `sampleBestDirection` for wall avoidance.
 - **[src/spells/spell.ts](src/spells/spell.ts)** — `Spell` interface (mesh, position, velocity, caster, dead, update).
 - **[src/spells/fireball.ts](src/spells/fireball.ts)** — four-layer fiery projectile with sphere-node trail. Supports `frozen` mode during caster's charge window; `setPosition` for caster-relative positioning during charge; `setVelocityFromDirection` on release. Spawns an `Explosion` and a `ParticleBurst` on impact.
 - **[src/spells/explosion.ts](src/spells/explosion.ts)** — short-lived expanding-sphere visual effect. Pure cosmetic; no damage.
@@ -151,6 +153,31 @@ Utility AI + steering behaviors, organized as three timescales:
 - **Action layer (hundreds of ms to seconds).** Discrete moves within the current tactic: cast, dash, teleport, strafe. Re-evaluated every 0.3–0.8s or on action completion. Scored by tactic-specific utility, drawn from a tactic-specific action pool.
 - **Control layer (per frame).** Steering vectors, aim, animation. Pure execution, no decisions.
 
+### Current implementation status
+
+We have a simplified two-tier slice of the above: **tactic layer → control layer**, no distinct action layer yet. Tactics emit `Directives` (preferred range, range band, charge eagerness, dodge eagerness, circle direction, ambush mode) that the existing `BasicWizard` behaviors consume as live parameters.
+
+Six common tactics + four wizard-signature tactics (ten total) are implemented in [src/tactics/](src/tactics/). A `TacticSelector` scores the active wizard's roster every second, applies random jitter, and commits to the winner for its minimum dwell.
+
+What's *not* yet present from the full spec:
+- Action layer (discrete named actions with their own commitment windows)
+- Plan-style multi-phase tactics (the current ones are "parameter bundles," not sequences)
+- Centralized interrupt system (dodge, HP threshold, and tactic commitment checks are each still ad-hoc in `BasicWizard`)
+- Personality vectors (each wizard's tactic-roster biases stand in for this for now)
+- Any learning / habit formation / opponent modeling
+
+### Planned evolution (toward full plan-based AI)
+
+Discussed on 2026-04-19. The end goal is tactics as *plans* — multi-phase sequences that forward-simulate a fight and commit to a navigation/action sequence, with interrupts that can modify or cancel the plan. Tactics configure their own interrupt posture (e.g. "rush" suppresses dodge; "kite" permits it).
+
+Staged path:
+
+1. ~~**Directional sampling at the control layer.**~~ *Done 2026-04-19.* 16-direction sampling with intent-alignment + wall clearance scoring refines the raw intent each frame.
+2. **Central interrupt system.** Refactor dodge into a named interrupt. Wizard owns a registry of interrupts; highest-priority firing one preempts the normal intent. HP-threshold and tactic-commitment checks migrate here too. Tactics can modify the interrupt list while active.
+3. **Tactics shape interrupts.** Aggressive tactics disable/limit dodge, defensive tactics amplify it. This is the first moment tactics actually author behavior rather than just tweak scalars.
+4. **Plans replace tactics.** Multi-phase sequences with advance/abort conditions. Plan selection replaces tactic selection. Plans can evaluate candidate *destinations* (not just preferred ranges) — longer-horizon position reasoning. Current sampling continues to be the reactive frame-by-frame realizer.
+5. **Enemy prediction model.** Tactics/plans "envision" the opponent's response during scoring. Linear extrapolation to start.
+
 ### Tactics as first-class objects
 
 Define a catalog of 6–12 named tactics. Each owns:
@@ -160,6 +187,18 @@ Define a catalog of 6–12 named tactics. Each owns:
 - Its own action-selection utility function
 
 Tactics should be recipes, not moods. "Close to melee and chain fire spells" — specific enough to be legibly succeeding or failing. Moods live in personality; tactics are what personality *chooses*.
+
+### Navigation
+
+Tactics emit a raw intent (direction), but the wizard shouldn't blindly move along that intent — walls, other obstacles, and later terrain need to inform frame-by-frame movement.
+
+**Current:** each frame, `sampleBestDirection` evaluates 16 directions around the wizard's raw intent. Each is scored by `intentWeight * alignment(dir, intent) − wallWeight * cubedCloseness(dir)`, where closeness is `1 - distanceToWall / wallHorizon` clamped to [0,1]. The cubic curve makes the penalty spike near walls and fade quickly at distance. The best-scoring direction becomes the body's actual intent. One behavior per frame — no summing.
+
+**Why not vector summing.** Summing produces the classic "confused standstill" when opposing forces cancel. We picked priority-layering: one behavior wins, committing visibly to that choice.
+
+**Known limitation — center drift.** Wizards still tend to end up at the arena edges. Root cause is structural: tactics see "range to enemy" but not "position in arena." Two wizards maintaining a fixed range trace an orbital arc whose center tends to drift; sampling pushes off walls locally but doesn't bias toward the center. Lowering tactic preferred ranges so none *requires* a wall position helped but didn't fix it. The real fix is **position reasoning at the tactic layer** — plans that score candidate destinations against multiple constraints (range, wall clearance, cover, etc.) rather than emitting a scalar preferred range. This is stage 4 of the roadmap above; further sampling-layer tweaks (e.g. adding a center-bias term) would be bandaid work we'd just rip out later.
+
+**Future.** As we add obstacles, platforms, and destructible terrain, sampling's scoring gets more factors: obstacle clearance, cover score, platform reachability. Tactics supply weights so different playstyles can lean toward/away from each factor.
 
 ### Commitment and interrupts
 
@@ -227,6 +266,7 @@ ML stays *out* of the decision layer — hand-authored utility is more legible a
 
 ### Done
 
+Movement & physics:
 - Kinematic body + ground physics (accel, friction, turn rate)
 - Movement states (idle, walking, running, sprinting, dodging, charging, recovering) with per-state stats
 - Stamina (short-term) resource — vigor was removed after degenerate-dodge-loop failure mode
@@ -235,26 +275,35 @@ ML stays *out* of the decision layer — hand-authored utility is more legible a
 - Sprint commits movement direction; facing can glance off-axis within a 75° cone
 - Charged fireball casts (pre-cast window where the spell follows the caster, released on state exit)
 - Predictive aiming with decaying Gaussian noise (quadratic lead solve, σ decays with shots fired)
-- Engagement-range oscillation (temporary hack to break duel lock; will be subsumed by tactic layer)
-- Sprint triggered by large deviation from preferred range, not just absolute distance to target
+
+AI layer (two-tier slice):
+- Steering primitives library in [src/steering.ts](src/steering.ts): seek / flee / arrive / pursue / evade / circle / wallRepulsion
+- Tactic interface + `Directives` + `TacticContext` in [src/tactics/tactic.ts](src/tactics/tactic.ts)
+- Six common tactics + four wizard-signature tactics
+- `TacticSelector` with utility scoring, random jitter, commitment dwell
+- Each of the four wizards gets a personality-biased roster
+- `BasicWizard` consumes live directives from the current tactic; old hardcoded range-oscillation / sprint-range constants removed
+- Directional sampling (16 directions, intent alignment + cubic wall-clearance scoring) refines the raw engage intent each frame
+
+Visual polish:
 - Status bars (HP + stamina) billboarded above each wizard
 - Speed trails during sprint / dodge
 - Fireball visual polish: four-layer orange gradient, trail, impact explosion, `THREE.Points` particle burst (POC confirming the Points pipeline works end-to-end)
 
 ### Next
 
-Tactic layer is the next big leap. Once it lands, a lot of the current ad-hoc behavior (range oscillation, sprint triggers, charge gating) collapses into proper tactic choices.
+Work toward the plan-based AI described in "Planned evolution" above. The known center-drift problem is structural (see Navigation) and will be resolved by plans with position reasoning, not by further tuning of the current system.
 
-1. **Tactic catalog** (6–12 named tactics, entry/continuation conditions, action pools).
-2. **Tactic-level utility scoring** with commitment timers and interrupt list. Subsumes engagement-range hack.
-3. **Per-tactic action selection.**
-4. **Steering behaviors at the control layer** (seek/flee/separate/pursue as reusable primitives rather than bespoke logic inside `BasicWizard`).
-5. **Personality vector** wired into tactic and action scoring.
-6. **Projectile kinematics for physical projectiles** (distinct from magical spells; levitated terrain etc.).
-7. **Predicted self-position helper** (forward-sim given current velocity + action). Generalize the one-off dodge-filter version into a reusable AI helper.
-8. **Commitment-cost term** usable by action-selection utility.
+1. **Centralize interrupts.** Refactor dodge into a named interrupt; add HP-threshold, opportunity, and tactic-broken interrupts on the same registry.
+2. **Tactics author interrupt posture.** Tactics modify the interrupt list while active (e.g., "rush" suppresses dodge).
+3. **Plans replace tactics.** Multi-phase sequences with advance/abort conditions and position-based scoring.
+4. **Enemy prediction model** feeding plan selection.
+5. **Per-tactic action selection** (actions as named discrete moves with their own commitment — fills in the missing action layer of the three-tier hierarchy).
+6. **Personality vector** wired into plan and action scoring (currently stand-in: per-wizard roster biases).
+7. **Projectile kinematics for physical projectiles** (distinct from magical spells; levitated terrain etc.).
+8. **Predicted self-position helper** — generalize the one-off dodge-filter version into a reusable AI helper.
 9. **Reaction-time delay** on AI stimulus response *(likely requires an event queue — defer the design)*.
-10. **Per-contestant persistence** (habit weights on tactics, opponent models, aim skill).
+10. **Per-contestant persistence** (habit weights on plans, opponent models, aim skill).
 11. **Opponent reaction modeling.**
 12. **Jumps** + airborne state + air control (when the vertical axis starts to matter).
 13. *(Later)* MAP-Elites for personality generation.
