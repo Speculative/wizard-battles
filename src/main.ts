@@ -6,7 +6,7 @@ import { BasicWizard } from "./contestants/basicWizard";
 
 const canvas = document.getElementById("arena") as HTMLCanvasElement;
 const gfx = new GameRenderer(canvas);
-const world = new World(gfx.scene);
+const world = new World(gfx.scene, gfx.camera);
 
 gfx.scene.add(buildArena());
 

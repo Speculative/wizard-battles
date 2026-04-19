@@ -12,7 +12,8 @@ export class Fireball implements Spell {
   readonly mesh: THREE.Object3D;
   readonly position: THREE.Vector3;
   readonly caster: Contestant;
-  private readonly velocity: THREE.Vector3;
+  readonly velocity: THREE.Vector3;
+  frozen = false;
   private age = 0;
   dead = false;
 
@@ -29,7 +30,18 @@ export class Fireball implements Spell {
     this.mesh = core;
   }
 
+  setVelocityFromDirection(direction: THREE.Vector3): void {
+    const len = Math.hypot(direction.x, direction.y, direction.z);
+    if (len < 1e-6) return;
+    this.velocity.set(
+      (direction.x / len) * SPEED,
+      (direction.y / len) * SPEED,
+      (direction.z / len) * SPEED
+    );
+  }
+
   update(dt: number, world: World): void {
+    if (this.frozen) return;
     this.age += dt;
     if (this.age >= LIFETIME) {
       this.dead = true;

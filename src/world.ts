@@ -5,12 +5,14 @@ import { ARENA } from "./config";
 
 export class World {
   readonly scene: THREE.Scene;
+  readonly camera: THREE.Camera;
   readonly contestants: Contestant[] = [];
   readonly spells: Spell[] = [];
   readonly bounds = ARENA;
 
-  constructor(scene: THREE.Scene) {
+  constructor(scene: THREE.Scene, camera: THREE.Camera) {
     this.scene = scene;
+    this.camera = camera;
   }
 
   addContestant(c: Contestant): void {

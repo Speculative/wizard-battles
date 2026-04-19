@@ -3,11 +3,99 @@ import type { Contestant } from "./contestant";
 import type { World } from "../world";
 import { Fireball } from "../spells/fireball";
 import { getToonGradient, makeOutline } from "../materials";
+import { KinematicBody, type MovementStats } from "../kinematics";
+import { StatusDisplay } from "../statusDisplay";
 
 const RADIUS = 22;
-const MOVE_SPEED = 80;
-const FIRE_COOLDOWN = 1.4;
 const FLOAT_HEIGHT = RADIUS * 1.5;
+const DODGE_SENSE_RADIUS = 160;
+const DODGE_ANGLE_COS = 0.85;
+const DODGE_SAFETY_MARGIN = 22;
+const PROJECTILE_RADIUS_ESTIMATE = 12;
+const SPRINT_CLOSE_RANGE_MIN = 320;
+const FIRE_COOLDOWN = 1.4;
+const CHARGE_DURATION = 0.45;
+
+const PREF_RANGE_MIN = 120;
+const PREF_RANGE_MAX = 380;
+const PREF_RANGE_SWITCH_MIN = 3.5;
+const PREF_RANGE_SWITCH_MAX = 8;
+const RANGE_DEADBAND = 35;
+
+const STAMINA_MAX = 3.0;
+const STAMINA_SPRINT_DRAIN = 1.0;
+const STAMINA_REGEN = 0.6;
+const SPRINT_MIN_STAMINA_TO_START = 0.8;
+const RECOVERY_DURATION = 1.2;
+
+const DODGE_DURATION_MAX = 0.22;
+const DODGE_DURATION_MIN = 0.08;
+const DODGE_IMPULSE_SPEED = 320;
+const DODGE_STAMINA_COST = 1.2;
+const DODGE_MIN_STAMINA = 0.6;
+const DODGE_COOLDOWN = 1.2;
+const DODGE_RECOVERY_DURATION = 0.35;
+
+const VIGOR_MAX = 1.0;
+const VIGOR_DRAIN_PER_SEC = 0.01;
+const VIGOR_MIN_SCALE = 0.55;
+
+const TRAIL_SAMPLE_INTERVAL = 0.03;
+const TRAIL_MAX_SAMPLES = 10;
+
+const FACING_TURN_RATE = Math.PI * 2.5;
+
+const STRAFE_SIDE_SCALE = 0.6;
+const STRAFE_BACK_SCALE = 0.4;
+
+type MovementState =
+  | "idle"
+  | "walking"
+  | "running"
+  | "sprinting"
+  | "dodging"
+  | "charging"
+  | "recovering";
+
+const STATE_STATS: Record<MovementState, MovementStats> = {
+  idle: { maxSpeed: 0, acceleration: 0, friction: 500, turnRate: Math.PI * 2 },
+  walking: {
+    maxSpeed: 60,
+    acceleration: 350,
+    friction: 350,
+    turnRate: Math.PI * 1.6,
+  },
+  running: {
+    maxSpeed: 130,
+    acceleration: 450,
+    friction: 300,
+    turnRate: Math.PI * 1.2,
+  },
+  sprinting: {
+    maxSpeed: 220,
+    acceleration: 500,
+    friction: 250,
+    turnRate: Math.PI * 0.7,
+  },
+  dodging: {
+    maxSpeed: 340,
+    acceleration: 2000,
+    friction: 600,
+    turnRate: Math.PI * 0.3,
+  },
+  charging: {
+    maxSpeed: 45,
+    acceleration: 250,
+    friction: 400,
+    turnRate: Math.PI * 1.8,
+  },
+  recovering: {
+    maxSpeed: 15,
+    acceleration: 50,
+    friction: 800,
+    turnRate: Math.PI * 0.6,
+  },
+};
 
 export interface BasicWizardOptions {
   id: string;
@@ -18,86 +106,545 @@ export interface BasicWizardOptions {
 export class BasicWizard implements Contestant {
   readonly id: string;
   readonly mesh: THREE.Object3D;
-  readonly position: THREE.Vector3;
   readonly radius = RADIUS;
   hp = 100;
   alive = true;
 
-  private readonly heading: THREE.Vector3;
+  private readonly body: KinematicBody;
+  readonly facing = new THREE.Vector3(1, 0, 0);
+  private readonly facingPivot: THREE.Group;
+  private readonly desiredDir = new THREE.Vector3();
+  private state: MovementState = "running";
+  private stateTimer = 0;
+  private stamina = STAMINA_MAX;
+  private vigor = VIGOR_MAX;
   private cooldown = Math.random() * FIRE_COOLDOWN;
   private turnTimer = 0;
+  private chargedFireball: Fireball | null = null;
+  private chargeTarget: Contestant | null = null;
+  private dodgeCooldown = 0;
+  private readonly dodgeDir = new THREE.Vector3();
+  private preferredRange = PREF_RANGE_MIN + Math.random() * (PREF_RANGE_MAX - PREF_RANGE_MIN);
+  private rangeTimer =
+    PREF_RANGE_SWITCH_MIN +
+    Math.random() * (PREF_RANGE_SWITCH_MAX - PREF_RANGE_SWITCH_MIN);
+  private readonly circleSign = Math.random() < 0.5 ? 1 : -1;
+  private readonly trail: THREE.Line;
+  private readonly trailPositions: Float32Array;
+  private readonly trailColors: Float32Array;
+  private readonly trailGeo: THREE.BufferGeometry;
+  private trailSampleTimer = 0;
+  private trailCount = 0;
+  private readonly trailBaseColor: THREE.Color;
+  private trailAttached = false;
+  private readonly status = new StatusDisplay();
+  private statusAttached = false;
+
+  get position(): THREE.Vector3 {
+    return this.body.position;
+  }
+  get velocity(): THREE.Vector3 {
+    return this.body.velocity;
+  }
 
   constructor(opts: BasicWizardOptions) {
     this.id = opts.id;
-    this.position = opts.start.clone();
-    this.position.y = FLOAT_HEIGHT;
+    this.body = new KinematicBody({ ...STATE_STATS.running }, opts.start);
+    this.body.position.y = FLOAT_HEIGHT;
 
     const sphereGeo = new THREE.SphereGeometry(RADIUS, 24, 24);
-    const body = new THREE.Mesh(
+    const bodyMesh = new THREE.Mesh(
       sphereGeo,
       new THREE.MeshToonMaterial({
         color: opts.color,
         gradientMap: getToonGradient(),
       })
     );
-    body.castShadow = true;
+    bodyMesh.castShadow = true;
     const group = new THREE.Group();
     group.add(makeOutline(sphereGeo, 1.05));
-    group.add(body);
+    group.add(bodyMesh);
+
+    const facingMarker = new THREE.Mesh(
+      new THREE.ConeGeometry(RADIUS * 0.35, RADIUS * 0.9, 10),
+      new THREE.MeshToonMaterial({
+        color: 0x222222,
+        gradientMap: getToonGradient(),
+      })
+    );
+    facingMarker.rotation.z = -Math.PI / 2;
+    facingMarker.position.set(RADIUS * 0.9, RADIUS * 0.3, 0);
+    const facingPivot = new THREE.Group();
+    facingPivot.add(facingMarker);
+    group.add(facingPivot);
+    this.facingPivot = facingPivot;
+
     this.mesh = group;
-    this.mesh.position.copy(this.position);
+    this.mesh.position.copy(this.body.position);
+
+    this.trailBaseColor = new THREE.Color(opts.color);
+    this.trailGeo = new THREE.BufferGeometry();
+    this.trailPositions = new Float32Array(TRAIL_MAX_SAMPLES * 3);
+    this.trailColors = new Float32Array(TRAIL_MAX_SAMPLES * 3);
+    this.trailGeo.setAttribute(
+      "position",
+      new THREE.BufferAttribute(this.trailPositions, 3)
+    );
+    this.trailGeo.setAttribute(
+      "color",
+      new THREE.BufferAttribute(this.trailColors, 3)
+    );
+    this.trailGeo.setDrawRange(0, 0);
+    this.trail = new THREE.Line(
+      this.trailGeo,
+      new THREE.LineBasicMaterial({ vertexColors: true, transparent: true })
+    );
+    this.trail.frustumCulled = false;
 
     const angle = Math.random() * Math.PI * 2;
-    this.heading = new THREE.Vector3(Math.cos(angle), 0, Math.sin(angle));
+    this.desiredDir.set(Math.cos(angle), 0, Math.sin(angle));
+    this.facing.copy(this.desiredDir);
+    this.facingPivot.rotation.y = -Math.atan2(this.facing.z, this.facing.x);
   }
 
   update(dt: number, world: World): void {
+    if (!this.trailAttached) {
+      world.scene.add(this.trail);
+      this.trailAttached = true;
+    }
+    if (!this.statusAttached) {
+      world.scene.add(this.status.group);
+      this.statusAttached = true;
+    }
+
     if (!this.alive) {
       this.mesh.visible = false;
+      this.trail.visible = false;
+      this.status.setVisible(false);
+      if (this.chargedFireball) {
+        this.chargedFireball.dead = true;
+        this.chargedFireball = null;
+      }
       return;
     }
+
+    this.vigor = Math.max(0, this.vigor - VIGOR_DRAIN_PER_SEC * dt);
+    this.dodgeCooldown = Math.max(0, this.dodgeCooldown - dt);
 
     this.turnTimer -= dt;
     if (this.turnTimer <= 0) {
       const angle = Math.random() * Math.PI * 2;
-      this.heading.set(Math.cos(angle), 0, Math.sin(angle));
+      this.desiredDir.set(Math.cos(angle), 0, Math.sin(angle));
       this.turnTimer = 0.8 + Math.random() * 1.6;
     }
 
-    this.position.addScaledVector(this.heading, MOVE_SPEED * dt);
+    const dodgeIntent = this.computeDodge(world);
+    const nearest = this.pickTarget(world);
+    const distToTarget = nearest
+      ? nearest.position.distanceTo(this.body.position)
+      : Infinity;
 
+    this.rangeTimer -= dt;
+    if (this.rangeTimer <= 0) {
+      this.preferredRange =
+        PREF_RANGE_MIN + Math.random() * (PREF_RANGE_MAX - PREF_RANGE_MIN);
+      this.rangeTimer =
+        PREF_RANGE_SWITCH_MIN +
+        Math.random() * (PREF_RANGE_SWITCH_MAX - PREF_RANGE_SWITCH_MIN);
+    }
+
+    if (nearest) {
+      this.computeEngageIntent(nearest, distToTarget, this.desiredDir);
+    }
+
+    if (
+      dodgeIntent &&
+      this.state !== "dodging" &&
+      this.state !== "recovering" &&
+      this.state !== "charging" &&
+      this.dodgeCooldown <= 0 &&
+      this.stamina >= DODGE_MIN_STAMINA
+    ) {
+      this.dodgeDir.copy(dodgeIntent);
+      this.body.velocity.x = this.dodgeDir.x * DODGE_IMPULSE_SPEED;
+      this.body.velocity.z = this.dodgeDir.z * DODGE_IMPULSE_SPEED;
+      const staminaFrac = Math.min(1, this.stamina / DODGE_STAMINA_COST);
+      this.stamina = Math.max(
+        0,
+        this.stamina - DODGE_STAMINA_COST * staminaFrac
+      );
+      this.dodgeCooldown = DODGE_COOLDOWN;
+      this.setState("dodging");
+      this.stateTimer =
+        DODGE_DURATION_MIN +
+        (DODGE_DURATION_MAX - DODGE_DURATION_MIN) * staminaFrac;
+    }
+
+    this.updateState(dt, distToTarget);
+
+    const isDodging = this.state === "dodging";
+    const intent = isDodging ? this.dodgeDir : this.desiredDir;
+    const commitMove = this.state === "sprinting";
+    const facingIntent =
+      isDodging || !commitMove
+        ? this.computeFacingIntent(intent, nearest)
+        : intent;
+    this.updateFacing(dt, facingIntent);
+
+    const baseMaxSpeed = this.body.stats.maxSpeed;
+    if (!isDodging) {
+      this.body.stats.maxSpeed = baseMaxSpeed * this.strafeScale(intent);
+    }
+
+    if (this.state === "idle") {
+      this.body.clearIntent();
+    } else {
+      this.body.setIntent(intent);
+    }
+    this.body.update(dt);
+    this.body.stats.maxSpeed = baseMaxSpeed;
+
+    this.enforceArenaBounds(world);
+
+    this.body.position.y = FLOAT_HEIGHT;
+    this.mesh.position.copy(this.body.position);
+
+    this.updateTrail(dt);
+    this.updateCombat(dt, world, nearest);
+    this.status.update(
+      this.hp / 100,
+      this.vigor,
+      this.stamina / STAMINA_MAX,
+      this.body.position,
+      RADIUS * 1.8,
+      world.camera.quaternion
+    );
+  }
+
+  private computeEngageIntent(
+    target: Contestant,
+    dist: number,
+    out: THREE.Vector3
+  ): void {
+    const dx = target.position.x - this.body.position.x;
+    const dz = target.position.z - this.body.position.z;
+    if (dist < 1e-3) return;
+    const nx = dx / dist;
+    const nz = dz / dist;
+    const tx = -nz * this.circleSign;
+    const tz = nx * this.circleSign;
+    const diff = dist - this.preferredRange;
+    let radial: number;
+    if (Math.abs(diff) < RANGE_DEADBAND) {
+      radial = 0;
+    } else {
+      const over = Math.abs(diff) - RANGE_DEADBAND;
+      const mag = Math.min(1, over / 60);
+      radial = diff > 0 ? mag : -mag;
+    }
+    const tangential = Math.sqrt(Math.max(0, 1 - radial * radial));
+    const rx = nx * radial + tx * tangential;
+    const rz = nz * radial + tz * tangential;
+    const len = Math.hypot(rx, rz);
+    if (len > 1e-3) out.set(rx / len, 0, rz / len);
+  }
+
+  private computeFacingIntent(
+    moveIntent: THREE.Vector3,
+    nearest: Contestant | null
+  ): THREE.Vector3 {
+    if (this.chargeTarget) {
+      const dx = this.chargeTarget.position.x - this.body.position.x;
+      const dz = this.chargeTarget.position.z - this.body.position.z;
+      const len = Math.hypot(dx, dz);
+      if (len > 1e-3) return new THREE.Vector3(dx / len, 0, dz / len);
+    }
+    if (nearest) {
+      const dx = nearest.position.x - this.body.position.x;
+      const dz = nearest.position.z - this.body.position.z;
+      const len = Math.hypot(dx, dz);
+      if (len > 1e-3) return new THREE.Vector3(dx / len, 0, dz / len);
+    }
+    return moveIntent;
+  }
+
+  private strafeScale(moveIntent: THREE.Vector3): number {
+    const iLen = Math.hypot(moveIntent.x, moveIntent.z);
+    if (iLen < 1e-3) return 1;
+    const ix = moveIntent.x / iLen;
+    const iz = moveIntent.z / iLen;
+    const dot = this.facing.x * ix + this.facing.z * iz;
+    if (dot >= 0) {
+      return 1 - (1 - STRAFE_SIDE_SCALE) * (1 - dot);
+    }
+    return STRAFE_SIDE_SCALE + (STRAFE_BACK_SCALE - STRAFE_SIDE_SCALE) * -dot;
+  }
+
+  private updateFacing(dt: number, intent: THREE.Vector3): void {
+    const len = Math.hypot(intent.x, intent.z);
+    if (len < 1e-3) return;
+    const tx = intent.x / len;
+    const tz = intent.z / len;
+    const dot = this.facing.x * tx + this.facing.z * tz;
+    const clamped = Math.max(-1, Math.min(1, dot));
+    const angleBetween = Math.acos(clamped);
+    const maxRotate = FACING_TURN_RATE * dt;
+    if (angleBetween <= maxRotate) {
+      this.facing.set(tx, 0, tz);
+    } else {
+      const cross = this.facing.x * tz - this.facing.z * tx;
+      const sign = cross >= 0 ? 1 : -1;
+      const rot = maxRotate * sign;
+      const cos = Math.cos(rot);
+      const sin = Math.sin(rot);
+      const fx = this.facing.x * cos - this.facing.z * sin;
+      const fz = this.facing.x * sin + this.facing.z * cos;
+      this.facing.set(fx, 0, fz);
+    }
+    this.facingPivot.rotation.y = -Math.atan2(this.facing.z, this.facing.x);
+  }
+
+  private updateTrail(dt: number): void {
+    if (this.state === "sprinting" || this.state === "dodging") {
+      this.trailSampleTimer -= dt;
+      if (this.trailSampleTimer <= 0) {
+        this.trailSampleTimer = TRAIL_SAMPLE_INTERVAL;
+        this.pushTrailSample();
+      }
+    } else if (this.trailCount > 0) {
+      this.trailSampleTimer -= dt;
+      if (this.trailSampleTimer <= 0) {
+        this.trailSampleTimer = TRAIL_SAMPLE_INTERVAL;
+        this.trailCount = Math.max(0, this.trailCount - 1);
+        this.rewriteTrailFromFront();
+      }
+    }
+    this.trail.visible = this.trailCount > 1;
+  }
+
+  private pushTrailSample(): void {
+    if (this.trailCount >= TRAIL_MAX_SAMPLES) {
+      for (let i = 1; i < TRAIL_MAX_SAMPLES; i++) {
+        this.trailPositions[(i - 1) * 3] = this.trailPositions[i * 3];
+        this.trailPositions[(i - 1) * 3 + 1] = this.trailPositions[i * 3 + 1];
+        this.trailPositions[(i - 1) * 3 + 2] = this.trailPositions[i * 3 + 2];
+      }
+      this.trailCount = TRAIL_MAX_SAMPLES - 1;
+    }
+    const idx = this.trailCount * 3;
+    this.trailPositions[idx] = this.body.position.x;
+    this.trailPositions[idx + 1] = this.body.position.y;
+    this.trailPositions[idx + 2] = this.body.position.z;
+    this.trailCount++;
+    this.rewriteTrailFromFront();
+  }
+
+  private rewriteTrailFromFront(): void {
+    const n = this.trailCount;
+    for (let i = 0; i < n; i++) {
+      const t = n <= 1 ? 1 : i / (n - 1);
+      this.trailColors[i * 3] = this.trailBaseColor.r * t;
+      this.trailColors[i * 3 + 1] = this.trailBaseColor.g * t;
+      this.trailColors[i * 3 + 2] = this.trailBaseColor.b * t;
+    }
+    this.trailGeo.attributes.position.needsUpdate = true;
+    this.trailGeo.attributes.color.needsUpdate = true;
+    this.trailGeo.setDrawRange(0, n);
+  }
+
+  private updateState(dt: number, distToTarget: number): void {
+    if (this.state === "charging") {
+      this.stateTimer -= dt;
+      this.stamina = Math.min(STAMINA_MAX, this.stamina + STAMINA_REGEN * dt);
+      if (this.stateTimer <= 0) this.setState("running");
+      return;
+    }
+    if (this.state === "recovering") {
+      this.stateTimer -= dt;
+      this.stamina = Math.min(STAMINA_MAX, this.stamina + STAMINA_REGEN * dt);
+      if (this.stateTimer <= 0) this.setState("running");
+      return;
+    }
+    if (this.state === "dodging") {
+      this.stateTimer -= dt;
+      if (this.stateTimer <= 0) {
+        this.setState("recovering");
+        this.stateTimer = DODGE_RECOVERY_DURATION;
+      }
+      return;
+    }
+
+    const wantsSprint =
+      distToTarget > SPRINT_CLOSE_RANGE_MIN &&
+      this.stamina > SPRINT_MIN_STAMINA_TO_START;
+
+    if (this.state === "sprinting") {
+      this.stamina -= STAMINA_SPRINT_DRAIN * dt;
+      if (this.stamina <= 0) {
+        this.stamina = 0;
+        this.setState("recovering");
+        this.stateTimer = RECOVERY_DURATION;
+        return;
+      }
+      if (!wantsSprint) this.setState("running");
+      return;
+    }
+
+    this.stamina = Math.min(STAMINA_MAX, this.stamina + STAMINA_REGEN * dt);
+
+    if (wantsSprint) {
+      this.setState("sprinting");
+      return;
+    }
+
+    const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
+    if (distToTarget < 180) {
+      this.setState("walking");
+    } else if (speed < 5) {
+      this.setState("idle");
+    } else {
+      this.setState("running");
+    }
+  }
+
+  private setState(next: MovementState): void {
+    if (this.state === next) return;
+    this.state = next;
+    const base = STATE_STATS[next];
+    const scale = VIGOR_MIN_SCALE + (1 - VIGOR_MIN_SCALE) * this.vigor;
+    this.body.stats = {
+      maxSpeed: base.maxSpeed * scale,
+      acceleration: base.acceleration,
+      friction: base.friction,
+      turnRate: base.turnRate,
+    };
+  }
+
+  private updateCombat(
+    dt: number,
+    world: World,
+    nearest: Contestant | null
+  ): void {
+    if (this.chargedFireball) {
+      const aim = this.chargeTarget
+        ? this.chargeTarget.position.clone().sub(this.body.position).normalize()
+        : this.desiredDir;
+      this.chargedFireball.position.set(
+        this.body.position.x + aim.x * (this.radius + 6),
+        this.body.position.y + 8,
+        this.body.position.z + aim.z * (this.radius + 6)
+      );
+      this.chargedFireball.mesh.position.copy(this.chargedFireball.position);
+      if (this.state !== "charging") {
+        this.releaseCharge();
+      }
+      return;
+    }
+
+    this.cooldown -= dt;
+    if (this.cooldown > 0 || !nearest) return;
+    if (this.state === "sprinting" || this.state === "recovering") return;
+
+    this.chargeTarget = nearest;
+    const fb = new Fireball(this, new THREE.Vector3(1, 0, 0), this.body.position);
+    fb.frozen = true;
+    this.chargedFireball = fb;
+    world.addSpell(fb);
+    this.setState("charging");
+    this.stateTimer = CHARGE_DURATION;
+  }
+
+  private releaseCharge(): void {
+    const fb = this.chargedFireball;
+    const target = this.chargeTarget;
+    if (!fb) return;
+    if (target) {
+      const dir = target.position.clone().sub(this.body.position);
+      fb.setVelocityFromDirection(dir);
+    }
+    fb.frozen = false;
+    this.chargedFireball = null;
+    this.chargeTarget = null;
+    this.cooldown = FIRE_COOLDOWN;
+  }
+
+  private enforceArenaBounds(world: World): void {
     const b = world.bounds;
     const halfW = b.width / 2 - this.radius;
     const halfD = b.depth / 2 - this.radius;
-    if (this.position.x < -halfW) {
-      this.position.x = -halfW;
-      this.heading.x *= -1;
-    } else if (this.position.x > halfW) {
-      this.position.x = halfW;
-      this.heading.x *= -1;
+    const p = this.body.position;
+    const v = this.body.velocity;
+    if (p.x < -halfW) {
+      p.x = -halfW;
+      if (v.x < 0) v.x = 0;
+      this.desiredDir.x = Math.abs(this.desiredDir.x);
+    } else if (p.x > halfW) {
+      p.x = halfW;
+      if (v.x > 0) v.x = 0;
+      this.desiredDir.x = -Math.abs(this.desiredDir.x);
     }
-    if (this.position.z < -halfD) {
-      this.position.z = -halfD;
-      this.heading.z *= -1;
-    } else if (this.position.z > halfD) {
-      this.position.z = halfD;
-      this.heading.z *= -1;
+    if (p.z < -halfD) {
+      p.z = -halfD;
+      if (v.z < 0) v.z = 0;
+      this.desiredDir.z = Math.abs(this.desiredDir.z);
+    } else if (p.z > halfD) {
+      p.z = halfD;
+      if (v.z > 0) v.z = 0;
+      this.desiredDir.z = -Math.abs(this.desiredDir.z);
     }
-    this.position.y = FLOAT_HEIGHT;
-    this.mesh.position.copy(this.position);
+  }
 
-    this.cooldown -= dt;
-    if (this.cooldown <= 0) {
-      const target = this.pickTarget(world);
-      if (target) {
-        const dir = target.position.clone().sub(this.position);
-        const origin = this.position
-          .clone()
-          .add(dir.clone().normalize().multiplyScalar(this.radius + 4));
-        world.addSpell(new Fireball(this, dir, origin));
+  private computeDodge(world: World): THREE.Vector3 | null {
+    let bestDist = DODGE_SENSE_RADIUS;
+    let bestSpell: typeof world.spells[number] | null = null;
+    const p = this.body.position;
+    const u = this.body.velocity;
+    const threatThreshold =
+      this.radius + PROJECTILE_RADIUS_ESTIMATE + DODGE_SAFETY_MARGIN;
+    for (const s of world.spells) {
+      if (s.caster === this) continue;
+      const vLen = Math.hypot(s.velocity.x, s.velocity.z);
+      if (vLen < 1e-3) continue;
+      const toMeX = p.x - s.position.x;
+      const toMeZ = p.z - s.position.z;
+      const toMeLen = Math.hypot(toMeX, toMeZ);
+      if (toMeLen < 1e-3 || toMeLen > DODGE_SENSE_RADIUS) continue;
+      const cos =
+        (s.velocity.x * toMeX + s.velocity.z * toMeZ) / (vLen * toMeLen);
+      if (cos < DODGE_ANGLE_COS) continue;
+
+      const relVx = u.x - s.velocity.x;
+      const relVz = u.z - s.velocity.z;
+      const relVSq = relVx * relVx + relVz * relVz;
+      let closestSq: number;
+      if (relVSq < 1e-6) {
+        closestSq = toMeX * toMeX + toMeZ * toMeZ;
+      } else {
+        const tMin = Math.max(
+          0,
+          -(toMeX * relVx + toMeZ * relVz) / relVSq
+        );
+        const cx = toMeX + relVx * tMin;
+        const cz = toMeZ + relVz * tMin;
+        closestSq = cx * cx + cz * cz;
       }
-      this.cooldown = FIRE_COOLDOWN;
+      if (closestSq > threatThreshold * threatThreshold) continue;
+
+      if (toMeLen < bestDist) {
+        bestDist = toMeLen;
+        bestSpell = s;
+      }
     }
+    if (!bestSpell) return null;
+
+    const vLen = Math.hypot(bestSpell.velocity.x, bestSpell.velocity.z);
+    const dx = bestSpell.velocity.x / vLen;
+    const dz = bestSpell.velocity.z / vLen;
+    const relX = p.x - bestSpell.position.x;
+    const relZ = p.z - bestSpell.position.z;
+    const side = dx * relZ - dz * relX;
+    const sign = side >= 0 ? 1 : -1;
+    return new THREE.Vector3(-dz * sign, 0, dx * sign);
   }
 
   private pickTarget(world: World): Contestant | null {
@@ -105,7 +652,7 @@ export class BasicWizard implements Contestant {
     let bestDist = Infinity;
     for (const c of world.contestants) {
       if (c === this || !c.alive) continue;
-      const d = c.position.distanceTo(this.position);
+      const d = c.position.distanceTo(this.body.position);
       if (d < bestDist) {
         bestDist = d;
         best = c;
