@@ -1,4 +1,6 @@
 import type { Contestant } from "../contestants/contestant";
+import type { EventDetector } from "../events/event";
+import type { Handler } from "../handlers/handler";
 
 export interface TacticContext {
   self: Contestant;
@@ -21,8 +23,12 @@ export interface Directives {
 export interface Tactic {
   readonly id: string;
   readonly minDwell: number;
+  readonly detectors?: EventDetector[];
+  readonly handlers?: Handler[];
   score(ctx: TacticContext): number;
   directives(ctx: TacticContext): Directives;
+  onObserve?(key: string, value: unknown): void;
+  liveDirectives?(base: Directives, ctx: TacticContext): Directives;
 }
 
 export const DEFAULT_DIRECTIVES: Directives = {

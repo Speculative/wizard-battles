@@ -31,6 +31,13 @@ export class TacticSelector {
     return this.cachedDirectives;
   }
 
+  effectiveDirectives(ctx: TacticContext): Directives {
+    if (this.current.liveDirectives) {
+      return this.current.liveDirectives(this.cachedDirectives, ctx);
+    }
+    return this.cachedDirectives;
+  }
+
   update(dt: number, ctx: TacticContext): void {
     this.dwellLeft -= dt;
     this.evalTimer -= dt;

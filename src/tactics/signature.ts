@@ -69,7 +69,7 @@ export class Scrapper implements Tactic {
   private circleFlip: 1 | -1 = 1;
   score(ctx: TacticContext): number {
     if (!ctx.enemy) return 0;
-    return 0.6 + Math.random() * 0.3;
+    return 0.35 + Math.random() * 0.3;
   }
   directives(ctx: TacticContext): Directives {
     this.circleFlip = -this.circleFlip as 1 | -1;

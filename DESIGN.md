@@ -24,10 +24,11 @@ The central design principle is **legibility over optimality** — the fights sh
 - **[src/materials.ts](src/materials.ts)** — shared toon gradient map; inverted-hull outline helper.
 - **[src/steering.ts](src/steering.ts)** — pure-function steering primitives (`seek`, `flee`, `arrive`, `pursue`, `evade`, `circle`, `wallRepulsion`) returning `Vec2` desired-velocities, plus `sampleBestDirection` which scores 16 directions around an intent and picks the best accounting for wall clearance.
 - **[src/tactics/](src/tactics/)** — AI tactic layer. `tactic.ts` defines the `Tactic` interface, `Directives` shape, `TacticContext`, `RosterEntry`. `common.ts` holds six shared tactics (Pressure, Kite, Orbit, Ambush, Retreat, BaitAndSwitch). `signature.ts` holds four wizard-signature tactics (DuelistCharge, Sniper, Turtle, Scrapper). `selector.ts` scores a roster each second with random jitter and commits to the winner for its minimum dwell.
-- **[src/events/](src/events/)** — event detection layer. `event.ts` defines `GameEvent<P>` and `EventDetector<P>`. `projectileIncoming.ts` is the first detector: replaces the old inline dodge-trigger scan with a standalone module, emits a typed payload (threatening spell + distance + closest-approach).
-- **[src/handlers/](src/handlers/)** — reactive handler layer. `change.ts` declares the `Change` discriminated union (`forceMovementState`, `observe`, `noop`) and the `HandlerTier` enum (`reflexive` > `tactical` > `observational`). `handler.ts` defines the `Handler<P>` interface (event id binding + tier + terminal flag). `lateralDodge.ts` is a reflexive terminal handler that emits a `forceMovementState: dodging` with a perpendicular-to-projectile direction. `pipeline.ts` runs detectors, dispatches events to handlers in tier order, stops a chain at the first terminal handler.
-- **[src/contestants/contestant.ts](src/contestants/contestant.ts)** — `Contestant` interface (mesh, position, velocity, facing, radius, hp, alive, update).
-- **[src/contestants/basicWizard.ts](src/contestants/basicWizard.ts)** — first concrete contestant. Holds a kinematic body, a state machine (see below), stamina, a `TacticSelector` driving live directives, facing with strafe tax, committed lateral dodges (triggered via the event/handler pipeline), charged-fireball casts with predictive aiming, status display, speed trail. Engage intent comes from `circle(...)` shaped by current directives and refined by `sampleBestDirection` for wall avoidance.
+- **[src/components.ts](src/components.ts)** — component registry (ECS-style but only the component part). `ComponentKey<T>` is a typed key with a string id. Current keys: `Charging`, `Dodging`, `Recovering`. Contestants attach/remove components as their state changes; any system can query `contestant.getComponent(Key)` without knowing the contestant's concrete type.
+- **[src/events/](src/events/)** — event detection layer. `event.ts` defines `GameEvent<P>` and `EventDetector<P>`. `projectileIncoming.ts` detects threatening spells on a collision-course. `opponentCharging.ts` detects any contestant with the `Charging` component — uses component query instead of contestant-type-specific inspection.
+- **[src/handlers/](src/handlers/)** — reactive handler layer. `change.ts` declares the `Change` discriminated union (`forceMovementState`, `observe`, `noop`) and the `HandlerTier` enum (`reflexive` > `tactical` > `observational`). `handler.ts` defines the `Handler<P>` interface (event id binding + tier + terminal flag). `lateralDodge.ts` is a reflexive terminal handler that emits a `forceMovementState: dodging`. `noteOpponentCharging.ts` is an observational non-terminal handler that emits an observe Change so the active tactic can react. `pipeline.ts` runs detectors, dispatches events to handlers in tier order (stable sort preserves registration order within a tier, so tactic-first handler lists get tactic precedence for free), stops a chain at the first terminal handler.
+- **[src/contestants/contestant.ts](src/contestants/contestant.ts)** — `Contestant` interface (mesh, position, velocity, facing, radius, hp, alive, update, plus `getComponent/addComponent/removeComponent`).
+- **[src/contestants/basicWizard.ts](src/contestants/basicWizard.ts)** — first concrete contestant. Holds a kinematic body, a state machine (see below), stamina, a `TacticSelector` driving live directives, facing with strafe tax, committed lateral dodges (triggered via the event/handler pipeline), charged-fireball casts with predictive aiming, status display, speed trail. Movement-state transitions install/remove components (`Charging`, `Dodging`, `Recovering`). Engage intent comes from `circle(...)` shaped by current directives and refined by `sampleBestDirection` for wall avoidance.
 - **[src/spells/spell.ts](src/spells/spell.ts)** — `Spell` interface (mesh, position, velocity, caster, dead, update).
 - **[src/spells/fireball.ts](src/spells/fireball.ts)** — four-layer fiery projectile with sphere-node trail. Supports `frozen` mode during caster's charge window; `setPosition` for caster-relative positioning during charge; `setVelocityFromDirection` on release. Spawns an `Explosion` and a `ParticleBurst` on impact.
 - **[src/spells/explosion.ts](src/spells/explosion.ts)** — short-lived expanding-sphere visual effect. Pure cosmetic; no damage.
@@ -161,12 +162,12 @@ We have a simplified two-tier slice of the above: **tactic layer → control lay
 
 Six common tactics + four wizard-signature tactics (ten total) are implemented in [src/tactics/](src/tactics/). A `TacticSelector` scores the active wizard's roster every second, applies random jitter, and commits to the winner for its minimum dwell.
 
-Reactive behaviors (starting with dodge) now flow through a separate **event/handler pipeline** (see "Events and handlers" below). Detectors observe the world, handlers decide reactions, Changes feed back to the wizard. This is the scaffolding for tactic-specific handlers and more reactive behaviors; currently only dodge uses it.
+Reactive behaviors flow through an **event/handler pipeline** (see "Events and handlers" below). Detectors observe the world, handlers decide reactions, Changes feed back to the wizard and the active tactic. Dodge uses it (common detector + terminal handler); BaitAndSwitch demonstrates a tactic-owned detector + observational handler that mutates tactic state via an `onObserve` callback and a `liveDirectives` override.
 
 What's *not* yet present from the full spec:
 - Action layer (discrete named actions with their own commitment windows)
 - Plan-style multi-phase tactics (the current ones are "parameter bundles," not sequences)
-- Tactic-specific event interests + handler overrides (infrastructure exists; not yet wired to any tactic)
+- Always-on detectors for non-active-tactic observation (currently a tactic only sees events while it's the active tactic — chicken-and-egg when a tactic wants to *become* active in response to an observation)
 - Personality vectors (each wizard's tactic-roster biases stand in for this for now)
 - Any learning / habit formation / opponent modeling
 
@@ -177,10 +178,11 @@ Discussed on 2026-04-19. The end goal is tactics as *plans* — multi-phase sequ
 Staged path:
 
 1. ~~**Directional sampling at the control layer.**~~ *Done 2026-04-19.* 16-direction sampling with intent-alignment + wall clearance scoring refines the raw intent each frame.
-2. ~~**Event/handler pipeline (reactive layer).**~~ *Done 2026-04-19.* Detectors observe the world each tick, handlers decide reactions, a pipeline routes events to handlers with tier precedence and terminal semantics. Dodge migrated onto this pipeline — behaviorally identical, but dodge-trigger logic now lives in a reusable reflexive-tier terminal handler rather than inline in `BasicWizard`.
-3. **Tactics author event interests + handlers.** Tactics declare which events they care about (`OpponentCharging`, `LowHPCrossed`, etc.) and can bind their own handlers. Handler precedence: tactic-specific → contestant-specific → common. Informative handlers (observation-writing) can coexist with terminal handlers (movement overrides) by running first in the chain.
-4. **Plans replace tactics.** Multi-phase sequences with advance/abort conditions. Plan selection replaces tactic selection. Plans can evaluate candidate *destinations* (not just preferred ranges) — longer-horizon position reasoning. Current sampling continues to be the reactive frame-by-frame realizer.
-5. **Enemy prediction model.** Tactics/plans "envision" the opponent's response during scoring. Linear extrapolation to start.
+2. ~~**Event/handler pipeline (reactive layer).**~~ *Done 2026-04-19.* Detectors observe the world each tick, handlers decide reactions, a pipeline routes events to handlers with tier precedence and terminal semantics. Dodge migrated onto this pipeline.
+3. ~~**Tactics author event interests + handlers.**~~ *Done 2026-04-19.* Tactics can declare optional `detectors`, `handlers`, `onObserve(key, value)`, and `liveDirectives(base, ctx)`. Tactic handlers merge in front of common handlers (stable sort → tactic precedence within tier). Observational handlers emit observe Changes that the active tactic's `onObserve` folds into its state; `liveDirectives` reads that state each frame to produce effective directives without re-running `directives()` per frame. Demo: BaitAndSwitch observes `OpponentCharging` and spikes `chargeEagerness` while an opponent is winding up a cast.
+4. **Always-on roster detectors.** Today only the active tactic's detectors run. A tactic in the roster can't see the world to justify becoming active. Fix: run every roster tactic's detectors each tick, route events to that tactic's handlers so observations update even when dormant. Then tactics can score themselves based on what they've been seeing.
+5. **Plans replace tactics.** Multi-phase sequences with advance/abort conditions. Plan selection replaces tactic selection. Plans can evaluate candidate *destinations* (not just preferred ranges) — longer-horizon position reasoning. Current sampling continues to be the reactive frame-by-frame realizer.
+6. **Enemy prediction model.** Tactics/plans "envision" the opponent's response during scoring. Linear extrapolation to start.
 
 ### Tactics as first-class objects
 
@@ -200,17 +202,23 @@ Reactive behaviors — dodge, brace, panic-retreat, "noticed enemy started charg
 
 | Layer | Job | Examples |
 |---|---|---|
-| **Events** | Detect world conditions. Pure observers; emit a typed payload or nothing. | `ProjectileIncoming` |
-| **Handlers** | Decide reactions. Pure functions `(self, event) → Change[]`. | `LateralDodge` |
+| **Events** | Detect world conditions. Pure observers; emit a typed payload or nothing. | `ProjectileIncoming`, `OpponentCharging` |
+| **Handlers** | Decide reactions. Pure functions `(self, event) → Change[]`. | `LateralDodge`, `NoteOpponentCharging` |
 | **Movement states** | Realize locked motions. Unchanged by this refactor. | `dodging`, `recovering`, future `jumping` |
 
 The critical separation: handlers don't *perform* the dodge; they emit a `forceMovementState: dodging` **Change**, which the wizard's movement state machine acts on. This keeps locked-motion behavior (the physical commitment of a dodge or jump) decoupled from the *decision* to do it. Tank-brace vs. wizard-dodge can share the same `ProjectileIncoming` event but route to different handlers which emit different movement-state changes.
 
-**Handler tiers** (priority, high to low): `reflexive` > `tactical` > `observational`. Handlers within a tier run in registration order. A **terminal** handler stops the chain for its event (only higher-tier terminal handlers can preempt it). An **informative** handler (e.g. "note that opponent started charging") emits observation Changes and doesn't stop the chain — the same event can still reach lower-tier handlers.
+**Components power observation.** Detectors query components (e.g. `Charging`, `Dodging`, `Recovering`) on contestants via `contestant.getComponent(Key)` — no coupling to the concrete contestant class. `BasicWizard` installs/removes these in `setState`. New contestant types automatically surface to existing detectors as long as they populate the same components.
 
-**Precedence across layers** (planned for stage 3): when an event fires, handlers are collected from the current tactic → contestant defaults → common set, in that order. The first terminal handler wins for that event. This lets a "rush" tactic bind a no-op terminal handler to `ProjectileIncoming` to suppress dodge entirely, while a "turtle" tactic could bind an *amplified* dodge.
+**Handler tiers** (priority, high to low): `reflexive` > `tactical` > `observational`. Handlers within a tier run in stable registration order. A **terminal** handler stops the chain for its event; an **informative** handler emits observation Changes and doesn't stop the chain — the same event can still reach lower-tier handlers.
 
-**Current extent:** only `ProjectileIncoming → LateralDodge` is wired. No tactic-specific interests yet. The pipeline infrastructure supports all the above, but only the common-handler case is exercised.
+**Precedence across layers:** when the pipeline runs, handlers are assembled tactic-first (active tactic's handlers), then common handlers. Stable sort by tier preserves this ordering within a tier. First terminal handler wins. Effect: a tactic can declare a no-op terminal handler to suppress a common one, or declare an informative handler to observe without blocking common terminal handlers down-chain.
+
+**Tactic observation + live directives.** When the pipeline produces an observe Change, `BasicWizard` calls the active tactic's `onObserve(key, value)`. Tactics store that in their own internal state. Each frame, if the tactic defines `liveDirectives(base, ctx)`, it folds the observation state into the cached-on-selection directives to produce the effective directives. This preserves the "directives computed once per tactic-selection" rule for Scrapper-style per-tactic state while allowing tactics to react to live observations.
+
+**Current extent:**
+- `ProjectileIncoming → LateralDodge` (common reflexive terminal) — all wizards dodge
+- `OpponentCharging → NoteOpponentCharging` (BaitAndSwitch-specific observational) — BaitAndSwitch spikes `chargeEagerness` while an enemy is mid-cast via `liveDirectives`
 
 **Why not just handle everything in `BasicWizard.update`?** Because the reactive layer needs to be composable — contestants customize handlers, tactics override them, new events and handlers get added without touching existing logic. Inline imperative checks don't compose; an event-dispatch pipeline does.
 
@@ -315,6 +323,9 @@ Reactive layer (event/handler pipeline):
 - Events + handlers + Changes + tiered pipeline in [src/events/](src/events/) and [src/handlers/](src/handlers/)
 - `ProjectileIncoming` detector + `LateralDodge` handler — dodge behavior-preserving refactored out of `BasicWizard` onto the pipeline
 - Movement states kept distinct from handlers; handlers emit `forceMovementState` Changes, wizard's state machine realizes them
+- Component system in [src/components.ts](src/components.ts): typed component keys + `getComponent/addComponent/removeComponent` on `Contestant`. `BasicWizard` installs `Charging`, `Dodging`, `Recovering` components on state entry/exit.
+- Tactic-specific detectors, handlers, `onObserve(key, value)`, `liveDirectives(base, ctx)` — tactics can declare their own event interests, bind their own handlers, consume observations, and fold them into effective directives each frame.
+- `OpponentCharging` detector (queries `Charging` component) + `NoteOpponentChargingHandler` (observational, non-terminal) — BaitAndSwitch demo spikes `chargeEagerness` while an enemy is winding up a cast.
 
 Visual polish:
 - Status bars (HP + stamina) billboarded above each wizard
@@ -325,8 +336,8 @@ Visual polish:
 
 Work toward the plan-based AI described in "Planned evolution" above. The known center-drift problem is structural (see Navigation) and will be resolved by plans with position reasoning, not by further tuning of the current system.
 
-1. **More events + handlers.** `OpponentCharging`, `LowHPCrossed`, `OpportunityStrike`, etc. All reuse the existing pipeline.
-2. **Tactics author event interests + handlers.** Tactics declare which events they care about; bind tactic-specific handlers (informative or terminal). Handler precedence: tactic → contestant → common.
+1. **Always-on roster detectors.** Fix the chicken-and-egg where a tactic only observes the world while already active. Run every roster tactic's detectors each tick so tactics can score themselves on world state they've been seeing while dormant.
+2. **More events + handlers.** `LowHPCrossed`, `OpportunityStrike`, `TargetLost`, etc. More reactive hooks for tactics to plan around.
 3. **Plans replace tactics.** Multi-phase sequences with advance/abort conditions and position-based scoring.
 4. **Enemy prediction model** feeding plan selection.
 5. **Per-tactic action selection** (actions as named discrete moves with their own commitment — fills in the missing action layer of the three-tier hierarchy).

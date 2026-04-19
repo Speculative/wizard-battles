@@ -24,6 +24,8 @@ import type { EventDetector } from "../events/event";
 import type { Handler } from "../handlers/handler";
 import { LateralDodgeHandler } from "../handlers/lateralDodge";
 import { runPipeline } from "../handlers/pipeline";
+import type { ComponentKey } from "../components";
+import { Charging, Dodging, Recovering } from "../components";
 
 function gaussian(): number {
   const u = 1 - Math.random();
@@ -148,6 +150,17 @@ export class BasicWizard implements Contestant {
   private readonly projectileDetector = new ProjectileIncomingDetector();
   private readonly detectors: EventDetector[] = [this.projectileDetector];
   private readonly handlers: Handler[] = [new LateralDodgeHandler()];
+  private readonly components = new Map<string, unknown>();
+
+  getComponent<T>(key: ComponentKey<T>): T | undefined {
+    return this.components.get(key.id) as T | undefined;
+  }
+  addComponent<T>(key: ComponentKey<T>, data: T): void {
+    this.components.set(key.id, data);
+  }
+  removeComponent<T>(key: ComponentKey<T>): void {
+    this.components.delete(key.id);
+  }
   private readonly sampleDebug: SampleDebug = {
     intentX: 0,
     intentZ: 0,
@@ -293,23 +306,32 @@ export class BasicWizard implements Contestant {
       shotsFired: this.shotsFired,
     };
     this.tacticSelector.update(dt, ctx);
-    this.directives = this.tacticSelector.directives;
+    this.directives = this.tacticSelector.effectiveDirectives(ctx);
 
     if (nearest) {
       this.computeEngageIntent(nearest, distToTarget, world, this.desiredDir);
     }
 
     this.projectileDetector.setEagerness(this.directives.dodgeEagerness);
+    const activeTactic = this.tacticSelector.currentTactic;
+    const mergedDetectors = activeTactic.detectors
+      ? [...activeTactic.detectors, ...this.detectors]
+      : this.detectors;
+    const mergedHandlers = activeTactic.handlers
+      ? [...activeTactic.handlers, ...this.handlers]
+      : this.handlers;
     const changes = runPipeline({
       self: this,
       world,
-      detectors: this.detectors,
-      handlers: this.handlers,
+      detectors: mergedDetectors,
+      handlers: mergedHandlers,
     });
 
     for (const c of changes) {
       if (c.type === "forceMovementState" && c.state === "dodging") {
         this.tryEnterDodge(c.direction);
+      } else if (c.type === "observe") {
+        activeTactic.onObserve?.(c.key, c.value);
       }
     }
 
@@ -544,20 +566,25 @@ export class BasicWizard implements Contestant {
     if (this.state === "charging") {
       this.stateTimer -= dt;
       this.stamina = Math.min(STAMINA_MAX, this.stamina + STAMINA_REGEN * dt);
+      const c = this.getComponent(Charging);
+      if (c) c.remaining = this.stateTimer;
       if (this.stateTimer <= 0) this.setState("running");
       return;
     }
     if (this.state === "recovering") {
       this.stateTimer -= dt;
       this.stamina = Math.min(STAMINA_MAX, this.stamina + STAMINA_REGEN * dt);
+      const r = this.getComponent(Recovering);
+      if (r) r.remaining = this.stateTimer;
       if (this.stateTimer <= 0) this.setState("running");
       return;
     }
     if (this.state === "dodging") {
       this.stateTimer -= dt;
+      const d = this.getComponent(Dodging);
+      if (d) d.remaining = this.stateTimer;
       if (this.stateTimer <= 0) {
-        this.setState("recovering");
-        this.stateTimer = DODGE_RECOVERY_DURATION;
+        this.setState("recovering", DODGE_RECOVERY_DURATION);
       }
       return;
     }
@@ -573,8 +600,7 @@ export class BasicWizard implements Contestant {
       this.stamina -= STAMINA_SPRINT_DRAIN * dt;
       if (this.stamina <= 0) {
         this.stamina = 0;
-        this.setState("recovering");
-        this.stateTimer = RECOVERY_DURATION;
+        this.setState("recovering", RECOVERY_DURATION);
         return;
       }
       if (!wantsSprint) this.setState("running");
@@ -598,10 +624,28 @@ export class BasicWizard implements Contestant {
     }
   }
 
-  private setState(next: MovementState): void {
+  private setState(next: MovementState, stateDuration = 0): void {
     if (this.state === next) return;
+    const prev = this.state;
     this.state = next;
     this.body.stats = { ...STATE_STATS[next] };
+    if (stateDuration > 0) this.stateTimer = stateDuration;
+
+    if (prev === "charging") this.removeComponent(Charging);
+    if (prev === "dodging") this.removeComponent(Dodging);
+    if (prev === "recovering") this.removeComponent(Recovering);
+
+    if (next === "charging") {
+      this.addComponent(Charging, {
+        target: this.chargeTarget,
+        remaining: stateDuration > 0 ? stateDuration : CHARGE_DURATION,
+        totalDuration: stateDuration > 0 ? stateDuration : CHARGE_DURATION,
+      });
+    } else if (next === "dodging") {
+      this.addComponent(Dodging, { remaining: stateDuration });
+    } else if (next === "recovering") {
+      this.addComponent(Recovering, { remaining: stateDuration });
+    }
   }
 
   private updateCombat(
@@ -633,8 +677,7 @@ export class BasicWizard implements Contestant {
     fb.frozen = true;
     this.chargedFireball = fb;
     world.addSpell(fb);
-    this.setState("charging");
-    this.stateTimer = CHARGE_DURATION;
+    this.setState("charging", CHARGE_DURATION);
   }
 
   private releaseCharge(): void {
@@ -746,10 +789,10 @@ export class BasicWizard implements Contestant {
       this.stamina - DODGE_STAMINA_COST * staminaFrac
     );
     this.dodgeCooldown = DODGE_COOLDOWN;
-    this.setState("dodging");
-    this.stateTimer =
+    const dodgeDuration =
       DODGE_DURATION_MIN +
       (DODGE_DURATION_MAX - DODGE_DURATION_MIN) * staminaFrac;
+    this.setState("dodging", dodgeDuration);
   }
 
   private pickTarget(world: World): Contestant | null {

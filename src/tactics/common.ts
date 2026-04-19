@@ -1,4 +1,6 @@
 import type { Tactic, TacticContext, Directives } from "./tactic";
+import { OpponentChargingDetector } from "../events/opponentCharging";
+import { NoteOpponentChargingHandler } from "../handlers/noteOpponentCharging";
 
 export class Pressure implements Tactic {
   readonly id = "pressure";
@@ -108,13 +110,21 @@ export class Retreat implements Tactic {
 export class BaitAndSwitch implements Tactic {
   readonly id = "bait";
   readonly minDwell = 1.5;
+  readonly detectors = [new OpponentChargingDetector()];
+  readonly handlers = [new NoteOpponentChargingHandler()];
   private flipSign: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private observations = {
+    enemyChargingRemaining: 0,
+    lastObservedAt: 0,
+  };
+
   score(ctx: TacticContext): number {
     if (!ctx.enemy) return 0;
     const midRange = ctx.distToEnemy > 200 && ctx.distToEnemy < 380 ? 1 : 0.4;
     const staminaOk = ctx.stamina01 > 0.6 ? 1 : 0.5;
     return 0.5 * midRange * staminaOk;
   }
+
   directives(ctx: TacticContext): Directives {
     this.flipSign = -this.flipSign as 1 | -1;
     const near = 180;
@@ -128,5 +138,20 @@ export class BaitAndSwitch implements Tactic {
       circleDir: this.flipSign,
       ambushMode: false,
     };
+  }
+
+  onObserve(key: string, value: unknown): void {
+    if (key === "opponentChargingRemaining" && typeof value === "number") {
+      this.observations.enemyChargingRemaining = value;
+      this.observations.lastObservedAt = performance.now();
+    }
+  }
+
+  liveDirectives(base: Directives): Directives {
+    const staleness = (performance.now() - this.observations.lastObservedAt) / 1000;
+    if (staleness > 0.2 || this.observations.enemyChargingRemaining <= 0) {
+      return base;
+    }
+    return { ...base, chargeEagerness: 2.2 };
   }
 }
