@@ -11,10 +11,17 @@ import {
   Retreat,
   BaitAndSwitch,
 } from "./tactics/common";
-import { DuelistCharge, Sniper, Turtle, Scrapper } from "./tactics/signature";
+import {
+  DuelistCharge,
+  Sniper,
+  Turtle,
+  Scrapper,
+  AntiMageZone,
+} from "./tactics/signature";
 import type { RosterEntry } from "./tactics/tactic";
 import { FireballFactory } from "./spells/fireball";
 import { MeleeFactory } from "./spells/meleeAttack";
+import { ProjectileSlowFieldFactory } from "./spells/projectileSlowField";
 
 const canvas = document.getElementById("arena") as HTMLCanvasElement;
 const gfx = new GameRenderer(canvas);
@@ -25,7 +32,8 @@ gfx.scene.add(buildArena());
 function redRoster(): RosterEntry[] {
   return [
     { tactic: new DuelistCharge(), bias: 1.6 },
-    { tactic: new Pressure(), bias: 1.3 },
+    { tactic: new AntiMageZone(), bias: 1.4 },
+    { tactic: new Pressure(), bias: 1.0 },
     { tactic: new Orbit(), bias: 0.8 },
     { tactic: new Retreat(), bias: 0.7 },
   ];
@@ -64,7 +72,7 @@ world.addContestant(
     color: 0xff2244,
     start: new THREE.Vector3(-300, 0, -150),
     roster: redRoster(),
-    spellbook: [MeleeFactory, FireballFactory],
+    spellbook: [MeleeFactory, ProjectileSlowFieldFactory, FireballFactory],
   })
 );
 world.addContestant(

@@ -19,6 +19,7 @@ export interface Directives {
   dodgeEagerness: number;
   circleDir: -1 | 0 | 1;
   ambushMode: boolean;
+  forceSprint?: boolean;
   selectSpell?: SpellSelector;
 }
 

@@ -37,7 +37,6 @@ function gaussian(): number {
 
 const RADIUS = 22;
 const FLOAT_HEIGHT = RADIUS * 1.5;
-const FIRE_COOLDOWN = 1.4;
 const CHARGE_DURATION = 0.45;
 
 const AIM_NOISE_SIGMA_MAX = 0.2;
@@ -142,7 +141,7 @@ export class BasicWizard implements Contestant {
   private state: MovementState = "running";
   private stateTimer = 0;
   private stamina = STAMINA_MAX;
-  private cooldown = Math.random() * FIRE_COOLDOWN;
+  private readonly readyAt = new Map<SpellFactory, number>();
   private turnTimer = 0;
   private readonly spellbook: SpellFactory[];
   private chargedSpell: (Spell & { frozen: boolean }) | null = null;
@@ -166,6 +165,7 @@ export class BasicWizard implements Contestant {
   removeComponent<T>(key: ComponentKey<T>): void {
     this.components.delete(key.id);
   }
+  private debugLogTimer = 0;
   private readonly sampleDebug: SampleDebug = {
     intentX: 0,
     intentZ: 0,
@@ -321,6 +321,24 @@ export class BasicWizard implements Contestant {
 
     if (nearest) {
       this.computeEngageIntent(nearest, centerDist, world, this.desiredDir);
+      if (this.id === "red") {
+        this.debugLogTimer -= dt;
+        if (this.debugLogTimer <= 0) {
+          this.debugLogTimer = 0.4;
+          const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
+          const nowS = performance.now() / 1000;
+          const cooldowns = this.spellbook
+            .map((f) => {
+              const r = this.readyAt.get(f) ?? 0;
+              const left = Math.max(0, r - nowS);
+              return `${f.metadata.id}=${left.toFixed(1)}`;
+            })
+            .join(" ");
+          console.log(
+            `red surf=${distToTarget.toFixed(0)} state=${this.state} spd=${speed.toFixed(0)} stam=${this.stamina.toFixed(1)} tactic=${this.tacticSelector.currentTactic.id} pref=${this.directives.preferredRange} band=${this.directives.rangeBand} cd[${cooldowns}]`
+          );
+        }
+      }
     }
 
     this.projectileDetector.setEagerness(this.directives.dodgeEagerness);
@@ -604,9 +622,13 @@ export class BasicWizard implements Contestant {
 
     const rangeGap = Math.abs(distToTarget - this.directives.preferredRange);
     const canSprint = !this.directives.ambushMode;
+    const outsideShell =
+      distToTarget >
+      this.directives.preferredRange + this.directives.rangeBand;
+    const forced = this.directives.forceSprint === true && outsideShell;
     const wantsSprint =
       canSprint &&
-      rangeGap > 100 &&
+      (forced || rangeGap > 100) &&
       this.stamina > SPRINT_MIN_STAMINA_TO_START;
 
     if (this.state === "sprinting") {
@@ -628,7 +650,10 @@ export class BasicWizard implements Contestant {
     }
 
     const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
-    if (distToTarget < 180) {
+    const atEngagementRange =
+      Math.abs(distToTarget - this.directives.preferredRange) <
+      this.directives.rangeBand + 20;
+    if (atEngagementRange) {
       this.setState("walking");
     } else if (speed < 5) {
       this.setState("idle");
@@ -662,7 +687,7 @@ export class BasicWizard implements Contestant {
   }
 
   private updateCombat(
-    dt: number,
+    _dt: number,
     world: World,
     nearest: Contestant | null,
     distToTarget: number
@@ -684,15 +709,17 @@ export class BasicWizard implements Contestant {
       return;
     }
 
-    this.cooldown -= dt;
-    if (this.cooldown > 0 || !nearest) return;
+    if (!nearest) return;
     if (this.state === "sprinting" || this.state === "recovering") return;
 
     const selector = this.directives.selectSpell ?? defaultSelector;
+    const nowSeconds = performance.now() / 1000;
     const factory = selector(this.spellbook, {
       self: this,
       target: nearest,
       distToTarget,
+      readyAt: this.readyAt,
+      nowSeconds,
     });
     if (!factory) return;
 
@@ -724,7 +751,8 @@ export class BasicWizard implements Contestant {
     this.chargedFactory = null;
     this.chargeTarget = null;
     const eag = Math.max(0.1, this.directives.chargeEagerness);
-    this.cooldown = (factory.metadata.cooldown || FIRE_COOLDOWN) / eag;
+    const cooldown = (factory.metadata.cooldown || 1.0) / eag;
+    this.readyAt.set(factory, performance.now() / 1000 + cooldown);
   }
 
   private computeAimDirection(target: Contestant): THREE.Vector3 {

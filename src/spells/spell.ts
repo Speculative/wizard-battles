@@ -18,6 +18,7 @@ export interface SpellMetadata {
   chargeTime: number;
   cooldown: number;
   tags: string[];
+  baseSpeed?: number;
 }
 
 export interface Spell {

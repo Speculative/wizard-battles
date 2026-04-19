@@ -148,7 +148,8 @@ export class MeleeAttack implements Spell {
       const dx = c.position.x - originX;
       const dz = c.position.z - originZ;
       const dist = Math.hypot(dx, dz);
-      if (dist > REACH + c.radius) continue;
+      const surfaceDist = dist - this.caster.radius - c.radius;
+      if (surfaceDist > REACH) continue;
       const cos = (dx * this.aim.x + dz * this.aim.z) / Math.max(dist, 1e-3);
       if (cos < Math.cos(CONE_HALF_ANGLE)) continue;
       c.hp -= DAMAGE;

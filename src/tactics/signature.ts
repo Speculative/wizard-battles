@@ -1,9 +1,11 @@
 import type { Tactic, TacticContext, Directives } from "./tactic";
-import { byTag, inRange } from "../spells/selection";
+import { byTag, inRange, byReady } from "../spells/selection";
+import { SuppressDodgeHandler } from "../handlers/suppressDodge";
 
 export class DuelistCharge implements Tactic {
   readonly id = "duelist";
   readonly minDwell = 3.5;
+  readonly handlers = [new SuppressDodgeHandler()];
   score(ctx: TacticContext): number {
     if (!ctx.enemy) return 0;
     const hp = ctx.hp01 > 0.35 ? 1 : 0.3;
@@ -12,14 +14,18 @@ export class DuelistCharge implements Tactic {
   }
   directives(): Directives {
     return {
-      preferredRange: 70,
-      rangeBand: 25,
+      preferredRange: 30,
+      rangeBand: 20,
       chargeEagerness: 1.4,
       dodgeEagerness: 0.7,
       circleDir: 0,
       ambushMode: false,
+      forceSprint: true,
       selectSpell: (book, ctx) =>
-        book.filter(byTag("melee")).find(inRange(ctx.distToTarget)) ?? null,
+        book
+          .filter(byTag("melee"))
+          .filter(byReady(ctx))
+          .find(inRange(ctx.distToTarget)) ?? null,
     };
   }
 }
@@ -63,6 +69,54 @@ export class Turtle implements Tactic {
       circleDir: 0,
       ambushMode: false,
     };
+  }
+}
+
+export class AntiMageZone implements Tactic {
+  readonly id = "antimage";
+  readonly minDwell = 1.0;
+  readonly handlers = [new SuppressDodgeHandler()];
+  private lastCastAt = 0;
+  score(ctx: TacticContext): number {
+    if (!ctx.enemy) return 0;
+    const sweetRange = ctx.distToEnemy > 60 && ctx.distToEnemy < 180 ? 1.4 : 0.3;
+    const staminaOk = ctx.stamina01 > 0.5 ? 1 : 0.5;
+    const recentCastPenalty =
+      (performance.now() - this.lastCastAt) / 1000 < 6 ? 0.15 : 1;
+    return 0.75 * sweetRange * staminaOk * recentCastPenalty;
+  }
+  directives(): Directives {
+    return {
+      preferredRange: 90,
+      rangeBand: 30,
+      chargeEagerness: 1.0,
+      dodgeEagerness: 1.0,
+      circleDir: 0,
+      ambushMode: false,
+      selectSpell: (book, ctx) => {
+        const field = book
+          .filter(byTag("zone"))
+          .filter(byReady(ctx))
+          .find(inRange(ctx.distToTarget));
+        if (field) {
+          this.lastCastAt = performance.now();
+          return field;
+        }
+        return null;
+      },
+    };
+  }
+  liveDirectives(base: Directives): Directives {
+    const sinceCast = (performance.now() - this.lastCastAt) / 1000;
+    if (sinceCast > 0 && sinceCast < 4) {
+      return {
+        ...base,
+        preferredRange: 40,
+        rangeBand: 20,
+        forceSprint: true,
+      };
+    }
+    return base;
   }
 }
 

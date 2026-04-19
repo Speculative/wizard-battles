@@ -23,16 +23,17 @@ The central design principle is **legibility over optimality** — the fights sh
 - **[src/statusDisplay.ts](src/statusDisplay.ts)** — HP + stamina bars billboarded to the camera, rendered above each contestant.
 - **[src/materials.ts](src/materials.ts)** — shared toon gradient map; inverted-hull outline helper.
 - **[src/steering.ts](src/steering.ts)** — pure-function steering primitives (`seek`, `flee`, `arrive`, `pursue`, `evade`, `circle`, `wallRepulsion`) returning `Vec2` desired-velocities, plus `sampleBestDirection` which scores 16 directions around an intent and picks the best accounting for wall clearance.
-- **[src/tactics/](src/tactics/)** — AI tactic layer. `tactic.ts` defines the `Tactic` interface, `Directives` shape, `TacticContext`, `RosterEntry`. `common.ts` holds six shared tactics (Pressure, Kite, Orbit, Ambush, Retreat, BaitAndSwitch). `signature.ts` holds four wizard-signature tactics (DuelistCharge, Sniper, Turtle, Scrapper). `selector.ts` scores a roster each second with random jitter and commits to the winner for its minimum dwell.
+- **[src/tactics/](src/tactics/)** — AI tactic layer. `tactic.ts` defines the `Tactic` interface, `Directives` shape, `TacticContext`, `RosterEntry`. `common.ts` holds six shared tactics (Pressure, Kite, Orbit, Ambush, Retreat, BaitAndSwitch). `signature.ts` holds five wizard-signature tactics (DuelistCharge, AntiMageZone, Sniper, Turtle, Scrapper). `selector.ts` scores a roster each second with random jitter and commits to the winner for its minimum dwell.
 - **[src/components.ts](src/components.ts)** — component registry (ECS-style but only the component part). `ComponentKey<T>` is a typed key with a string id. Current keys: `Charging`, `Dodging`, `Recovering`. Contestants attach/remove components as their state changes; any system can query `contestant.getComponent(Key)` without knowing the contestant's concrete type.
 - **[src/events/](src/events/)** — event detection layer. `event.ts` defines `GameEvent<P>` and `EventDetector<P>`. `projectileIncoming.ts` detects threatening spells on a collision-course. `opponentCharging.ts` detects any contestant with the `Charging` component — uses component query instead of contestant-type-specific inspection.
-- **[src/handlers/](src/handlers/)** — reactive handler layer. `change.ts` declares the `Change` discriminated union (`forceMovementState`, `observe`, `noop`) and the `HandlerTier` enum (`reflexive` > `tactical` > `observational`). `handler.ts` defines the `Handler<P>` interface (event id binding + tier + terminal flag). `lateralDodge.ts` is a reflexive terminal handler that emits a `forceMovementState: dodging`. `noteOpponentCharging.ts` is an observational non-terminal handler that emits an observe Change so the active tactic can react. `pipeline.ts` runs detectors, dispatches events to handlers in tier order (stable sort preserves registration order within a tier, so tactic-first handler lists get tactic precedence for free), stops a chain at the first terminal handler.
+- **[src/handlers/](src/handlers/)** — reactive handler layer. `change.ts` declares the `Change` discriminated union (`forceMovementState`, `observe`, `noop`) and the `HandlerTier` enum (`reflexive` > `tactical` > `observational`). `handler.ts` defines the `Handler<P>` interface (event id binding + tier + terminal flag). `lateralDodge.ts` is a reflexive terminal handler that emits a `forceMovementState: dodging`. `suppressDodge.ts` is a reflexive terminal handler that emits no Change — tactics bind it to preempt `lateralDodge` and keep commitment. `noteOpponentCharging.ts` is an observational non-terminal handler that emits an observe Change so the active tactic can react. `pipeline.ts` runs detectors, dispatches events to handlers in tier order (stable sort preserves registration order within a tier, so tactic-first handler lists get tactic precedence for free), stops a chain at the first terminal handler.
 - **[src/contestants/contestant.ts](src/contestants/contestant.ts)** — `Contestant` interface (mesh, position, velocity, facing, radius, hp, alive, update, plus `getComponent/addComponent/removeComponent`).
 - **[src/contestants/basicWizard.ts](src/contestants/basicWizard.ts)** — first concrete contestant. Holds a kinematic body, a state machine (see below), stamina, a `TacticSelector` driving live directives, a `spellbook: SpellFactory[]`, facing with strafe tax, committed lateral dodges (triggered via the event/handler pipeline), charged spell casts with predictive aiming, status display, speed trail. Movement-state transitions install/remove components (`Charging`, `Dodging`, `Recovering`). Engage intent comes from `circle(...)` shaped by current directives and refined by `sampleBestDirection` for wall avoidance. Combat selects a spell each cast via the active tactic's `selectSpell` function (or `defaultSelector`) over its spellbook.
 - **[src/spells/spell.ts](src/spells/spell.ts)** — `Spell` interface (mesh, position, velocity, caster, metadata, dead, update). `SpellMetadata` carries id, kind (projectile/instant/zone/buff), element, range {min,max} (surface-to-surface), chargeTime, cooldown, and tags. `SpellFactory` pairs metadata with a `create(caster, target, aim)` constructor — the unit of selection.
 - **[src/spells/selection.ts](src/spells/selection.ts)** — selection library. Predicates (`byTag`, `byAnyTag`, `byAllTags`, `byKind`, `byElement`, `inRange`) + comparators (`preferLongestRange`, `preferShortestCooldown`, `preferShortestCharge`) + `defaultSelector`. Tactics compose these into their own `SpellSelector` function. No fixed preference fields — selection is code, not configuration.
 - **[src/spells/fireball.ts](src/spells/fireball.ts)** — four-layer fiery projectile with sphere-node trail. Supports `frozen` mode during caster's charge window; `setPosition` for caster-relative positioning during charge; `setVelocityFromDirection` on release. Spawns an `Explosion` and a `ParticleBurst` on impact. Exports `FireballFactory`.
 - **[src/spells/meleeAttack.ts](src/spells/meleeAttack.ts)** — self-spell with a glowing cone-arc mesh. Locks caster position during the charge window (existing `charging` state); during the released phase, lunges the caster mesh forward ~18u then back (visual only, no kinematic movement). Hit check is a ±60° cone up to 54u surface-to-surface reach during a short window in the middle of the swing. Exports `MeleeFactory`.
+- **[src/spells/projectileSlowField.ts](src/spells/projectileSlowField.ts)** — zone spell that drops a translucent blue dome at the caster's position. 130u radius, 4s duration, 6s cooldown. Iterates projectiles each tick, scales their velocity to 25% of baseSpeed while inside the dome and restores on exit. First cross-spell interaction. Exports `ProjectileSlowFieldFactory`.
 - **[src/spells/explosion.ts](src/spells/explosion.ts)** — short-lived expanding-sphere visual effect. Pure cosmetic; no damage.
 - **[src/spells/particleBurst.ts](src/spells/particleBurst.ts)** — `THREE.Points`-based particle system (single draw call). Soft circular texture built once via canvas, shared across bursts.
 - **[src/config.ts](src/config.ts)** — arena and camera constants.
@@ -171,9 +172,10 @@ Spells are represented as `SpellFactory` entries in a wizard's spellbook, each c
 What's *not* yet present from the full spec:
 - Action layer (discrete named actions with their own commitment windows)
 - Plan-style multi-phase tactics (the current ones are "parameter bundles," not sequences)
-- Tactic-authored interrupt posture (e.g. DuelistCharge should suppress dodge while rushing — currently it still dodges en route, breaking the rush commitment)
 - Personality vectors (each wizard's tactic-roster biases stand in for this for now)
 - Any learning / habit formation / opponent modeling
+
+**Architectural note — dodge as a first-class plan element.** Dodge currently lives outside plans as a reflexive reaction (common `LateralDodge` handler on `ProjectileIncoming`). Tactics that want to commit (DuelistCharge, AntiMageZone) bind a `SuppressDodgeHandler` to override it. This is a workaround: ideally, plans explicitly choose whether dodge is enabled for each phase, rather than the reactive layer defaulting to dodge and specific tactics having to opt out. When plans land (stage 7), dodge should be repositioned as a plan-authored action — the plan's current phase declares its dodge policy, and the event→handler path isn't used for suppression anymore.
 
 ### Planned evolution (toward full plan-based AI)
 
@@ -186,7 +188,7 @@ Staged path:
 3. ~~**Tactics author event interests + handlers.**~~ *Done 2026-04-19.* Tactics can declare optional `detectors`, `handlers`, `onObserve(key, value)`, and `liveDirectives(base, ctx)`. Tactic handlers merge in front of common handlers (stable sort → tactic precedence within tier). Observational handlers emit observe Changes that the active tactic's `onObserve` folds into its state; `liveDirectives` reads that state each frame to produce effective directives without re-running `directives()` per frame. Demo: BaitAndSwitch observes `OpponentCharging` and spikes `chargeEagerness` while an opponent is winding up a cast.
 4. ~~**Always-on roster detectors.**~~ *Done 2026-04-19.* `TacticSelector.updateDormantObservations` runs non-active tactics' detectors each tick, routing events to their handlers; only observe-Changes are kept (action Changes from dormant tactics are dropped). BaitAndSwitch's score boosts when it's been observing an opponent charging, so it can *earn* activation on observation.
 5. ~~**Spell metadata + selection.**~~ *Done 2026-04-19.* Spells carry metadata (range/kind/element/tags). Tactics supply a `selectSpell` function composed from filter/compare helpers in [src/spells/selection.ts](src/spells/selection.ts). Added `MeleeAttack` spell; DuelistCharge exclusively selects melee.
-6. **Tactic-authored interrupt posture.** Tactics bind their own handlers with terminal semantics to override common reactive behavior (e.g. DuelistCharge binds a terminal `ProjectileIncoming` handler that emits no Change, suppressing common `LateralDodge` — "I'm committed to this rush, I won't dodge"). Infrastructure exists; no tactic uses it yet.
+6. ~~**Tactic-authored interrupt posture.**~~ *Done 2026-04-19.* Tactics bind their own handlers with terminal semantics to override common reactive behavior. `SuppressDodgeHandler` is a terminal `ProjectileIncoming` handler that emits no Change — tactics that want to commit (DuelistCharge, AntiMageZone) bind it to suppress the common `LateralDodge`. Workaround for dodge-not-being-in-plans; will be reworked when plans land (stage 7).
 7. **Plans replace tactics.** Multi-phase sequences with advance/abort conditions. Plan selection replaces tactic selection. Plans can evaluate candidate *destinations* (not just preferred ranges) — longer-horizon position reasoning. Current sampling continues to be the reactive frame-by-frame realizer.
 8. **Enemy prediction model.** Tactics/plans "envision" the opponent's response during scoring. Linear extrapolation to start.
 
@@ -350,11 +352,14 @@ Reactive layer (event/handler pipeline):
 - Always-on roster detectors: non-active tactic detectors run each tick; only observe-Changes are kept. Tactics can build observations while dormant and earn selection based on them.
 
 Spells and selection:
-- `SpellMetadata` + `SpellFactory` on spells; every spell carries range / kind / element / chargeTime / cooldown / tags.
+- `SpellMetadata` + `SpellFactory` on spells; every spell carries range / kind / element / chargeTime / cooldown / tags (+ optional `baseSpeed` for projectiles).
 - Selection library in [src/spells/selection.ts](src/spells/selection.ts): predicates + comparators + defaultSelector.
 - `Directives.selectSpell` is a tactic-supplied function, not a config bundle. Tactics compose filters + comparators.
 - `MeleeAttack` self-spell with cone-arc visual, lunge animation, cone hit detection.
+- `ProjectileSlowField` zone spell (translucent blue dome) — first cross-spell interaction. Slows projectiles (25%) while inside, restores on exit. Iterate-and-scale for now; component-based refactor planned.
 - DuelistCharge selector filters by `byTag("melee")` — wizard refuses to cast fireball while in this tactic.
+- AntiMageZone selector filters by `byTag("zone")`; `liveDirectives` pushes preferredRange inward for 4s after casting so Red charges into melee under the field.
+- Both DuelistCharge and AntiMageZone bind `SuppressDodgeHandler` to keep Red committed to the rush (workaround — will be replaced by plan-level dodge policy once plans land).
 - Distances in directives / tactic context / spell range are surface-to-surface (for future size variation).
 
 Visual polish:
@@ -366,21 +371,19 @@ Visual polish:
 
 Work toward the plan-based AI described in "Planned evolution" above. The known center-drift problem is structural (see Navigation) and will be resolved by plans with position reasoning, not by further tuning of the current system.
 
-1. **ProjectileSlowField spell** (next session). Zone/buff spell type, translucent blue dome, slows projectiles passing through. First cross-spell interaction. Uses simple iterate-and-scale logic for now; migrate to component-based spell interactions later.
-2. **Tactic-authored interrupt posture.** DuelistCharge binds a terminal `ProjectileIncoming` handler that suppresses dodge, so Red actually commits to the rush instead of getting dodge-locked en route. Uses existing pipeline infrastructure.
-3. **More events + handlers.** `LowHPCrossed`, `OpportunityStrike`, `TargetLost`, etc.
-4. **Plans replace tactics.** Multi-phase sequences with advance/abort conditions and position-based scoring.
-5. **Enemy prediction model** feeding plan selection.
-6. **Per-tactic action selection** (actions as named discrete moves with their own commitment — fills in the missing action layer of the three-tier hierarchy).
-7. **Personality vector** wired into plan and action scoring (currently stand-in: per-wizard roster biases).
-8. **Component-based spell interactions.** Refactor zone effects (slowing field, future auras) to install components on affected spells rather than iterate-and-modify. Enables stacking, spell-controlled responses.
-9. **Projectile kinematics for physical projectiles** (distinct from magical spells; levitated terrain etc.).
-10. **Predicted self-position helper** — generalize the one-off dodge-filter version into a reusable AI helper.
-11. **Reaction-time delay** on AI stimulus response *(likely requires an event queue — defer the design)*.
-12. **Per-contestant persistence** (habit weights on plans, opponent models, aim skill).
-13. **Opponent reaction modeling.**
-14. **Jumps** + airborne state + air control (when the vertical axis starts to matter).
-15. *(Later)* MAP-Elites for personality generation.
+1. **More events + handlers.** `LowHPCrossed`, `OpportunityStrike`, `TargetLost`, etc. More reactive hooks for tactics to plan around.
+2. **Plans replace tactics.** Multi-phase sequences with advance/abort conditions and position-based scoring. Also repositions dodge as a plan-authored action (per-phase dodge policy) so tactics don't need to bind `SuppressDodgeHandler` to commit.
+3. **Enemy prediction model** feeding plan selection.
+4. **Per-tactic action selection** (actions as named discrete moves with their own commitment — fills in the missing action layer of the three-tier hierarchy).
+5. **Personality vector** wired into plan and action scoring (currently stand-in: per-wizard roster biases).
+6. **Component-based spell interactions.** Refactor zone effects (slowing field, future auras) to install components on affected spells rather than iterate-and-modify. Enables stacking, spell-controlled responses.
+7. **Projectile kinematics for physical projectiles** (distinct from magical spells; levitated terrain etc.).
+8. **Predicted self-position helper** — generalize the one-off dodge-filter version into a reusable AI helper.
+9. **Reaction-time delay** on AI stimulus response *(likely requires an event queue — defer the design)*.
+10. **Per-contestant persistence** (habit weights on plans, opponent models, aim skill).
+11. **Opponent reaction modeling.**
+12. **Jumps** + airborne state + air control (when the vertical axis starts to matter).
+13. *(Later)* MAP-Elites for personality generation.
 14. *(Later)* Learned trajectory predictor.
 15. *(Optional)* LLM commentary over event log.
 

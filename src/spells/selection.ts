@@ -5,6 +5,8 @@ export interface SelectionContext {
   self: Contestant;
   target: Contestant;
   distToTarget: number;
+  readyAt: Map<SpellFactory, number>;
+  nowSeconds: number;
 }
 
 export type SpellSelector = (
@@ -39,6 +41,13 @@ export function inRange(distance: number) {
     distance >= f.metadata.range.min && distance <= f.metadata.range.max;
 }
 
+export function byReady(ctx: SelectionContext) {
+  return (f: SpellFactory): boolean => {
+    const ready = ctx.readyAt.get(f);
+    return ready === undefined || ready <= ctx.nowSeconds;
+  };
+}
+
 export function preferLongestRange(
   a: SpellFactory,
   b: SpellFactory
@@ -60,7 +69,9 @@ export function preferShortestCharge(
   return a.metadata.chargeTime - b.metadata.chargeTime;
 }
 
-/** Default selector: first in-range spell from the book. */
+/** Default selector: first in-range, ready spell from the book. */
 export const defaultSelector: SpellSelector = (book, ctx) => {
-  return book.find(inRange(ctx.distToTarget)) ?? null;
+  return (
+    book.filter(byReady(ctx)).find(inRange(ctx.distToTarget)) ?? null
+  );
 };

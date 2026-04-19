@@ -19,6 +19,7 @@ export const FIREBALL_METADATA: SpellMetadata = {
   chargeTime: 0.45,
   cooldown: 1.4,
   tags: ["ranged", "projectile"],
+  baseSpeed: FIREBALL_SPEED,
 };
 
 export const FireballFactory: SpellFactory = {
