@@ -24,8 +24,10 @@ The central design principle is **legibility over optimality** — the fights sh
 - **[src/materials.ts](src/materials.ts)** — shared toon gradient map; inverted-hull outline helper.
 - **[src/steering.ts](src/steering.ts)** — pure-function steering primitives (`seek`, `flee`, `arrive`, `pursue`, `evade`, `circle`, `wallRepulsion`) returning `Vec2` desired-velocities, plus `sampleBestDirection` which scores 16 directions around an intent and picks the best accounting for wall clearance.
 - **[src/tactics/](src/tactics/)** — AI tactic layer. `tactic.ts` defines the `Tactic` interface, `Directives` shape, `TacticContext`, `RosterEntry`. `common.ts` holds six shared tactics (Pressure, Kite, Orbit, Ambush, Retreat, BaitAndSwitch). `signature.ts` holds four wizard-signature tactics (DuelistCharge, Sniper, Turtle, Scrapper). `selector.ts` scores a roster each second with random jitter and commits to the winner for its minimum dwell.
+- **[src/events/](src/events/)** — event detection layer. `event.ts` defines `GameEvent<P>` and `EventDetector<P>`. `projectileIncoming.ts` is the first detector: replaces the old inline dodge-trigger scan with a standalone module, emits a typed payload (threatening spell + distance + closest-approach).
+- **[src/handlers/](src/handlers/)** — reactive handler layer. `change.ts` declares the `Change` discriminated union (`forceMovementState`, `observe`, `noop`) and the `HandlerTier` enum (`reflexive` > `tactical` > `observational`). `handler.ts` defines the `Handler<P>` interface (event id binding + tier + terminal flag). `lateralDodge.ts` is a reflexive terminal handler that emits a `forceMovementState: dodging` with a perpendicular-to-projectile direction. `pipeline.ts` runs detectors, dispatches events to handlers in tier order, stops a chain at the first terminal handler.
 - **[src/contestants/contestant.ts](src/contestants/contestant.ts)** — `Contestant` interface (mesh, position, velocity, facing, radius, hp, alive, update).
-- **[src/contestants/basicWizard.ts](src/contestants/basicWizard.ts)** — first concrete contestant. Holds a kinematic body, a state machine (see below), stamina, a `TacticSelector` driving live directives, facing with strafe tax, committed lateral dodges, charged-fireball casts with predictive aiming, status display, speed trail. Engage intent comes from `circle(...)` shaped by current directives and refined by `sampleBestDirection` for wall avoidance.
+- **[src/contestants/basicWizard.ts](src/contestants/basicWizard.ts)** — first concrete contestant. Holds a kinematic body, a state machine (see below), stamina, a `TacticSelector` driving live directives, facing with strafe tax, committed lateral dodges (triggered via the event/handler pipeline), charged-fireball casts with predictive aiming, status display, speed trail. Engage intent comes from `circle(...)` shaped by current directives and refined by `sampleBestDirection` for wall avoidance.
 - **[src/spells/spell.ts](src/spells/spell.ts)** — `Spell` interface (mesh, position, velocity, caster, dead, update).
 - **[src/spells/fireball.ts](src/spells/fireball.ts)** — four-layer fiery projectile with sphere-node trail. Supports `frozen` mode during caster's charge window; `setPosition` for caster-relative positioning during charge; `setVelocityFromDirection` on release. Spawns an `Explosion` and a `ParticleBurst` on impact.
 - **[src/spells/explosion.ts](src/spells/explosion.ts)** — short-lived expanding-sphere visual effect. Pure cosmetic; no damage.
@@ -159,10 +161,12 @@ We have a simplified two-tier slice of the above: **tactic layer → control lay
 
 Six common tactics + four wizard-signature tactics (ten total) are implemented in [src/tactics/](src/tactics/). A `TacticSelector` scores the active wizard's roster every second, applies random jitter, and commits to the winner for its minimum dwell.
 
+Reactive behaviors (starting with dodge) now flow through a separate **event/handler pipeline** (see "Events and handlers" below). Detectors observe the world, handlers decide reactions, Changes feed back to the wizard. This is the scaffolding for tactic-specific handlers and more reactive behaviors; currently only dodge uses it.
+
 What's *not* yet present from the full spec:
 - Action layer (discrete named actions with their own commitment windows)
 - Plan-style multi-phase tactics (the current ones are "parameter bundles," not sequences)
-- Centralized interrupt system (dodge, HP threshold, and tactic commitment checks are each still ad-hoc in `BasicWizard`)
+- Tactic-specific event interests + handler overrides (infrastructure exists; not yet wired to any tactic)
 - Personality vectors (each wizard's tactic-roster biases stand in for this for now)
 - Any learning / habit formation / opponent modeling
 
@@ -173,8 +177,8 @@ Discussed on 2026-04-19. The end goal is tactics as *plans* — multi-phase sequ
 Staged path:
 
 1. ~~**Directional sampling at the control layer.**~~ *Done 2026-04-19.* 16-direction sampling with intent-alignment + wall clearance scoring refines the raw intent each frame.
-2. **Central interrupt system.** Refactor dodge into a named interrupt. Wizard owns a registry of interrupts; highest-priority firing one preempts the normal intent. HP-threshold and tactic-commitment checks migrate here too. Tactics can modify the interrupt list while active.
-3. **Tactics shape interrupts.** Aggressive tactics disable/limit dodge, defensive tactics amplify it. This is the first moment tactics actually author behavior rather than just tweak scalars.
+2. ~~**Event/handler pipeline (reactive layer).**~~ *Done 2026-04-19.* Detectors observe the world each tick, handlers decide reactions, a pipeline routes events to handlers with tier precedence and terminal semantics. Dodge migrated onto this pipeline — behaviorally identical, but dodge-trigger logic now lives in a reusable reflexive-tier terminal handler rather than inline in `BasicWizard`.
+3. **Tactics author event interests + handlers.** Tactics declare which events they care about (`OpponentCharging`, `LowHPCrossed`, etc.) and can bind their own handlers. Handler precedence: tactic-specific → contestant-specific → common. Informative handlers (observation-writing) can coexist with terminal handlers (movement overrides) by running first in the chain.
 4. **Plans replace tactics.** Multi-phase sequences with advance/abort conditions. Plan selection replaces tactic selection. Plans can evaluate candidate *destinations* (not just preferred ranges) — longer-horizon position reasoning. Current sampling continues to be the reactive frame-by-frame realizer.
 5. **Enemy prediction model.** Tactics/plans "envision" the opponent's response during scoring. Linear extrapolation to start.
 
@@ -187,6 +191,28 @@ Define a catalog of 6–12 named tactics. Each owns:
 - Its own action-selection utility function
 
 Tactics should be recipes, not moods. "Close to melee and chain fire spells" — specific enough to be legibly succeeding or failing. Moods live in personality; tactics are what personality *chooses*.
+
+### Events and handlers (reactive layer)
+
+Reactive behaviors — dodge, brace, panic-retreat, "noticed enemy started charging" — flow through a three-step pipeline designed in an FRP shape: state + world → events → changes → folded into state.
+
+**Layers:**
+
+| Layer | Job | Examples |
+|---|---|---|
+| **Events** | Detect world conditions. Pure observers; emit a typed payload or nothing. | `ProjectileIncoming` |
+| **Handlers** | Decide reactions. Pure functions `(self, event) → Change[]`. | `LateralDodge` |
+| **Movement states** | Realize locked motions. Unchanged by this refactor. | `dodging`, `recovering`, future `jumping` |
+
+The critical separation: handlers don't *perform* the dodge; they emit a `forceMovementState: dodging` **Change**, which the wizard's movement state machine acts on. This keeps locked-motion behavior (the physical commitment of a dodge or jump) decoupled from the *decision* to do it. Tank-brace vs. wizard-dodge can share the same `ProjectileIncoming` event but route to different handlers which emit different movement-state changes.
+
+**Handler tiers** (priority, high to low): `reflexive` > `tactical` > `observational`. Handlers within a tier run in registration order. A **terminal** handler stops the chain for its event (only higher-tier terminal handlers can preempt it). An **informative** handler (e.g. "note that opponent started charging") emits observation Changes and doesn't stop the chain — the same event can still reach lower-tier handlers.
+
+**Precedence across layers** (planned for stage 3): when an event fires, handlers are collected from the current tactic → contestant defaults → common set, in that order. The first terminal handler wins for that event. This lets a "rush" tactic bind a no-op terminal handler to `ProjectileIncoming` to suppress dodge entirely, while a "turtle" tactic could bind an *amplified* dodge.
+
+**Current extent:** only `ProjectileIncoming → LateralDodge` is wired. No tactic-specific interests yet. The pipeline infrastructure supports all the above, but only the common-handler case is exercised.
+
+**Why not just handle everything in `BasicWizard.update`?** Because the reactive layer needs to be composable — contestants customize handlers, tactics override them, new events and handlers get added without touching existing logic. Inline imperative checks don't compose; an event-dispatch pipeline does.
 
 ### Navigation
 
@@ -285,6 +311,11 @@ AI layer (two-tier slice):
 - `BasicWizard` consumes live directives from the current tactic; old hardcoded range-oscillation / sprint-range constants removed
 - Directional sampling (16 directions, intent alignment + cubic wall-clearance scoring) refines the raw engage intent each frame
 
+Reactive layer (event/handler pipeline):
+- Events + handlers + Changes + tiered pipeline in [src/events/](src/events/) and [src/handlers/](src/handlers/)
+- `ProjectileIncoming` detector + `LateralDodge` handler — dodge behavior-preserving refactored out of `BasicWizard` onto the pipeline
+- Movement states kept distinct from handlers; handlers emit `forceMovementState` Changes, wizard's state machine realizes them
+
 Visual polish:
 - Status bars (HP + stamina) billboarded above each wizard
 - Speed trails during sprint / dodge
@@ -294,8 +325,8 @@ Visual polish:
 
 Work toward the plan-based AI described in "Planned evolution" above. The known center-drift problem is structural (see Navigation) and will be resolved by plans with position reasoning, not by further tuning of the current system.
 
-1. **Centralize interrupts.** Refactor dodge into a named interrupt; add HP-threshold, opportunity, and tactic-broken interrupts on the same registry.
-2. **Tactics author interrupt posture.** Tactics modify the interrupt list while active (e.g., "rush" suppresses dodge).
+1. **More events + handlers.** `OpponentCharging`, `LowHPCrossed`, `OpportunityStrike`, etc. All reuse the existing pipeline.
+2. **Tactics author event interests + handlers.** Tactics declare which events they care about; bind tactic-specific handlers (informative or terminal). Handler precedence: tactic → contestant → common.
 3. **Plans replace tactics.** Multi-phase sequences with advance/abort conditions and position-based scoring.
 4. **Enemy prediction model** feeding plan selection.
 5. **Per-tactic action selection** (actions as named discrete moves with their own commitment — fills in the missing action layer of the three-tier hierarchy).

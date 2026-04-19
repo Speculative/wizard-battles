@@ -19,6 +19,11 @@ import {
   type Vec2,
   type SampleDebug,
 } from "../steering";
+import { ProjectileIncomingDetector } from "../events/projectileIncoming";
+import type { EventDetector } from "../events/event";
+import type { Handler } from "../handlers/handler";
+import { LateralDodgeHandler } from "../handlers/lateralDodge";
+import { runPipeline } from "../handlers/pipeline";
 
 function gaussian(): number {
   const u = 1 - Math.random();
@@ -28,10 +33,6 @@ function gaussian(): number {
 
 const RADIUS = 22;
 const FLOAT_HEIGHT = RADIUS * 1.5;
-const DODGE_SENSE_RADIUS = 160;
-const DODGE_ANGLE_COS = 0.85;
-const DODGE_SAFETY_MARGIN = 22;
-const PROJECTILE_RADIUS_ESTIMATE = 12;
 const FIRE_COOLDOWN = 1.4;
 const CHARGE_DURATION = 0.45;
 
@@ -144,6 +145,9 @@ export class BasicWizard implements Contestant {
   private dodgeCooldown = 0;
   private readonly dodgeDir = new THREE.Vector3();
   private readonly defaultCircleSign: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private readonly projectileDetector = new ProjectileIncomingDetector();
+  private readonly detectors: EventDetector[] = [this.projectileDetector];
+  private readonly handlers: Handler[] = [new LateralDodgeHandler()];
   private readonly sampleDebug: SampleDebug = {
     intentX: 0,
     intentZ: 0,
@@ -291,34 +295,22 @@ export class BasicWizard implements Contestant {
     this.tacticSelector.update(dt, ctx);
     this.directives = this.tacticSelector.directives;
 
-    const dodgeIntent =
-      this.directives.dodgeEagerness > 0.05 ? this.computeDodge(world) : null;
-
     if (nearest) {
       this.computeEngageIntent(nearest, distToTarget, world, this.desiredDir);
     }
 
-    if (
-      dodgeIntent &&
-      this.state !== "dodging" &&
-      this.state !== "recovering" &&
-      this.state !== "charging" &&
-      this.dodgeCooldown <= 0 &&
-      this.stamina >= DODGE_MIN_STAMINA
-    ) {
-      this.dodgeDir.copy(dodgeIntent);
-      this.body.velocity.x = this.dodgeDir.x * DODGE_IMPULSE_SPEED;
-      this.body.velocity.z = this.dodgeDir.z * DODGE_IMPULSE_SPEED;
-      const staminaFrac = Math.min(1, this.stamina / DODGE_STAMINA_COST);
-      this.stamina = Math.max(
-        0,
-        this.stamina - DODGE_STAMINA_COST * staminaFrac
-      );
-      this.dodgeCooldown = DODGE_COOLDOWN;
-      this.setState("dodging");
-      this.stateTimer =
-        DODGE_DURATION_MIN +
-        (DODGE_DURATION_MAX - DODGE_DURATION_MIN) * staminaFrac;
+    this.projectileDetector.setEagerness(this.directives.dodgeEagerness);
+    const changes = runPipeline({
+      self: this,
+      world,
+      detectors: this.detectors,
+      handlers: this.handlers,
+    });
+
+    for (const c of changes) {
+      if (c.type === "forceMovementState" && c.state === "dodging") {
+        this.tryEnterDodge(c.direction);
+      }
     }
 
     this.updateState(dt, distToTarget);
@@ -735,58 +727,29 @@ export class BasicWizard implements Contestant {
     }
   }
 
-  private computeDodge(world: World): THREE.Vector3 | null {
-    const senseRadius = DODGE_SENSE_RADIUS * this.directives.dodgeEagerness;
-    let bestDist = senseRadius;
-    let bestSpell: typeof world.spells[number] | null = null;
-    const p = this.body.position;
-    const u = this.body.velocity;
-    const threatThreshold =
-      this.radius + PROJECTILE_RADIUS_ESTIMATE + DODGE_SAFETY_MARGIN;
-    for (const s of world.spells) {
-      if (s.caster === this) continue;
-      const vLen = Math.hypot(s.velocity.x, s.velocity.z);
-      if (vLen < 1e-3) continue;
-      const toMeX = p.x - s.position.x;
-      const toMeZ = p.z - s.position.z;
-      const toMeLen = Math.hypot(toMeX, toMeZ);
-      if (toMeLen < 1e-3 || toMeLen > senseRadius) continue;
-      const cos =
-        (s.velocity.x * toMeX + s.velocity.z * toMeZ) / (vLen * toMeLen);
-      if (cos < DODGE_ANGLE_COS) continue;
+  private tryEnterDodge(direction: THREE.Vector3): void {
+    if (
+      this.state === "dodging" ||
+      this.state === "recovering" ||
+      this.state === "charging"
+    )
+      return;
+    if (this.dodgeCooldown > 0) return;
+    if (this.stamina < DODGE_MIN_STAMINA) return;
 
-      const relVx = u.x - s.velocity.x;
-      const relVz = u.z - s.velocity.z;
-      const relVSq = relVx * relVx + relVz * relVz;
-      let closestSq: number;
-      if (relVSq < 1e-6) {
-        closestSq = toMeX * toMeX + toMeZ * toMeZ;
-      } else {
-        const tMin = Math.max(
-          0,
-          -(toMeX * relVx + toMeZ * relVz) / relVSq
-        );
-        const cx = toMeX + relVx * tMin;
-        const cz = toMeZ + relVz * tMin;
-        closestSq = cx * cx + cz * cz;
-      }
-      if (closestSq > threatThreshold * threatThreshold) continue;
-
-      if (toMeLen < bestDist) {
-        bestDist = toMeLen;
-        bestSpell = s;
-      }
-    }
-    if (!bestSpell) return null;
-
-    const vLen = Math.hypot(bestSpell.velocity.x, bestSpell.velocity.z);
-    const dx = bestSpell.velocity.x / vLen;
-    const dz = bestSpell.velocity.z / vLen;
-    const relX = p.x - bestSpell.position.x;
-    const relZ = p.z - bestSpell.position.z;
-    const side = dx * relZ - dz * relX;
-    const sign = side >= 0 ? 1 : -1;
-    return new THREE.Vector3(-dz * sign, 0, dx * sign);
+    this.dodgeDir.copy(direction);
+    this.body.velocity.x = this.dodgeDir.x * DODGE_IMPULSE_SPEED;
+    this.body.velocity.z = this.dodgeDir.z * DODGE_IMPULSE_SPEED;
+    const staminaFrac = Math.min(1, this.stamina / DODGE_STAMINA_COST);
+    this.stamina = Math.max(
+      0,
+      this.stamina - DODGE_STAMINA_COST * staminaFrac
+    );
+    this.dodgeCooldown = DODGE_COOLDOWN;
+    this.setState("dodging");
+    this.stateTimer =
+      DODGE_DURATION_MIN +
+      (DODGE_DURATION_MAX - DODGE_DURATION_MIN) * staminaFrac;
   }
 
   private pickTarget(world: World): Contestant | null {
