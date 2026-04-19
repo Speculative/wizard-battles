@@ -3,19 +3,18 @@ import type { Contestant } from "./contestant";
 import type { World } from "../world";
 import { Fireball, FIREBALL_SPEED, FireballFactory } from "../spells/fireball";
 import type { Spell, SpellFactory } from "../spells/spell";
-import { defaultSelector } from "../spells/selection";
 import { getToonGradient, makeOutline } from "../materials";
 import { KinematicBody, type MovementStats } from "../kinematics";
 import { StatusDisplay } from "../statusDisplay";
-import { TacticSelector } from "../tactics/selector";
+import { TacticSelector } from "../tactics/planSelector";
 import type {
-  Directives,
+  CastController,
+  PaceHint,
   RosterEntry,
-  TacticContext,
-} from "../tactics/tactic";
-import { DEFAULT_DIRECTIVES } from "../tactics/tactic";
+  TacticOutput,
+} from "../tactics/plan";
+import { isStationary } from "../tactics/plan";
 import {
-  circle,
   sampleBestDirection,
   toVector3,
   type Vec2,
@@ -127,6 +126,36 @@ export interface BasicWizardOptions {
   spellbook?: SpellFactory[];
 }
 
+class WizardCastController implements CastController {
+  private readonly wizard: BasicWizard;
+  constructor(wizard: BasicWizard) {
+    this.wizard = wizard;
+  }
+
+  requestCast(
+    factory: SpellFactory,
+    target: Contestant | null,
+    aim: Vec2
+  ): boolean {
+    return this.wizard._ccRequestCast(factory, target, aim);
+  }
+  cancelCharging(): void {
+    this.wizard._ccCancelCharging();
+  }
+  updateAim(target: Contestant | null, aim: Vec2): void {
+    this.wizard._ccUpdateAim(target, aim);
+  }
+  isCharging(): boolean {
+    return this.wizard._ccIsCharging();
+  }
+  currentFactory(): SpellFactory | null {
+    return this.wizard._ccCurrentFactory();
+  }
+  isReady(factory: SpellFactory): boolean {
+    return this.wizard._ccIsReady(factory);
+  }
+}
+
 export class BasicWizard implements Contestant {
   readonly id: string;
   readonly mesh: THREE.Object3D;
@@ -137,7 +166,7 @@ export class BasicWizard implements Contestant {
   private readonly body: KinematicBody;
   readonly facing = new THREE.Vector3(1, 0, 0);
   private readonly facingPivot: THREE.Group;
-  private readonly desiredDir = new THREE.Vector3();
+  private readonly wanderDir = new THREE.Vector3();
   private state: MovementState = "running";
   private stateTimer = 0;
   private stamina = STAMINA_MAX;
@@ -150,11 +179,16 @@ export class BasicWizard implements Contestant {
   private shotsFired = 0;
   private dodgeCooldown = 0;
   private readonly dodgeDir = new THREE.Vector3();
-  private readonly defaultCircleSign: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
   private readonly projectileDetector = new ProjectileIncomingDetector();
   private readonly detectors: EventDetector[] = [this.projectileDetector];
   private readonly handlers: Handler[] = [new LateralDodgeHandler()];
   private readonly components = new Map<string, unknown>();
+  private readonly castController: WizardCastController;
+  private currentMoveIntent: Vec2 = { x: 0, z: 0 };
+  private currentPaceHint: PaceHint = "hold";
+  private currentFacingIntent: Vec2 = { x: 0, z: 0 };
+  private readonly moveScratch = new THREE.Vector3();
+  private _cachedWorldForCast: World | null = null;
 
   getComponent<T>(key: ComponentKey<T>): T | undefined {
     return this.components.get(key.id) as T | undefined;
@@ -177,7 +211,6 @@ export class BasicWizard implements Contestant {
     nearestWallDist: 0,
   };
   private readonly tacticSelector: TacticSelector;
-  private directives: Directives = { ...DEFAULT_DIRECTIVES };
   private readonly trail: THREE.Line;
   private readonly trailPositions: Float32Array;
   private readonly trailColors: Float32Array;
@@ -202,16 +235,8 @@ export class BasicWizard implements Contestant {
     this.spellbook = opts.spellbook ?? [FireballFactory];
     this.body = new KinematicBody({ ...STATE_STATS.running }, opts.start);
     this.body.position.y = FLOAT_HEIGHT;
-    const initialCtx: TacticContext = {
-      self: this,
-      enemy: null,
-      distToEnemy: Infinity,
-      stamina01: 1,
-      hp01: 1,
-      shotsFired: 0,
-    };
-    this.tacticSelector = new TacticSelector(opts.roster, initialCtx, opts.id);
-    this.directives = this.tacticSelector.directives;
+    this.tacticSelector = new TacticSelector(opts.roster, opts.id);
+    this.castController = new WizardCastController(this);
 
     const sphereGeo = new THREE.SphereGeometry(RADIUS, 24, 24);
     const bodyMesh = new THREE.Mesh(
@@ -263,9 +288,25 @@ export class BasicWizard implements Contestant {
     this.trail.frustumCulled = false;
 
     const angle = Math.random() * Math.PI * 2;
-    this.desiredDir.set(Math.cos(angle), 0, Math.sin(angle));
-    this.facing.copy(this.desiredDir);
+    this.wanderDir.set(Math.cos(angle), 0, Math.sin(angle));
+    this.facing.copy(this.wanderDir);
     this.facingPivot.rotation.y = -Math.atan2(this.facing.z, this.facing.x);
+  }
+
+  stamina01(): number {
+    return this.stamina / STAMINA_MAX;
+  }
+  hp01(): number {
+    return this.hp / 100;
+  }
+  getShotsFired(): number {
+    return this.shotsFired;
+  }
+  getSpellbook(): readonly SpellFactory[] {
+    return this.spellbook;
+  }
+  getReadyAt(): Map<SpellFactory, number> {
+    return this.readyAt;
   }
 
   update(dt: number, world: World): void {
@@ -290,59 +331,20 @@ export class BasicWizard implements Contestant {
       return;
     }
 
+    this._cachedWorldForCast = world;
     this.dodgeCooldown = Math.max(0, this.dodgeCooldown - dt);
 
     this.turnTimer -= dt;
     if (this.turnTimer <= 0) {
       const angle = Math.random() * Math.PI * 2;
-      this.desiredDir.set(Math.cos(angle), 0, Math.sin(angle));
+      this.wanderDir.set(Math.cos(angle), 0, Math.sin(angle));
       this.turnTimer = 0.8 + Math.random() * 1.6;
     }
 
-    const nearest = this.pickTarget(world);
-    const centerDist = nearest
-      ? nearest.position.distanceTo(this.body.position)
-      : Infinity;
-    const distToTarget = nearest
-      ? Math.max(0, centerDist - this.radius - nearest.radius)
-      : Infinity;
-
-    const ctx: TacticContext = {
-      self: this,
-      enemy: nearest,
-      distToEnemy: distToTarget,
-      stamina01: this.stamina / STAMINA_MAX,
-      hp01: this.hp / 100,
-      shotsFired: this.shotsFired,
-    };
     this.tacticSelector.updateDormantObservations(this, world);
-    this.tacticSelector.update(dt, ctx);
-    this.directives = this.tacticSelector.effectiveDirectives(ctx);
-
-    if (nearest) {
-      this.computeEngageIntent(nearest, centerDist, world, this.desiredDir);
-      if (this.id === "red") {
-        this.debugLogTimer -= dt;
-        if (this.debugLogTimer <= 0) {
-          this.debugLogTimer = 0.4;
-          const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
-          const nowS = performance.now() / 1000;
-          const cooldowns = this.spellbook
-            .map((f) => {
-              const r = this.readyAt.get(f) ?? 0;
-              const left = Math.max(0, r - nowS);
-              return `${f.metadata.id}=${left.toFixed(1)}`;
-            })
-            .join(" ");
-          console.log(
-            `red surf=${distToTarget.toFixed(0)} state=${this.state} spd=${speed.toFixed(0)} stam=${this.stamina.toFixed(1)} tactic=${this.tacticSelector.currentTactic.id} pref=${this.directives.preferredRange} band=${this.directives.rangeBand} cd[${cooldowns}]`
-          );
-        }
-      }
-    }
-
-    this.projectileDetector.setEagerness(this.directives.dodgeEagerness);
+    this.tacticSelector.update(dt, this, world);
     const activeTactic = this.tacticSelector.currentTactic;
+
     const mergedDetectors = activeTactic.detectors
       ? [...activeTactic.detectors, ...this.detectors]
       : this.detectors;
@@ -364,30 +366,36 @@ export class BasicWizard implements Contestant {
       }
     }
 
-    this.updateState(dt, distToTarget);
+    const output: TacticOutput = activeTactic.update(dt, this, world);
+    this.currentMoveIntent = output.moveIntent;
+    this.currentPaceHint = output.paceHint;
+    this.currentFacingIntent = output.facingIntent;
+
+    this.updateState(dt, output.paceHint);
 
     const isDodging = this.state === "dodging";
-    const intent = isDodging ? this.dodgeDir : this.desiredDir;
-    let facingIntent = this.computeFacingIntent(intent, nearest);
+    const moveVec = this.resolveMoveVector(world, isDodging);
+
+    let facingIntent3 = this.resolveFacingVector();
     if (this.state === "sprinting") {
-      facingIntent = this.clampToCone(
-        facingIntent,
+      facingIntent3 = this.clampToCone(
+        facingIntent3,
         this.body.velocity,
         SPRINT_FACING_CONE,
-        intent
+        moveVec
       );
     }
-    this.updateFacing(dt, facingIntent);
+    this.updateFacing(dt, facingIntent3);
 
     const baseMaxSpeed = this.body.stats.maxSpeed;
     if (!isDodging && this.state !== "sprinting") {
-      this.body.stats.maxSpeed = baseMaxSpeed * this.strafeScale(intent);
+      this.body.stats.maxSpeed = baseMaxSpeed * this.strafeScale(moveVec);
     }
 
     if (this.state === "idle") {
       this.body.clearIntent();
     } else {
-      this.body.setIntent(intent);
+      this.body.setIntent(moveVec);
     }
     this.body.update(dt);
     this.body.stats.maxSpeed = baseMaxSpeed;
@@ -398,7 +406,10 @@ export class BasicWizard implements Contestant {
     this.mesh.position.copy(this.body.position);
 
     this.updateTrail(dt);
-    this.updateCombat(dt, world, nearest, distToTarget);
+
+    activeTactic.maybeCast?.(dt, this, world, this.castController);
+    this.updateChargedSpell();
+
     this.status.update(
       this.hp / 100,
       this.stamina / STAMINA_MAX,
@@ -406,36 +417,51 @@ export class BasicWizard implements Contestant {
       RADIUS * 1.8,
       world.camera.quaternion
     );
+
+    if (this.id === "red") {
+      this.debugLogTimer -= dt;
+      if (this.debugLogTimer <= 0) {
+        this.debugLogTimer = 0.4;
+        const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
+        const nowS = performance.now() / 1000;
+        const cooldowns = this.spellbook
+          .map((f) => {
+            const r = this.readyAt.get(f) ?? 0;
+            const left = Math.max(0, r - nowS);
+            return `${f.metadata.id}=${left.toFixed(1)}`;
+          })
+          .join(" ");
+        console.log(
+          `red state=${this.state} spd=${speed.toFixed(0)} stam=${this.stamina.toFixed(1)} tactic=${activeTactic.id} pace=${this.currentPaceHint} cd[${cooldowns}]`
+        );
+      }
+    }
   }
 
-  private computeEngageIntent(
-    target: Contestant,
-    _dist: number,
-    world: World,
-    out: THREE.Vector3
-  ): void {
+  private hasLivingEnemy(world: World): boolean {
+    for (const c of world.contestants) {
+      if (c !== this && c.alive) return true;
+    }
+    return false;
+  }
+
+  private resolveMoveVector(world: World, isDodging: boolean): THREE.Vector3 {
+    if (isDodging) return this.dodgeDir;
+    let intent = this.currentMoveIntent;
+    if (isStationary(intent) && !this.hasLivingEnemy(world)) {
+      intent = { x: this.wanderDir.x, z: this.wanderDir.z };
+    }
+    if (isStationary(intent)) {
+      this.moveScratch.set(0, 0, 0);
+      return this.moveScratch;
+    }
     const pos: Vec2 = { x: this.body.position.x, z: this.body.position.z };
-    const sign =
-      this.directives.circleDir !== 0
-        ? this.directives.circleDir
-        : this.defaultCircleSign;
-
-    const preferredCenterRange =
-      this.directives.preferredRange + this.radius + target.radius;
-    const rawIntent = circle(
-      pos,
-      { x: target.position.x, z: target.position.z },
-      preferredCenterRange,
-      sign,
-      this.directives.rangeBand
-    );
-
     const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
     const refined = sampleBestDirection(
       {
         pos,
         speed,
-        intent: rawIntent,
+        intent,
         bounds: world.bounds,
         wallHorizon: SAMPLE_WALL_HORIZON,
         intentWeight: SAMPLE_INTENT_WEIGHT,
@@ -444,26 +470,20 @@ export class BasicWizard implements Contestant {
       16,
       this.sampleDebug
     );
-    toVector3(refined, out);
+    toVector3(refined, this.moveScratch);
+    return this.moveScratch;
   }
 
-  private computeFacingIntent(
-    moveIntent: THREE.Vector3,
-    nearest: Contestant | null
-  ): THREE.Vector3 {
-    if (this.chargeTarget) {
-      const dx = this.chargeTarget.position.x - this.body.position.x;
-      const dz = this.chargeTarget.position.z - this.body.position.z;
-      const len = Math.hypot(dx, dz);
-      if (len > 1e-3) return new THREE.Vector3(dx / len, 0, dz / len);
+  private resolveFacingVector(): THREE.Vector3 {
+    const intent = this.currentFacingIntent;
+    if (isStationary(intent)) {
+      return new THREE.Vector3(this.facing.x, 0, this.facing.z);
     }
-    if (nearest) {
-      const dx = nearest.position.x - this.body.position.x;
-      const dz = nearest.position.z - this.body.position.z;
-      const len = Math.hypot(dx, dz);
-      if (len > 1e-3) return new THREE.Vector3(dx / len, 0, dz / len);
+    const len = Math.hypot(intent.x, intent.z);
+    if (len < 1e-4) {
+      return new THREE.Vector3(this.facing.x, 0, this.facing.z);
     }
-    return moveIntent;
+    return new THREE.Vector3(intent.x / len, 0, intent.z / len);
   }
 
   private clampToCone(
@@ -593,7 +613,7 @@ export class BasicWizard implements Contestant {
     this.trailGeo.setDrawRange(0, n);
   }
 
-  private updateState(dt: number, distToTarget: number): void {
+  private updateState(dt: number, paceHint: PaceHint): void {
     if (this.state === "charging") {
       this.stateTimer -= dt;
       this.stamina = Math.min(STAMINA_MAX, this.stamina + STAMINA_REGEN * dt);
@@ -620,15 +640,8 @@ export class BasicWizard implements Contestant {
       return;
     }
 
-    const rangeGap = Math.abs(distToTarget - this.directives.preferredRange);
-    const canSprint = !this.directives.ambushMode;
-    const outsideShell =
-      distToTarget >
-      this.directives.preferredRange + this.directives.rangeBand;
-    const forced = this.directives.forceSprint === true && outsideShell;
     const wantsSprint =
-      canSprint &&
-      (forced || rangeGap > 100) &&
+      paceHint === "sprint" &&
       this.stamina > SPRINT_MIN_STAMINA_TO_START;
 
     if (this.state === "sprinting") {
@@ -650,12 +663,10 @@ export class BasicWizard implements Contestant {
     }
 
     const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
-    const atEngagementRange =
-      Math.abs(distToTarget - this.directives.preferredRange) <
-      this.directives.rangeBand + 20;
-    if (atEngagementRange) {
-      this.setState("walking");
-    } else if (speed < 5) {
+    const moving = !isStationary(this.currentMoveIntent);
+    if (paceHint === "walk") {
+      this.setState(moving ? "walking" : "idle");
+    } else if (!moving && speed < 5) {
       this.setState("idle");
     } else {
       this.setState("running");
@@ -686,53 +697,74 @@ export class BasicWizard implements Contestant {
     }
   }
 
-  private updateCombat(
-    _dt: number,
-    world: World,
-    nearest: Contestant | null,
-    distToTarget: number
-  ): void {
-    if (this.chargedSpell) {
-      const aim = this.chargeTarget
-        ? this.chargeTarget.position.clone().sub(this.body.position).normalize()
-        : this.desiredDir;
-      if (this.chargedSpell instanceof Fireball) {
-        this.chargedSpell.setPosition(
-          this.body.position.x + aim.x * (this.radius + 6),
-          this.body.position.y + 8,
-          this.body.position.z + aim.z * (this.radius + 6)
-        );
-      }
-      if (this.state !== "charging") {
-        this.releaseCharge();
-      }
-      return;
+  private updateChargedSpell(): void {
+    if (!this.chargedSpell) return;
+    const aim = this.chargeTarget
+      ? this.chargeTarget.position.clone().sub(this.body.position).normalize()
+      : this.facing;
+    if (this.chargedSpell instanceof Fireball) {
+      this.chargedSpell.setPosition(
+        this.body.position.x + aim.x * (this.radius + 6),
+        this.body.position.y + 8,
+        this.body.position.z + aim.z * (this.radius + 6)
+      );
     }
+    if (this.state !== "charging") {
+      this.releaseCharge();
+    }
+  }
 
-    if (!nearest) return;
-    if (this.state === "sprinting" || this.state === "recovering") return;
+  _ccRequestCast(
+    factory: SpellFactory,
+    target: Contestant | null,
+    aim: Vec2
+  ): boolean {
+    if (!this.alive) return false;
+    if (
+      this.state === "sprinting" ||
+      this.state === "recovering" ||
+      this.state === "dodging" ||
+      this.state === "charging"
+    )
+      return false;
+    if (!this._ccIsReady(factory)) return false;
 
-    const selector = this.directives.selectSpell ?? defaultSelector;
-    const nowSeconds = performance.now() / 1000;
-    const factory = selector(this.spellbook, {
-      self: this,
-      target: nearest,
-      distToTarget,
-      readyAt: this.readyAt,
-      nowSeconds,
-    });
-    if (!factory) return;
-
-    this.chargeTarget = nearest;
-    const aim = new THREE.Vector3(1, 0, 0);
-    const spell = factory.create(this, nearest, aim) as Spell & {
+    this.chargeTarget = target;
+    const aimVec = new THREE.Vector3(aim.x, 0, aim.z);
+    if (aimVec.lengthSq() < 1e-6) aimVec.set(1, 0, 0);
+    const spell = factory.create(this, target, aimVec) as Spell & {
       frozen: boolean;
     };
     spell.frozen = true;
     this.chargedSpell = spell;
     this.chargedFactory = factory;
-    world.addSpell(spell);
-    this.setState("charging", factory.metadata.chargeTime || CHARGE_DURATION);
+    this._cachedWorldForCast?.addSpell(spell);
+    this.setState(
+      "charging",
+      factory.metadata.chargeTime || CHARGE_DURATION
+    );
+    return true;
+  }
+  _ccCancelCharging(): void {
+    if (!this.chargedSpell) return;
+    this.chargedSpell.dead = true;
+    this.chargedSpell = null;
+    this.chargedFactory = null;
+    this.chargeTarget = null;
+    if (this.state === "charging") this.setState("running");
+  }
+  _ccUpdateAim(target: Contestant | null, _aim: Vec2): void {
+    this.chargeTarget = target;
+  }
+  _ccIsCharging(): boolean {
+    return this.chargedSpell !== null;
+  }
+  _ccCurrentFactory(): SpellFactory | null {
+    return this.chargedFactory;
+  }
+  _ccIsReady(factory: SpellFactory): boolean {
+    const readyAt = this.readyAt.get(factory) ?? 0;
+    return readyAt <= performance.now() / 1000;
   }
 
   private releaseCharge(): void {
@@ -750,8 +782,7 @@ export class BasicWizard implements Contestant {
     this.chargedSpell = null;
     this.chargedFactory = null;
     this.chargeTarget = null;
-    const eag = Math.max(0.1, this.directives.chargeEagerness);
-    const cooldown = (factory.metadata.cooldown || 1.0) / eag;
+    const cooldown = factory.metadata.cooldown || 1.0;
     this.readyAt.set(factory, performance.now() / 1000 + cooldown);
   }
 
@@ -812,20 +843,16 @@ export class BasicWizard implements Contestant {
     if (p.x < -halfW) {
       p.x = -halfW;
       if (v.x < 0) v.x = 0;
-      this.desiredDir.x = Math.abs(this.desiredDir.x);
     } else if (p.x > halfW) {
       p.x = halfW;
       if (v.x > 0) v.x = 0;
-      this.desiredDir.x = -Math.abs(this.desiredDir.x);
     }
     if (p.z < -halfD) {
       p.z = -halfD;
       if (v.z < 0) v.z = 0;
-      this.desiredDir.z = Math.abs(this.desiredDir.z);
     } else if (p.z > halfD) {
       p.z = halfD;
       if (v.z > 0) v.z = 0;
-      this.desiredDir.z = -Math.abs(this.desiredDir.z);
     }
   }
 
@@ -854,17 +881,4 @@ export class BasicWizard implements Contestant {
     this.setState("dodging", dodgeDuration);
   }
 
-  private pickTarget(world: World): Contestant | null {
-    let best: Contestant | null = null;
-    let bestDist = Infinity;
-    for (const c of world.contestants) {
-      if (c === this || !c.alive) continue;
-      const d = c.position.distanceTo(this.body.position);
-      if (d < bestDist) {
-        bestDist = d;
-        best = c;
-      }
-    }
-    return best;
-  }
 }
