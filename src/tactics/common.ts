@@ -122,7 +122,11 @@ export class BaitAndSwitch implements Tactic {
     if (!ctx.enemy) return 0;
     const midRange = ctx.distToEnemy > 200 && ctx.distToEnemy < 380 ? 1 : 0.4;
     const staminaOk = ctx.stamina01 > 0.6 ? 1 : 0.5;
-    return 0.5 * midRange * staminaOk;
+    const staleness =
+      (performance.now() - this.observations.lastObservedAt) / 1000;
+    const opportunityBoost =
+      staleness < 0.5 && this.observations.enemyChargingRemaining > 0 ? 2.5 : 1;
+    return 0.5 * midRange * staminaOk * opportunityBoost;
   }
 
   directives(ctx: TacticContext): Directives {

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import type { Spell } from "./spell";
+import type { Spell, SpellMetadata } from "./spell";
 import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
 
@@ -7,11 +7,22 @@ const DURATION = 0.32;
 const START_RADIUS = 8;
 const PEAK_RADIUS = 38;
 
+const EXPLOSION_METADATA: SpellMetadata = {
+  id: "explosion",
+  kind: "instant",
+  element: "fire",
+  range: { min: 0, max: 0 },
+  chargeTime: 0,
+  cooldown: 0,
+  tags: ["fx", "internal"],
+};
+
 export class Explosion implements Spell {
   readonly mesh: THREE.Object3D;
   readonly position: THREE.Vector3;
   readonly velocity = new THREE.Vector3();
   readonly caster: Contestant;
+  readonly metadata = EXPLOSION_METADATA;
   dead = false;
   private age = 0;
   private readonly coreMat: THREE.MeshBasicMaterial;

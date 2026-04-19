@@ -1,4 +1,5 @@
 import type { Tactic, TacticContext, Directives } from "./tactic";
+import { byTag, inRange } from "../spells/selection";
 
 export class DuelistCharge implements Tactic {
   readonly id = "duelist";
@@ -11,12 +12,14 @@ export class DuelistCharge implements Tactic {
   }
   directives(): Directives {
     return {
-      preferredRange: 140,
-      rangeBand: 35,
+      preferredRange: 70,
+      rangeBand: 25,
       chargeEagerness: 1.4,
       dodgeEagerness: 0.7,
       circleDir: 0,
       ambushMode: false,
+      selectSpell: (book, ctx) =>
+        book.filter(byTag("melee")).find(inRange(ctx.distToTarget)) ?? null,
     };
   }
 }

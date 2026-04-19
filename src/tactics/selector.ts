@@ -1,4 +1,6 @@
 import type { Tactic, TacticContext, Directives, RosterEntry } from "./tactic";
+import type { Contestant } from "../contestants/contestant";
+import type { World } from "../world";
 
 const EVAL_INTERVAL = 1.0;
 const RANDOM_JITTER = 0.35;
@@ -36,6 +38,29 @@ export class TacticSelector {
       return this.current.liveDirectives(this.cachedDirectives, ctx);
     }
     return this.cachedDirectives;
+  }
+
+  updateDormantObservations(self: Contestant, world: World): void {
+    for (const entry of this.roster) {
+      const tactic = entry.tactic;
+      if (tactic === this.current) continue;
+      if (!tactic.detectors || !tactic.onObserve) continue;
+      const handlers = tactic.handlers ?? [];
+      for (const detector of tactic.detectors) {
+        const event = detector.detect(self, world);
+        if (!event) continue;
+        for (const handler of handlers) {
+          if (handler.eventId !== event.id) continue;
+          const produced = handler.handle(self, event);
+          for (const c of produced) {
+            if (c.type === "observe") {
+              tactic.onObserve(c.key, c.value);
+            }
+          }
+          if (handler.terminal) break;
+        }
+      }
+    }
   }
 
   update(dt: number, ctx: TacticContext): void {

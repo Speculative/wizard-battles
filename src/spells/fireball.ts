@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import type { Spell } from "./spell";
+import type { Spell, SpellFactory, SpellMetadata } from "./spell";
 import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
 import { Explosion } from "./explosion";
@@ -10,6 +10,28 @@ const SPEED = FIREBALL_SPEED;
 const RADIUS = 10;
 const DAMAGE = 10;
 const LIFETIME = 6;
+
+export const FIREBALL_METADATA: SpellMetadata = {
+  id: "fireball",
+  kind: "projectile",
+  element: "fire",
+  range: { min: 60, max: 600 },
+  chargeTime: 0.45,
+  cooldown: 1.4,
+  tags: ["ranged", "projectile"],
+};
+
+export const FireballFactory: SpellFactory = {
+  metadata: FIREBALL_METADATA,
+  create(caster, _target, aim) {
+    const origin = caster.position
+      .clone()
+      .add(
+        new THREE.Vector3(aim.x, 0, aim.z).normalize().multiplyScalar(caster.radius + 4)
+      );
+    return new Fireball(caster, aim, origin);
+  },
+};
 
 const TRAIL_COUNT = 7;
 const TRAIL_SAMPLE_INTERVAL = 0.025;
@@ -30,6 +52,7 @@ export class Fireball implements Spell {
   readonly position: THREE.Vector3;
   readonly caster: Contestant;
   readonly velocity: THREE.Vector3;
+  readonly metadata = FIREBALL_METADATA;
   frozen = false;
   private age = 0;
   dead = false;

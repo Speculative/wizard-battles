@@ -1,6 +1,7 @@
 import type { Contestant } from "../contestants/contestant";
 import type { EventDetector } from "../events/event";
 import type { Handler } from "../handlers/handler";
+import type { SpellSelector } from "../spells/selection";
 
 export interface TacticContext {
   self: Contestant;
@@ -18,6 +19,7 @@ export interface Directives {
   dodgeEagerness: number;
   circleDir: -1 | 0 | 1;
   ambushMode: boolean;
+  selectSpell?: SpellSelector;
 }
 
 export interface Tactic {

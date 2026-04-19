@@ -1,7 +1,17 @@
 import * as THREE from "three";
-import type { Spell } from "./spell";
+import type { Spell, SpellMetadata } from "./spell";
 import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
+
+const PARTICLE_BURST_METADATA: SpellMetadata = {
+  id: "particleBurst",
+  kind: "instant",
+  element: "fire",
+  range: { min: 0, max: 0 },
+  chargeTime: 0,
+  cooldown: 0,
+  tags: ["fx", "internal"],
+};
 
 const PARTICLE_COUNT = 28;
 const LIFETIME = 0.55;
@@ -44,6 +54,7 @@ export class ParticleBurst implements Spell {
   readonly position: THREE.Vector3;
   readonly velocity = new THREE.Vector3();
   readonly caster: Contestant;
+  readonly metadata = PARTICLE_BURST_METADATA;
   dead = false;
   private age = 0;
   private readonly positions: Float32Array;

@@ -1,7 +1,9 @@
 import * as THREE from "three";
 import type { Contestant } from "./contestant";
 import type { World } from "../world";
-import { Fireball, FIREBALL_SPEED } from "../spells/fireball";
+import { Fireball, FIREBALL_SPEED, FireballFactory } from "../spells/fireball";
+import type { Spell, SpellFactory } from "../spells/spell";
+import { defaultSelector } from "../spells/selection";
 import { getToonGradient, makeOutline } from "../materials";
 import { KinematicBody, type MovementStats } from "../kinematics";
 import { StatusDisplay } from "../statusDisplay";
@@ -123,6 +125,7 @@ export interface BasicWizardOptions {
   color: number;
   start: THREE.Vector3;
   roster: RosterEntry[];
+  spellbook?: SpellFactory[];
 }
 
 export class BasicWizard implements Contestant {
@@ -141,7 +144,9 @@ export class BasicWizard implements Contestant {
   private stamina = STAMINA_MAX;
   private cooldown = Math.random() * FIRE_COOLDOWN;
   private turnTimer = 0;
-  private chargedFireball: Fireball | null = null;
+  private readonly spellbook: SpellFactory[];
+  private chargedSpell: (Spell & { frozen: boolean }) | null = null;
+  private chargedFactory: SpellFactory | null = null;
   private chargeTarget: Contestant | null = null;
   private shotsFired = 0;
   private dodgeCooldown = 0;
@@ -194,6 +199,7 @@ export class BasicWizard implements Contestant {
 
   constructor(opts: BasicWizardOptions) {
     this.id = opts.id;
+    this.spellbook = opts.spellbook ?? [FireballFactory];
     this.body = new KinematicBody({ ...STATE_STATS.running }, opts.start);
     this.body.position.y = FLOAT_HEIGHT;
     const initialCtx: TacticContext = {
@@ -276,9 +282,10 @@ export class BasicWizard implements Contestant {
       this.mesh.visible = false;
       this.trail.visible = false;
       this.status.setVisible(false);
-      if (this.chargedFireball) {
-        this.chargedFireball.dead = true;
-        this.chargedFireball = null;
+      if (this.chargedSpell) {
+        this.chargedSpell.dead = true;
+        this.chargedSpell = null;
+        this.chargedFactory = null;
       }
       return;
     }
@@ -293,8 +300,11 @@ export class BasicWizard implements Contestant {
     }
 
     const nearest = this.pickTarget(world);
-    const distToTarget = nearest
+    const centerDist = nearest
       ? nearest.position.distanceTo(this.body.position)
+      : Infinity;
+    const distToTarget = nearest
+      ? Math.max(0, centerDist - this.radius - nearest.radius)
       : Infinity;
 
     const ctx: TacticContext = {
@@ -305,11 +315,12 @@ export class BasicWizard implements Contestant {
       hp01: this.hp / 100,
       shotsFired: this.shotsFired,
     };
+    this.tacticSelector.updateDormantObservations(this, world);
     this.tacticSelector.update(dt, ctx);
     this.directives = this.tacticSelector.effectiveDirectives(ctx);
 
     if (nearest) {
-      this.computeEngageIntent(nearest, distToTarget, world, this.desiredDir);
+      this.computeEngageIntent(nearest, centerDist, world, this.desiredDir);
     }
 
     this.projectileDetector.setEagerness(this.directives.dodgeEagerness);
@@ -369,7 +380,7 @@ export class BasicWizard implements Contestant {
     this.mesh.position.copy(this.body.position);
 
     this.updateTrail(dt);
-    this.updateCombat(dt, world, nearest);
+    this.updateCombat(dt, world, nearest, distToTarget);
     this.status.update(
       this.hp / 100,
       this.stamina / STAMINA_MAX,
@@ -391,10 +402,12 @@ export class BasicWizard implements Contestant {
         ? this.directives.circleDir
         : this.defaultCircleSign;
 
+    const preferredCenterRange =
+      this.directives.preferredRange + this.radius + target.radius;
     const rawIntent = circle(
       pos,
       { x: target.position.x, z: target.position.z },
-      this.directives.preferredRange,
+      preferredCenterRange,
       sign,
       this.directives.rangeBand
     );
@@ -651,17 +664,20 @@ export class BasicWizard implements Contestant {
   private updateCombat(
     dt: number,
     world: World,
-    nearest: Contestant | null
+    nearest: Contestant | null,
+    distToTarget: number
   ): void {
-    if (this.chargedFireball) {
+    if (this.chargedSpell) {
       const aim = this.chargeTarget
         ? this.chargeTarget.position.clone().sub(this.body.position).normalize()
         : this.desiredDir;
-      this.chargedFireball.setPosition(
-        this.body.position.x + aim.x * (this.radius + 6),
-        this.body.position.y + 8,
-        this.body.position.z + aim.z * (this.radius + 6)
-      );
+      if (this.chargedSpell instanceof Fireball) {
+        this.chargedSpell.setPosition(
+          this.body.position.x + aim.x * (this.radius + 6),
+          this.body.position.y + 8,
+          this.body.position.z + aim.z * (this.radius + 6)
+        );
+      }
       if (this.state !== "charging") {
         this.releaseCharge();
       }
@@ -672,28 +688,43 @@ export class BasicWizard implements Contestant {
     if (this.cooldown > 0 || !nearest) return;
     if (this.state === "sprinting" || this.state === "recovering") return;
 
+    const selector = this.directives.selectSpell ?? defaultSelector;
+    const factory = selector(this.spellbook, {
+      self: this,
+      target: nearest,
+      distToTarget,
+    });
+    if (!factory) return;
+
     this.chargeTarget = nearest;
-    const fb = new Fireball(this, new THREE.Vector3(1, 0, 0), this.body.position);
-    fb.frozen = true;
-    this.chargedFireball = fb;
-    world.addSpell(fb);
-    this.setState("charging", CHARGE_DURATION);
+    const aim = new THREE.Vector3(1, 0, 0);
+    const spell = factory.create(this, nearest, aim) as Spell & {
+      frozen: boolean;
+    };
+    spell.frozen = true;
+    this.chargedSpell = spell;
+    this.chargedFactory = factory;
+    world.addSpell(spell);
+    this.setState("charging", factory.metadata.chargeTime || CHARGE_DURATION);
   }
 
   private releaseCharge(): void {
-    const fb = this.chargedFireball;
+    const spell = this.chargedSpell;
+    const factory = this.chargedFactory;
     const target = this.chargeTarget;
-    if (!fb) return;
-    if (target) {
+    if (!spell || !factory) return;
+
+    if (spell instanceof Fireball && target) {
       const aim = this.computeAimDirection(target);
-      fb.setVelocityFromDirection(aim);
+      spell.setVelocityFromDirection(aim);
       this.shotsFired++;
     }
-    fb.frozen = false;
-    this.chargedFireball = null;
+    spell.frozen = false;
+    this.chargedSpell = null;
+    this.chargedFactory = null;
     this.chargeTarget = null;
     const eag = Math.max(0.1, this.directives.chargeEagerness);
-    this.cooldown = FIRE_COOLDOWN / eag;
+    this.cooldown = (factory.metadata.cooldown || FIRE_COOLDOWN) / eag;
   }
 
   private computeAimDirection(target: Contestant): THREE.Vector3 {
