@@ -2,10 +2,11 @@ import type { Contestant } from "../contestants/contestant";
 import type { SpellFactory } from "../spells/spell";
 import type { World } from "../world";
 import { type Vec2 } from "../steering";
-import type { PaceHint } from "./tactic";
+import type { CastController, PaceHint } from "./tactic";
 import { STATIONARY } from "./tactic";
 import type { SelectionContext } from "../spells/selection";
 import { ARENA } from "../config";
+import { ProjectileIncomingDetector } from "../events/projectileIncoming";
 
 export interface Candidate {
   pos: Vec2;
@@ -307,4 +308,146 @@ export function steerToward(self: Contestant, dest: Vec2): Vec2 {
   const len = Math.hypot(dx, dz);
   if (len < 8) return STATIONARY;
   return { x: dx / len, z: dz / len };
+}
+
+const sharedProjectileDetector = new ProjectileIncomingDetector();
+
+function scoreAwayFromEnemies(
+  candidates: Candidate[],
+  self: Contestant,
+  world: World,
+  weight = 0.8,
+  horizon = 400
+): Candidate[] {
+  return score(candidates, (c) => {
+    let best = 0;
+    for (const other of world.contestants) {
+      if (other === self || !other.alive) continue;
+      const d = Math.hypot(
+        c.pos.x - other.position.x,
+        c.pos.z - other.position.z
+      );
+      const gain = Math.min(1, d / horizon);
+      if (gain > best) best = gain;
+    }
+    return weight * best;
+  });
+}
+
+export interface SafeDestinationOptions {
+  distance: number;
+  directions: Vec2[];
+  projectileWeight?: number;
+  enemyWeight?: number;
+  wallWeight?: number;
+  centerWeight?: number;
+}
+
+export function pickSafeDirection(
+  self: Contestant,
+  world: World,
+  options: SafeDestinationOptions
+): Vec2 | null {
+  const {
+    distance,
+    directions,
+    projectileWeight = 1.5,
+    enemyWeight = 0.8,
+    wallWeight = 1.6,
+    centerWeight = 0.3,
+  } = options;
+  if (directions.length === 0) return null;
+  const candidates: Candidate[] = directions.map((d) => ({
+    pos: {
+      x: self.position.x + d.x * distance,
+      z: self.position.z + d.z * distance,
+    },
+    score: 0,
+  }));
+  let scored = scoreAwayFromProjectiles(
+    candidates,
+    self,
+    world,
+    projectileWeight,
+    220
+  );
+  scored = scoreAwayFromEnemies(scored, self, world, enemyWeight);
+  scored = scoreByWallClearance(scored, wallWeight, 140);
+  scored = scoreByArenaCenter(scored, centerWeight);
+  const best = pickBest(scored);
+  if (!best) return null;
+  const idx = scored.indexOf(best);
+  return directions[idx];
+}
+
+export function ringDirections(count: number, angleOffset = 0): Vec2[] {
+  const out: Vec2[] = [];
+  for (let i = 0; i < count; i++) {
+    const a = angleOffset + (i / count) * Math.PI * 2;
+    out.push({ x: Math.cos(a), z: Math.sin(a) });
+  }
+  return out;
+}
+
+export function arcDirections(
+  center: Vec2,
+  halfArcRadians: number,
+  count: number
+): Vec2[] {
+  const len = Math.hypot(center.x, center.z);
+  if (len < 1e-4) return ringDirections(count);
+  const cx = center.x / len;
+  const cz = center.z / len;
+  const baseAngle = Math.atan2(cz, cx);
+  const out: Vec2[] = [];
+  for (let i = 0; i < count; i++) {
+    const t = count === 1 ? 0 : (i / (count - 1)) * 2 - 1;
+    const a = baseAngle + t * halfArcRadians;
+    out.push({ x: Math.cos(a), z: Math.sin(a) });
+  }
+  return out;
+}
+
+export interface MobilityCandidate {
+  factory: SpellFactory;
+  distance: number;
+}
+
+export function findReadyMobility(
+  self: Contestant,
+  caster: CastController,
+  tagFilter: (f: SpellFactory) => boolean,
+  distanceOf: (f: SpellFactory) => number
+): MobilityCandidate | null {
+  for (const factory of spellbook(self)) {
+    if (!tagFilter(factory)) continue;
+    if (!caster.isReady(factory)) continue;
+    return { factory, distance: distanceOf(factory) };
+  }
+  return null;
+}
+
+export function hasIncomingProjectile(
+  self: Contestant,
+  world: World
+): boolean {
+  return sharedProjectileDetector.detect(self, world) !== null;
+}
+
+export function tryMobilityAway(
+  self: Contestant,
+  world: World,
+  caster: CastController,
+  tagFilter: (f: SpellFactory) => boolean,
+  distanceOf: (f: SpellFactory) => number
+): boolean {
+  if (caster.isCharging()) return false;
+  const mobility = findReadyMobility(self, caster, tagFilter, distanceOf);
+  if (!mobility) return false;
+  const aim = pickSafeDirection(self, world, {
+    distance: mobility.distance,
+    directions: ringDirections(16),
+  });
+  if (!aim) return false;
+  return caster.requestCast(mobility.factory, null, aim);
 }

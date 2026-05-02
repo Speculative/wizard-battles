@@ -8,7 +8,7 @@ export type Change =
 
 export interface ForceMovementStateChange {
   type: "forceMovementState";
-  state: "dodging";
+  state: "dashing";
   direction: THREE.Vector3;
   priority: HandlerTier;
 }

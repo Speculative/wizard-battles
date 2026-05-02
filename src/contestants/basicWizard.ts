@@ -19,11 +19,12 @@ import { ProjectileIncomingDetector } from "../events/projectileIncoming";
 import type { EventDetector } from "../events/event";
 import type { Handler } from "../handlers/handler";
 import { LateralDodgeHandler } from "../handlers/lateralDodge";
+import { InterruptOnProjectileHandler } from "../handlers/interruptOnProjectile";
 import { LowHPCrossedDetector } from "../events/lowHPCrossed";
 import { InterruptOnLowHPHandler } from "../handlers/interruptOnLowHP";
 import { runPipeline } from "../handlers/pipeline";
 import type { ComponentKey } from "../components";
-import { Charging, Dodging, Recovering } from "../components";
+import { Charging, Dashing, Recovering } from "../components";
 
 function gaussian(): number {
   const u = 1 - Math.random();
@@ -45,13 +46,13 @@ const STAMINA_REGEN = 0.6;
 const SPRINT_MIN_STAMINA_TO_START = 0.8;
 const RECOVERY_DURATION = 1.2;
 
-const DODGE_DURATION_MAX = 0.22;
-const DODGE_DURATION_MIN = 0.08;
-const DODGE_IMPULSE_SPEED = 320;
-const DODGE_STAMINA_COST = 1.2;
-const DODGE_MIN_STAMINA = 0.6;
-const DODGE_COOLDOWN = 1.2;
-const DODGE_RECOVERY_DURATION = 0.35;
+const DASH_DURATION_MAX = 0.22;
+const DASH_DURATION_MIN = 0.08;
+const DASH_IMPULSE_SPEED = 320;
+const DASH_STAMINA_COST = 1.2;
+const DASH_MIN_STAMINA = 0.6;
+const DASH_COOLDOWN = 1.2;
+const DASH_RECOVERY_DURATION = 0.35;
 
 const TRAIL_SAMPLE_INTERVAL = 0.03;
 const TRAIL_MAX_SAMPLES = 10;
@@ -67,7 +68,7 @@ type MovementState =
   | "walking"
   | "running"
   | "sprinting"
-  | "dodging"
+  | "dashing"
   | "charging"
   | "recovering";
 
@@ -91,7 +92,7 @@ const STATE_STATS: Record<MovementState, MovementStats> = {
     friction: 250,
     turnRate: Math.PI * 0.7,
   },
-  dodging: {
+  dashing: {
     maxSpeed: 340,
     acceleration: 2000,
     friction: 600,
@@ -170,8 +171,8 @@ export class BasicWizard implements Contestant {
   private chargedFactory: SpellFactory | null = null;
   private chargeTarget: Contestant | null = null;
   private shotsFired = 0;
-  private dodgeCooldown = 0;
-  private readonly dodgeDir = new THREE.Vector3();
+  private dashCooldown = 0;
+  private readonly dashDir = new THREE.Vector3();
   private readonly projectileDetector = new ProjectileIncomingDetector();
   private readonly lowHPDetector = new LowHPCrossedDetector(0.4);
   private readonly detectors: EventDetector[] = [
@@ -181,6 +182,7 @@ export class BasicWizard implements Contestant {
   private readonly handlers: Handler[] = [
     new LateralDodgeHandler(),
     new InterruptOnLowHPHandler(),
+    new InterruptOnProjectileHandler(),
   ];
   private readonly components = new Map<string, unknown>();
   private readonly castController: WizardCastController;
@@ -322,7 +324,7 @@ export class BasicWizard implements Contestant {
     }
 
     this._cachedWorldForCast = world;
-    this.dodgeCooldown = Math.max(0, this.dodgeCooldown - dt);
+    this.dashCooldown = Math.max(0, this.dashCooldown - dt);
 
     this.turnTimer -= dt;
     if (this.turnTimer <= 0) {
@@ -350,24 +352,25 @@ export class BasicWizard implements Contestant {
 
     let interruptReason: string | null = null;
     for (const c of changes) {
-      if (c.type === "forceMovementState" && c.state === "dodging") {
-        const policy = activeTactic.dodgePolicy?.() ?? "always";
+      if (c.type === "interrupt") interruptReason = c.reason;
+    }
+    if (interruptReason !== null) {
+      this.tacticSelector.forceRescore(this, world, interruptReason);
+      activeTactic = this.tacticSelector.currentTactic;
+    }
+    for (const c of changes) {
+      if (c.type === "forceMovementState" && c.state === "dashing") {
+        const policy = activeTactic.dodgePolicy?.(this, world) ?? "always";
         if (policy === "never") {
           console.log(
             `${this.id} ${activeTactic.id} policy blocked dodge`
           );
         } else {
-          this.tryEnterDodge(c.direction);
+          this.tryEnterDash(c.direction);
         }
       } else if (c.type === "observe") {
         activeTactic.onObserve?.(c.key, c.value);
-      } else if (c.type === "interrupt") {
-        interruptReason = c.reason;
       }
-    }
-    if (interruptReason !== null) {
-      this.tacticSelector.forceRescore(this, world, interruptReason);
-      activeTactic = this.tacticSelector.currentTactic;
     }
 
     const yieldReason = activeTactic.shouldYield?.(this, world) ?? null;
@@ -383,8 +386,8 @@ export class BasicWizard implements Contestant {
 
     this.updateState(dt, output.paceHint);
 
-    const isDodging = this.state === "dodging";
-    const moveVec = this.resolveMoveVector(world, isDodging);
+    const isDashing = this.state === "dashing";
+    const moveVec = this.resolveMoveVector(world, isDashing);
 
     let facingIntent3 = this.resolveFacingVector();
     if (this.state === "sprinting") {
@@ -398,7 +401,7 @@ export class BasicWizard implements Contestant {
     this.updateFacing(dt, facingIntent3);
 
     const baseMaxSpeed = this.body.stats.maxSpeed;
-    if (!isDodging && this.state !== "sprinting") {
+    if (!isDashing && this.state !== "sprinting") {
       this.body.stats.maxSpeed = baseMaxSpeed * this.strafeScale(moveVec);
     }
 
@@ -455,8 +458,8 @@ export class BasicWizard implements Contestant {
     return false;
   }
 
-  private resolveMoveVector(world: World, isDodging: boolean): THREE.Vector3 {
-    if (isDodging) return this.dodgeDir;
+  private resolveMoveVector(world: World, isDashing: boolean): THREE.Vector3 {
+    if (isDashing) return this.dashDir;
     let intent = this.currentMoveIntent;
     if (isStationary(intent) && !this.hasLivingEnemy(world)) {
       intent = { x: this.wanderDir.x, z: this.wanderDir.z };
@@ -544,7 +547,7 @@ export class BasicWizard implements Contestant {
   }
 
   private updateTrail(dt: number): void {
-    const sampling = this.state === "sprinting" || this.state === "dodging";
+    const sampling = this.state === "sprinting" || this.state === "dashing";
     if (sampling !== this.trailSampling) {
       this.trailCount = 0;
       this.trailSampleTimer = 0;
@@ -625,12 +628,12 @@ export class BasicWizard implements Contestant {
       if (this.stateTimer <= 0) this.setState("running");
       return;
     }
-    if (this.state === "dodging") {
+    if (this.state === "dashing") {
       this.stateTimer -= dt;
-      const d = this.getComponent(Dodging);
+      const d = this.getComponent(Dashing);
       if (d) d.remaining = this.stateTimer;
       if (this.stateTimer <= 0) {
-        this.setState("recovering", DODGE_RECOVERY_DURATION);
+        this.setState("recovering", DASH_RECOVERY_DURATION);
       }
       return;
     }
@@ -676,7 +679,7 @@ export class BasicWizard implements Contestant {
     if (stateDuration > 0) this.stateTimer = stateDuration;
 
     if (prev === "charging") this.removeComponent(Charging);
-    if (prev === "dodging") this.removeComponent(Dodging);
+    if (prev === "dashing") this.removeComponent(Dashing);
     if (prev === "recovering") this.removeComponent(Recovering);
 
     if (next === "charging") {
@@ -685,8 +688,8 @@ export class BasicWizard implements Contestant {
         remaining: stateDuration > 0 ? stateDuration : CHARGE_DURATION,
         totalDuration: stateDuration > 0 ? stateDuration : CHARGE_DURATION,
       });
-    } else if (next === "dodging") {
-      this.addComponent(Dodging, { remaining: stateDuration });
+    } else if (next === "dashing") {
+      this.addComponent(Dashing, { remaining: stateDuration });
     } else if (next === "recovering") {
       this.addComponent(Recovering, { remaining: stateDuration });
     }
@@ -718,7 +721,7 @@ export class BasicWizard implements Contestant {
     if (
       this.state === "sprinting" ||
       this.state === "recovering" ||
-      this.state === "dodging" ||
+      this.state === "dashing" ||
       this.state === "charging"
     )
       return false;
@@ -851,29 +854,29 @@ export class BasicWizard implements Contestant {
     }
   }
 
-  private tryEnterDodge(direction: THREE.Vector3): void {
+  private tryEnterDash(direction: THREE.Vector3): void {
     if (
-      this.state === "dodging" ||
+      this.state === "dashing" ||
       this.state === "recovering" ||
       this.state === "charging"
     )
       return;
-    if (this.dodgeCooldown > 0) return;
-    if (this.stamina < DODGE_MIN_STAMINA) return;
+    if (this.dashCooldown > 0) return;
+    if (this.stamina < DASH_MIN_STAMINA) return;
 
-    this.dodgeDir.copy(direction);
-    this.body.velocity.x = this.dodgeDir.x * DODGE_IMPULSE_SPEED;
-    this.body.velocity.z = this.dodgeDir.z * DODGE_IMPULSE_SPEED;
-    const staminaFrac = Math.min(1, this.stamina / DODGE_STAMINA_COST);
+    this.dashDir.copy(direction);
+    this.body.velocity.x = this.dashDir.x * DASH_IMPULSE_SPEED;
+    this.body.velocity.z = this.dashDir.z * DASH_IMPULSE_SPEED;
+    const staminaFrac = Math.min(1, this.stamina / DASH_STAMINA_COST);
     this.stamina = Math.max(
       0,
-      this.stamina - DODGE_STAMINA_COST * staminaFrac
+      this.stamina - DASH_STAMINA_COST * staminaFrac
     );
-    this.dodgeCooldown = DODGE_COOLDOWN;
-    const dodgeDuration =
-      DODGE_DURATION_MIN +
-      (DODGE_DURATION_MAX - DODGE_DURATION_MIN) * staminaFrac;
-    this.setState("dodging", dodgeDuration);
+    this.dashCooldown = DASH_COOLDOWN;
+    const dashDuration =
+      DASH_DURATION_MIN +
+      (DASH_DURATION_MAX - DASH_DURATION_MIN) * staminaFrac;
+    this.setState("dashing", dashDuration);
   }
 
 }

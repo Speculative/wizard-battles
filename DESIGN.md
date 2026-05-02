@@ -22,20 +22,21 @@ The central design principle is **legibility over optimality** — the fights sh
 - **[src/kinematics.ts](src/kinematics.ts)** — `KinematicBody` class: position, velocity, intent; integrates acceleration toward intent with turn-rate cap, friction when idle, max-speed clamp.
 - **[src/statusDisplay.ts](src/statusDisplay.ts)** — HP + stamina bars billboarded to the camera, rendered above each contestant.
 - **[src/materials.ts](src/materials.ts)** — shared toon gradient map; inverted-hull outline helper.
-- **[src/steering.ts](src/steering.ts)** — pure-function steering primitives (`seek`, `flee`, `arrive`, `pursue`, `evade`, `circle`, `wallRepulsion`) returning `Vec2` desired-velocities, plus `sampleBestDirection` which scores 16 directions around an intent and picks the best accounting for wall clearance.
-- **[src/tactics/](src/tactics/)** — AI tactic layer. `tactic.ts` defines the `Tactic` interface, `TacticOutput`, `CastController`, `PaceHint`, `STATIONARY`, `RosterEntry`. `native.ts` implements the eleven concrete tactics (Pressure, Kite, Orbit, Ambush, Retreat, BaitAndSwitch, DuelistCharge, AntiMageZone, Sniper, Turtle, Scrapper). `helpers.ts` provides shared building blocks for tactics (nearest-enemy lookup, orbit / close-to movement primitives, facing, pace mapping, wizard accessors, and a default cast-request path). `selector.ts` scores a roster each second with random jitter and commits to the winner for its minimum dwell, logs phase transitions via each tactic's optional `currentPhaseId()`, and exposes `forceRescore(self, world, reason)` for interrupt-driven same-frame rescoring (used by both pipeline-emitted `interrupt` Changes and tactic-authored `shouldYield` returns).
-- **[src/components.ts](src/components.ts)** — component registry (ECS-style but only the component part). `ComponentKey<T>` is a typed key with a string id. Current keys: `Charging`, `Dodging`, `Recovering`. Contestants attach/remove components as their state changes; any system can query `contestant.getComponent(Key)` without knowing the contestant's concrete type.
+- **[src/steering.ts](src/steering.ts)** — pure-function steering primitives (`seek`, `flee`, `arrive`, `pursue`, `evade`, `circle`, `wallRepulsion`, `sampleBestDirection`) returning `Vec2` desired-velocities. The wizard no longer applies any of these directly; tactics compose them and the candidate-scoring helpers in [src/tactics/helpers.ts](src/tactics/helpers.ts).
+- **[src/tactics/](src/tactics/)** — AI tactic layer. `tactic.ts` defines the `Tactic` interface, `TacticOutput`, `CastController`, `PaceHint`, `DodgePolicy`, `STATIONARY`, `RosterEntry`. `native.ts` implements the concrete tactics (Pressure, Kite, Orbit, Ambush, Retreat, BaitAndSwitch, DuelistCharge, CloseQuarters, AntiMageZone, Sniper, Turtle, Scrapper, AvoidIncoming). `helpers.ts` provides shared building blocks for tactics: world queries (`nearestEnemy`, `surfaceDistance`), wizard accessors, the candidate-scoring toolkit (`sampleRing`, `sampleRingAroundEnemy`, `pickSafeDirection`, `ringDirections`, `arcDirections`, `scoreByWallClearance`, `scoreByArenaCenter`, `scoreByReachability`, `scoreByRangeMatch`, `scoreByAngularPreference`, `scoreAwayFromProjectiles`, `pickBest`, `steerToward`), incoming-threat checks (`hasIncomingProjectile`), a generic mobility-spell helper (`tryMobilityAway`), and the default cast-request path (`tryDefaultCast`). `selector.ts` scores a roster each second with random jitter and commits to the winner for its minimum dwell, logs phase transitions via each tactic's optional `currentPhaseId()`, and exposes `forceRescore(self, world, reason)` for interrupt-driven same-frame rescoring (used by both pipeline-emitted `interrupt` Changes and tactic-authored `shouldYield` returns).
+- **[src/components.ts](src/components.ts)** — component registry (ECS-style but only the component part). `ComponentKey<T>` is a typed key with a string id. Current keys: `Charging`, `Dashing`, `Recovering`. Contestants attach/remove components as their state changes; any system can query `contestant.getComponent(Key)` without knowing the contestant's concrete type.
 - **[src/events/](src/events/)** — event detection layer. `event.ts` defines `GameEvent<P>` and `EventDetector<P>`. `projectileIncoming.ts` detects threatening spells on a collision-course. `opponentCharging.ts` detects any contestant with the `Charging` component — uses component query instead of contestant-type-specific inspection. `lowHPCrossed.ts` is edge-triggered when the wizard's HP falls below a threshold (default 40%); rearms when HP rises back above.
-- **[src/handlers/](src/handlers/)** — reactive handler layer. `change.ts` declares the `Change` discriminated union (`forceMovementState`, `observe`, `interrupt`, `noop`) and the `HandlerTier` enum (`reflexive` > `tactical` > `observational`). `handler.ts` defines the `Handler<P>` interface (event id binding + tier + terminal flag). `lateralDodge.ts` is a reflexive terminal handler that emits a `forceMovementState: dodging`. `suppressDodge.ts` is a reflexive terminal handler that emits no Change — tactics bind it to preempt `lateralDodge` and keep commitment. `noteOpponentCharging.ts` is an observational non-terminal handler that emits an observe Change so the active tactic can react. `interruptOnLowHP.ts` is a reflexive terminal handler that emits an `interrupt` Change, forcing the tactic selector to rescore. `pipeline.ts` runs detectors, dispatches events to handlers in tier order (stable sort preserves registration order within a tier, so tactic-first handler lists get tactic precedence for free), stops a chain at the first terminal handler.
+- **[src/handlers/](src/handlers/)** — reactive handler layer. `change.ts` declares the `Change` discriminated union (`forceMovementState`, `observe`, `interrupt`, `noop`) and the `HandlerTier` enum (`reflexive` > `tactical` > `observational`). `handler.ts` defines the `Handler<P>` interface (event id binding + tier + terminal flag); handlers receive `(self, event, world)` so they can score against world state. `lateralDodge.ts` is a reflexive terminal handler that picks a dodge direction by scoring an arc of candidates around the perpendicular-away vector via `pickSafeDirection`, then emits a `forceMovementState: dashing`. `noteOpponentCharging.ts` is an observational non-terminal handler that emits an observe Change so the active tactic can react. `interruptOnLowHP.ts` is a reflexive terminal handler that emits an `interrupt` Change. `interruptOnProjectile.ts` is a reflexive non-terminal handler that emits an `interrupt` Change ahead of the dodge handler, letting the active tactic rescore on the same frame the projectile arrives. `pipeline.ts` runs detectors, dispatches events to handlers in tier order (stable sort preserves registration order within a tier, so tactic-first handler lists get tactic precedence for free), stops a chain at the first terminal handler.
 - **[src/contestants/contestant.ts](src/contestants/contestant.ts)** — `Contestant` interface (mesh, position, velocity, facing, radius, hp, alive, update, plus `getComponent/addComponent/removeComponent`).
-- **[src/contestants/basicWizard.ts](src/contestants/basicWizard.ts)** — first concrete contestant. Holds a kinematic body, a state machine (see below), stamina, a `TacticSelector`, a `spellbook: SpellFactory[]`, facing with strafe tax, committed lateral dodges (triggered via the event/handler pipeline), charged spell casts with predictive aiming, status display, speed trail. Each frame: selector picks the active tactic, pipeline runs reactive detectors/handlers, the active tactic's `update(dt, self, world)` returns a `TacticOutput` (move intent + pace hint + facing intent), the wizard applies wall-avoidance sampling to the move intent and the 75° sprint-facing cone to the facing intent, the state machine transitions based on the pace hint and stamina, and finally `tactic.maybeCast(dt, self, world, castController)` is called so the tactic can start a new cast through a `CastController`. The controller enforces cast legality (not sprinting / dodging / charging, cooldown respected, spell ready). Movement-state transitions install/remove components (`Charging`, `Dodging`, `Recovering`). When no enemy is alive, the wizard falls back to a slow random wander.
+- **[src/contestants/basicWizard.ts](src/contestants/basicWizard.ts)** — first concrete contestant. Holds a kinematic body, a state machine (see below), stamina, a `TacticSelector`, a `spellbook: SpellFactory[]`, facing with strafe tax, committed lateral dashes (triggered via the event/handler pipeline), charged spell casts with predictive aiming, status display, speed trail. Each frame: selector picks the active tactic, pipeline runs reactive detectors/handlers, interrupts are processed first (forcing a same-frame rescore if any), then `forceMovementState` Changes are realized (subject to the active tactic's `dodgePolicy`), then the active tactic's `update(dt, self, world)` returns a `TacticOutput` (move intent + pace hint + facing intent). The wizard applies the 75° sprint-facing cone to facing while sprinting, the state machine transitions based on the pace hint and stamina, and finally `tactic.maybeCast(dt, self, world, castController)` is called so the tactic can start a new cast through a `CastController`. The controller enforces cast legality (not sprinting / dashing / charging, cooldown respected, spell ready). Movement-state transitions install/remove components (`Charging`, `Dashing`, `Recovering`). When no enemy is alive, the wizard falls back to a slow random wander.
 - **[src/spells/spell.ts](src/spells/spell.ts)** — `Spell` interface (mesh, position, velocity, caster, metadata, dead, update). `SpellMetadata` carries id, kind (projectile/instant/zone/buff), element, range {min,max} (surface-to-surface), chargeTime, cooldown, and tags. `SpellFactory` pairs metadata with a `create(caster, target, aim)` constructor — the unit of selection.
 - **[src/spells/selection.ts](src/spells/selection.ts)** — selection library. Predicates (`byTag`, `byAnyTag`, `byAllTags`, `byKind`, `byElement`, `inRange`) + comparators (`preferLongestRange`, `preferShortestCooldown`, `preferShortestCharge`) + `defaultSelector`. Tactics compose these into their own `SpellSelector` function. No fixed preference fields — selection is code, not configuration.
 - **[src/spells/fireball.ts](src/spells/fireball.ts)** — four-layer fiery projectile with sphere-node trail. Supports `frozen` mode during caster's charge window; `setPosition` for caster-relative positioning during charge; `setVelocityFromDirection` on release. Spawns an `Explosion` and a `ParticleBurst` on impact. Exports `FireballFactory`.
 - **[src/spells/meleeAttack.ts](src/spells/meleeAttack.ts)** — self-spell with a glowing cone-arc mesh. Locks caster position during the charge window (existing `charging` state); during the released phase, lunges the caster mesh forward ~18u then back (visual only, no kinematic movement). Hit check is a ±60° cone up to 54u surface-to-surface reach during a short window in the middle of the swing. Exports `MeleeFactory`.
 - **[src/spells/projectileSlowField.ts](src/spells/projectileSlowField.ts)** — zone spell that drops a translucent blue dome at the caster's position. 130u radius, 4s duration, 6s cooldown. Iterates projectiles each tick, scales their velocity to 25% of baseSpeed while inside the dome and restores on exit. First cross-spell interaction. Exports `ProjectileSlowFieldFactory`.
+- **[src/spells/blink.ts](src/spells/blink.ts)** — instant self-spell that teleports the caster up to 180u in an aim direction, clamped by arena bounds. Tags `["blink", "mobility", "self"]`. 0.08s charge, 5s cooldown. Spawns two cool-blue particle bursts (depart at origin, arrive at destination). Exports `BlinkFactory`.
 - **[src/spells/explosion.ts](src/spells/explosion.ts)** — short-lived expanding-sphere visual effect. Pure cosmetic; no damage.
-- **[src/spells/particleBurst.ts](src/spells/particleBurst.ts)** — `THREE.Points`-based particle system (single draw call). Soft circular texture built once via canvas, shared across bursts.
+- **[src/spells/particleBurst.ts](src/spells/particleBurst.ts)** — `THREE.Points`-based particle system (single draw call). Soft circular texture built once via canvas per palette, cached and shared across bursts. Default palette is fire-orange (used by fireball impacts); blink supplies a cool-blue/purple palette.
 - **[src/config.ts](src/config.ts)** — arena and camera constants.
 
 ## Rendering notes
@@ -81,9 +82,9 @@ Deferred from the original parameter list: `mass` (for knockback), `max_air_spee
 - **walking** — nimble, low speed (when close to target)
 - **running** — default cruise
 - **sprinting** — high speed, low turn rate; drains stamina; used to close big distances
-- **dodging** — short burst (0.08–0.22s scaled by stamina), fixed direction, very high acceleration; initiated by incoming projectile. See "Dodges" below.
+- **dashing** — short burst (0.08–0.22s scaled by stamina), fixed direction, very high acceleration. The neutral *mechanism*: a quick committed impulse. Today it's used reactively for projectile dodges; offensive uses (slip past an enemy mid-strike) sit on the same machinery. See "Dodges and dashes" below.
 - **charging** — locked to caster, reduced mobility while a spell winds up
-- **recovering** — near-motionless; entered after sprint exhaustion or dodge landing. Essential tail on committed actions.
+- **recovering** — near-motionless; entered after sprint exhaustion or dash landing. Essential tail on committed actions.
 
 Grounded / airborne split deferred until jumps land.
 
@@ -93,14 +94,16 @@ Facing is a *contestant* concern, not a physics concern — a wizard can be stra
 
 - `BasicWizard.facing` rotates toward an intent-vector-of-attention: charge target (if charging) > nearest enemy > current move direction.
 - Move speed is scaled by the dot product of facing and movement direction: 100% forward, ~60% sideways, ~40% backward. Strafing has a legible cost.
-- **Commitment exception:** during sprint and dodge, facing aligns to move direction and the strafe tax is bypassed. These are full-commit actions; "look where you're going" reads right.
+- **Commitment exception:** during sprint and dash, facing aligns to move direction and the strafe tax is bypassed. These are full-commit actions; "look where you're going" reads right.
 - Visible facing indicator: a small dark cone protruding from each wizard's sphere.
 
-### Dodges
+### Dodges and dashes
 
-Committed lateral bursts, not sprints. Triggered when an enemy projectile is inside sense radius AND roughly heading at the wizard AND its predicted closest-approach (current velocities, linear extrapolation) falls inside `radius + safety_margin`. Dodge direction is perpendicular to projectile velocity, on whichever side the wizard is already on.
+The *dash* is a movement-state mechanism — a committed lateral burst with high acceleration, fixed direction, brief duration, and a recovery tail. It's not specifically a dodge; offensive uses (e.g. slip past an enemy during their cast) sit on the same machinery.
 
-Costs stamina proportional to duration used; has a cooldown + minimum stamina to start. Ends in `recovering` (brief motionless tail) so dodges are real commits, not free reactions.
+The *dodge* is a reactive use of the dash, triggered by `LateralDodgeHandler` (reflexive terminal) when an enemy projectile is inside sense radius AND roughly heading at the wizard AND its predicted closest-approach falls inside `radius + safety_margin`. The handler picks a direction by scoring an arc of candidates around the perpendicular-away vector via `pickSafeDirection` (factors: distance from projectile trajectory, distance from enemies, wall clearance, arena-center bias). It emits a `forceMovementState: dashing` Change which the wizard's state machine realizes — but only if the active tactic's `dodgePolicy(self, world)` returns `"always"`. Tactics that need to commit (DuelistCharge, AntiMageZone in cast/rush phases, AvoidIncoming when a mobility spell is ready) return `"never"` and the dodge is logged-and-blocked.
+
+Costs stamina proportional to duration used; has a cooldown + minimum stamina to start. Ends in `recovering` (brief motionless tail) so dashes are real commits, not free reactions.
 
 ### Endurance: stamina only (for now)
 
@@ -157,31 +160,32 @@ Utility AI + steering behaviors, organized as three timescales:
 
 We have a simplified two-tier slice of the above: **tactic layer → control layer**, no distinct action layer yet. **Tactics are plans** — state machines that expose `update(dt, self, world) → TacticOutput` (move intent + pace hint + facing intent) and `maybeCast(dt, self, world, castController)` for cast requests. Each tactic owns its internal state (phase, observation buffers, timers). There is no `Directives` record and no per-frame parameter bundle: the output is the actor's movement and facing for that frame.
 
-Eleven tactics are implemented in [src/tactics/native.ts](src/tactics/native.ts). Simple ones (Pressure, Kite, Orbit, Ambush, Retreat, Sniper, Turtle) orbit at a preferred range via the `orbit` helper, emitting a pace hint computed from the range gap. Stateful ones step through explicit phases:
-- **DuelistCharge** — `close` (sprint toward enemy) → `strike` (walk in melee reach, request melee cast). Transitions on surface distance crossing 50.
-- **AntiMageZone** — `approach` (orbit at mid-range) → `cast` (stationary, request zone cast) → `rush` (sprint onto enemy for 4s after casting). Phase is computed each frame from `lastCastAt`, distance, and whether the zone spell is ready.
+Thirteen tactics are implemented in [src/tactics/native.ts](src/tactics/native.ts). Simple orbit-at-range tactics (Pressure, Kite, Orbit, Ambush, Retreat, Sniper, Turtle, BaitAndSwitch, Scrapper) sample a ring of candidate positions around the enemy, score them with the candidate-scoring toolkit, pick the best, and steer toward it. Stateful ones step through explicit phases:
+- **DuelistCharge** — single-purpose approach tactic: sprint toward enemy with sampling-based approach-angle scoring (dodges projectiles, avoids walls), `shouldYield`s `"arrived"` once within ~55u surface distance so CloseQuarters takes over.
+- **CloseQuarters** — close-range fighting tactic (~35u surface, walking, melee on cooldown). Default dodge policy (allows reactive dash). Yields if the enemy slips beyond ~150u.
+- **AntiMageZone** — `approach` (orbit at mid-range) → `cast` (stationary, request zone cast) → `rush` (sprint onto enemy for 4s after casting; yields when within melee range so CloseQuarters takes over). `dodgePolicy` is `"always"` during approach, `"never"` during cast/rush.
 - **BaitAndSwitch** — direction-flipping kite with an `OpponentCharging` observation; scores higher while an enemy is winding up a cast.
 - **Scrapper** — timer-driven circle-flip and range-reroll to look chaotic.
+- **AvoidIncoming** — fires whenever a threatening projectile is detected. Tag-driven and parameterizable: queries the spellbook for any ready spell matching `["blink", "teleport"]` (or whatever tags the constructor receives). Conditional `dodgePolicy`: `"never"` when a mobility spell is ready (so the spell fires instead of a dash), `"always"` otherwise (so the common `LateralDodgeHandler`'s dash still saves you). `update` emits a sprint along a `pickSafeDirection` away vector as a fallback for when neither blink nor dash fires.
 
 A `TacticSelector` scores the active wizard's roster every second, applies random jitter, and commits to the winner for its minimum dwell. Dormant-tactic detectors run too (stage 4), so tactics can build up observations while not yet active and use them in scoring to earn selection. When a tactic's `currentPhaseId()` changes between frames, the selector logs the transition.
+
+**Position planning lives in tactics, not the wizard.** Each frame, tactics that care sample a set of candidate positions and score them with composable factors: `scoreByRangeMatch` (preferred distance to enemy), `scoreByAngularPreference` (orbit direction, decayed when far from range so wizards don't spiral while approaching), `scoreByReachability` (prefer nearby), `scoreByWallClearance` (cubic penalty within wallHorizon), `scoreByArenaCenter` (mild center pull — fixes the old center-drift problem), `scoreAwayFromProjectiles` (avoid projectile lines). The chosen position becomes a steering target via `steerToward`. Tactics that don't compose these get exactly the behavior they ask for — no implicit wall avoidance from the wizard. The same toolkit is used for picking dash/blink directions in handlers.
 
 Movement pace is driven entirely by tactics via `PaceHint` (`"walk" | "run" | "sprint" | "hold"`). The wizard's state machine interprets the hint with stamina as a gate — `"sprint"` requires stamina to enter, drains it while active. `"hold"` defaults to running. Distance-based pace heuristics in the wizard are gone.
 
 Facing is driven by tactics too. The `facingIntent` vector in `TacticOutput` becomes the turn target; `STATIONARY` means "hold current facing." The sprint-facing cone (75°) still clamps the facing while sprinting — a physics invariant, not a tactic choice.
 
-**Cast legality is the controller's job, not the tactic's.** Tactics call `castController.requestCast(factory, target, aim)`; the controller rejects if the wizard is sprinting / dodging / charging / dead, or if the spell is on cooldown. Tactics are free to try; the world is consistent by construction.
+**Cast legality is the controller's job, not the tactic's.** Tactics call `castController.requestCast(factory, target, aim)`; the controller rejects if the wizard is sprinting / dashing / charging / dead, or if the spell is on cooldown. Tactics are free to try; the world is consistent by construction.
 
 Reactive behaviors flow through an **event/handler pipeline** (see "Events and handlers" below). Detectors observe the world, handlers decide reactions, Changes feed back to the wizard and the active tactic. Dodge uses it (common detector + terminal handler); BaitAndSwitch demonstrates a tactic-owned detector + observational handler that mutates tactic state via an `onObserve` callback.
 
-Spells are represented as `SpellFactory` entries in a wizard's spellbook, each carrying `SpellMetadata` (range, kind, element, cooldown, tags, etc.). Tactics express spell choice as *code* inside `maybeCast`, composing filter predicates and comparators from [src/spells/selection.ts](src/spells/selection.ts) (e.g. DuelistCharge: `book.filter(byTag("melee")).filter(byReady(ctx)).find(inRange(dist))`). Tactics that don't care use a shared `tryDefaultCast` helper that fires the first ready in-range spell. Three spells exist today: `Fireball`, `MeleeAttack`, `ProjectileSlowField`.
+Spells are represented as `SpellFactory` entries in a wizard's spellbook, each carrying `SpellMetadata` (range, kind, element, cooldown, tags, etc.). Tactics express spell choice as *code* inside `maybeCast`, composing filter predicates and comparators from [src/spells/selection.ts](src/spells/selection.ts) (e.g. DuelistCharge: `book.filter(byTag("melee")).filter(byReady(ctx)).find(inRange(dist))`). Tactics that don't care use a shared `tryDefaultCast` helper that fires the first ready in-range spell. Tactics framed around mobility-as-tool (e.g. AvoidIncoming) use `tryMobilityAway` with a tag filter, so any spell tagged `"blink"` / `"teleport"` / etc. is automatically considered. Four spells exist today: `Fireball`, `MeleeAttack`, `ProjectileSlowField`, `Blink`.
 
 What's *not* yet present from the full spec:
 - Action layer (discrete named actions with their own commitment windows)
-- Position reasoning (tactics emit scalar preferredRange, not candidate destinations — see Navigation's center-drift note)
 - Personality vectors (each wizard's tactic-roster biases stand in for this for now)
 - Any learning / habit formation / opponent modeling
-
-**Architectural note — dodge as a first-class plan element.** Dodge currently lives outside tactics as a reflexive reaction (common `LateralDodge` handler on `ProjectileIncoming`). Tactics that want to commit (DuelistCharge, AntiMageZone) bind a `SuppressDodgeHandler` to override it. This workaround *still* stands: the plans refactor repositioned the tactic shape without repositioning dodge itself. A cleaner follow-up would have each tactic's current phase declare a dodge policy directly, removing the need for a dedicated suppress handler.
 
 ### Planned evolution (toward full plan-based AI)
 
@@ -194,10 +198,11 @@ Staged path:
 3. ~~**Tactics author event interests + handlers.**~~ *Done 2026-04-19.* Tactics can declare optional `detectors`, `handlers`, `onObserve(key, value)`. Tactic handlers merge in front of common handlers (stable sort → tactic precedence within tier). Observational handlers emit observe Changes that the active tactic's `onObserve` folds into its state. Demo: BaitAndSwitch observes `OpponentCharging` and scores higher while an opponent is winding up a cast.
 4. ~~**Always-on roster detectors.**~~ *Done 2026-04-19.* `TacticSelector.updateDormantObservations` runs non-active tactics' detectors each tick, routing events to their handlers; only observe-Changes are kept (action Changes from dormant tactics are dropped). BaitAndSwitch's score boosts when it's been observing an opponent charging, so it can *earn* activation on observation.
 5. ~~**Spell metadata + selection.**~~ *Done 2026-04-19.* Spells carry metadata (range/kind/element/tags). Tactics pick spells inside `maybeCast` by composing filter/compare helpers in [src/spells/selection.ts](src/spells/selection.ts). Added `MeleeAttack` spell; DuelistCharge exclusively selects melee.
-6. ~~**Tactic-authored interrupt posture.**~~ *Done 2026-04-19.* Tactics bind their own handlers with terminal semantics to override common reactive behavior. `SuppressDodgeHandler` is a terminal `ProjectileIncoming` handler that emits no Change — tactics that want to commit (DuelistCharge, AntiMageZone) bind it to suppress the common `LateralDodge`. Workaround for dodge-not-being-in-tactics.
-7. ~~**Tactics as state machines (plans-shaped tactics).**~~ *Done 2026-04-19.* `Directives` and `liveDirectives()` are gone; each tactic is a state machine that emits per-frame `TacticOutput` from `update(...)` and uses a `CastController` to request casts. Multi-phase tactics expose a `currentPhaseId()` that the selector logs on transition. DuelistCharge (two phases) and AntiMageZone (three phases) are the first multi-phase examples. **Not yet done at this stage:** position reasoning (tactics still emit a scalar preferred range, not candidate destinations) and plan-authored dodge policy (still using `SuppressDodgeHandler`).
-8. **Position reasoning.** Tactics emit candidate destinations (scored for range, wall clearance, cover, future factors), not just a preferred range. Addresses the center-drift limitation documented in Navigation.
-9. **Enemy prediction model.** Tactics "envision" the opponent's response during scoring. Linear extrapolation to start.
+6. ~~**Tactic-authored interrupt posture.**~~ *Done 2026-04-19, generalized 2026-04-20.* Initially handled by binding a terminal `SuppressDodgeHandler` per tactic. Replaced 2026-04-20 by `Tactic.dodgePolicy(self, world): "always" | "never"` — the wizard checks the active tactic's policy when realizing a `forceMovementState: dashing` Change and blocks the dash if the policy says no. `SuppressDodgeHandler` and its file are gone. Conditional policies are now possible (e.g. AvoidIncoming returns `"never"` only when a mobility spell is ready).
+7. ~~**Tactics as state machines (plans-shaped tactics).**~~ *Done 2026-04-19.* `Directives` and `liveDirectives()` are gone; each tactic is a state machine that emits per-frame `TacticOutput` from `update(...)` and uses a `CastController` to request casts. Multi-phase tactics expose a `currentPhaseId()` that the selector logs on transition.
+8. ~~**Position reasoning.**~~ *Done 2026-04-20.* Tactics that care about positioning sample candidate positions (rings, arcs, single points), score them with a composable toolkit (`scoreByRangeMatch`, `scoreByAngularPreference`, `scoreByReachability`, `scoreByWallClearance`, `scoreByArenaCenter`, `scoreAwayFromProjectiles`), and pick the best. The wizard's old `sampleBestDirection` direction-pick is gone — wall avoidance is now a tactic concern. Resolves the center-drift issue from Navigation.
+9. ~~**Interrupts as same-frame tactic switches.**~~ *Done 2026-04-19.* `interrupt: { reason }` Change type plus `selector.forceRescore(self, world, reason)` and `Tactic.shouldYield(self, world): string | null`. Reflexive non-terminal `InterruptOnProjectileHandler` lets the active tactic rescore as soon as a projectile arrives, on the same frame the dodge would fire.
+10. **Enemy prediction model.** Tactics "envision" the opponent's response during scoring. Linear extrapolation to start.
 
 ### Tactics as first-class objects
 
@@ -220,7 +225,7 @@ Each spell exposes `SpellMetadata` — id, kind (`projectile | instant | zone | 
 
 A tactic that doesn't find a suitable spell just returns without calling `requestCast` — the wizard waits. This is how DuelistCharge refuses to fire fireballs even while out of melee range.
 
-The `CastController` enforces legality. A tactic can call `requestCast` freely; the controller rejects the call (and returns `false`) if the wizard is in an invalid state (sprinting, dodging, charging, dead) or the spell is on cooldown. Tactics that need to coordinate with their own casting phase (e.g. AntiMageZone's `lastCastAt` tracker) check the return value.
+The `CastController` enforces legality. A tactic can call `requestCast` freely; the controller rejects the call (and returns `false`) if the wizard is in an invalid state (sprinting, dashing, charging, dead) or the spell is on cooldown. Tactics that need to coordinate with their own casting phase (e.g. AntiMageZone's `lastCastAt` tracker) check the return value.
 
 **Why a function instead of declarative fields.** We tried a fixed `SpellPreference` with preferred/required/avoid tag lists and scoring weights; it predicted a handful of filter types and hard-coded them. Tactics want arbitrary logic: "longest range, fastest projectile," "lowest cooldown," "element that counters the opponent's last N dodges." Function composition generalizes cleanly where configuration bundles don't.
 
@@ -234,13 +239,13 @@ Reactive behaviors — dodge, brace, panic-retreat, "noticed enemy started charg
 
 | Layer | Job | Examples |
 |---|---|---|
-| **Events** | Detect world conditions. Pure observers; emit a typed payload or nothing. | `ProjectileIncoming`, `OpponentCharging` |
-| **Handlers** | Decide reactions. Pure functions `(self, event) → Change[]`. | `LateralDodge`, `NoteOpponentCharging` |
-| **Movement states** | Realize locked motions. Unchanged by this refactor. | `dodging`, `recovering`, future `jumping` |
+| **Events** | Detect world conditions. Pure observers; emit a typed payload or nothing. | `ProjectileIncoming`, `OpponentCharging`, `LowHPCrossed` |
+| **Handlers** | Decide reactions. Pure functions `(self, event, world) → Change[]`. | `LateralDodge`, `NoteOpponentCharging`, `InterruptOnLowHP`, `InterruptOnProjectile` |
+| **Movement states** | Realize locked motions. | `dashing`, `recovering`, future `jumping` |
 
-The critical separation: handlers don't *perform* the dodge; they emit a `forceMovementState: dodging` **Change**, which the wizard's movement state machine acts on. This keeps locked-motion behavior (the physical commitment of a dodge or jump) decoupled from the *decision* to do it. Tank-brace vs. wizard-dodge can share the same `ProjectileIncoming` event but route to different handlers which emit different movement-state changes.
+The critical separation: handlers don't *perform* the dash; they emit a `forceMovementState: dashing` **Change**, which the wizard's movement state machine acts on (subject to the active tactic's `dodgePolicy`). This keeps locked-motion behavior (the physical commitment of a dash or jump) decoupled from the *decision* to invoke it. Tank-brace vs. wizard-dodge can share the same `ProjectileIncoming` event but route to different handlers which emit different movement-state changes.
 
-**Components power observation.** Detectors query components (e.g. `Charging`, `Dodging`, `Recovering`) on contestants via `contestant.getComponent(Key)` — no coupling to the concrete contestant class. `BasicWizard` installs/removes these in `setState`. New contestant types automatically surface to existing detectors as long as they populate the same components.
+**Components power observation.** Detectors query components (e.g. `Charging`, `Dashing`, `Recovering`) on contestants via `contestant.getComponent(Key)` — no coupling to the concrete contestant class. `BasicWizard` installs/removes these in `setState`. New contestant types automatically surface to existing detectors as long as they populate the same components.
 
 **Handler tiers** (priority, high to low): `reflexive` > `tactical` > `observational`. Handlers within a tier run in stable registration order. A **terminal** handler stops the chain for its event; an **informative** handler emits observation Changes and doesn't stop the chain — the same event can still reach lower-tier handlers.
 
@@ -249,22 +254,29 @@ The critical separation: handlers don't *perform* the dodge; they emit a `forceM
 **Tactic observation.** When the pipeline produces an observe Change, `BasicWizard` calls the active tactic's `onObserve(key, value)`. Tactics store it in their own internal state and read it each frame from `update(...)` or `score(...)` — since tactics are state machines, there's no separate "base vs. live" split to manage.
 
 **Current extent:**
-- `ProjectileIncoming → LateralDodge` (common reflexive terminal) — all wizards dodge
-- `OpponentCharging → NoteOpponentCharging` (BaitAndSwitch-specific observational) — BaitAndSwitch's score spikes while an enemy is winding up a cast, earning selection in opportunistic moments
+- `ProjectileIncoming → InterruptOnProjectile` (common reflexive non-terminal) — emits an `interrupt` Change ahead of the dodge. The active tactic gets a same-frame rescore opportunity (e.g. AvoidIncoming wins selection while there's still time to act).
+- `ProjectileIncoming → LateralDodge` (common reflexive terminal) — picks a dash direction by scoring an arc of candidates, emits a `forceMovementState: dashing`. Realized only if the (possibly newly-selected) active tactic's `dodgePolicy` permits.
+- `LowHPCrossed → InterruptOnLowHP` (common reflexive terminal) — fires once when HP drops below 40%, emitting an `interrupt`. Retreat usually wins the rescore.
+- `OpponentCharging → NoteOpponentCharging` (BaitAndSwitch-specific observational) — BaitAndSwitch's score spikes while an enemy is winding up a cast, earning selection in opportunistic moments.
 
 **Why not just handle everything in `BasicWizard.update`?** Because the reactive layer needs to be composable — contestants customize handlers, tactics override them, new events and handlers get added without touching existing logic. Inline imperative checks don't compose; an event-dispatch pipeline does.
 
 ### Navigation
 
-Tactics emit a raw intent (direction), but the wizard shouldn't blindly move along that intent — walls, other obstacles, and later terrain need to inform frame-by-frame movement.
+Tactics own positioning. There is no implicit wall avoidance, center bias, or projectile evasion at the wizard level — tactics that want those behaviors compose them.
 
-**Current:** each frame, `sampleBestDirection` evaluates 16 directions around the wizard's raw intent. Each is scored by `intentWeight * alignment(dir, intent) − wallWeight * cubedCloseness(dir)`, where closeness is `1 - distanceToWall / wallHorizon` clamped to [0,1]. The cubic curve makes the penalty spike near walls and fade quickly at distance. The best-scoring direction becomes the body's actual intent. One behavior per frame — no summing.
+**The toolkit** ([src/tactics/helpers.ts](src/tactics/helpers.ts)):
 
-**Why not vector summing.** Summing produces the classic "confused standstill" when opposing forces cancel. We picked priority-layering: one behavior wins, committing visibly to that choice.
+- **Sampling.** `sampleRing(center, radius, count)`, `sampleRingAroundEnemy(self, enemy, surfaceRange, count)`, `singleCandidate(pos)`, `ringDirections`, `arcDirections` — produce candidate position sets or direction sets.
+- **Scoring.** Each scorer is a `Candidate[] → Candidate[]` that adds to the score field, so they compose by chaining: `scoreByRangeMatch` (preferred surface distance), `scoreByAngularPreference` (orbit direction with weight that decays as the wizard moves away from preferred range), `scoreByReachability` (prefer nearby — kills antipodal flicker), `scoreByWallClearance` (cubic penalty), `scoreByArenaCenter` (mild center pull), `scoreAwayFromProjectiles` (perpendicular distance from projectile lines, clamped horizon).
+- **Selection.** `pickBest(candidates)` returns the max-score candidate. `steerToward(self, dest)` converts to a unit-direction `Vec2` for `TacticOutput.moveIntent`, with a small dead-zone so the wizard doesn't oscillate when arrived.
+- **Direction-only flavor for instants.** `pickSafeDirection(self, world, options)` takes a list of candidate directions + a distance and returns the best — used by `LateralDodgeHandler` to pick a dash direction (arc around perpendicular-away) and by `tryMobilityAway` to pick a blink direction (full ring).
 
-**Known limitation — center drift.** Wizards still tend to end up at the arena edges. Root cause is structural: tactics see "range to enemy" but not "position in arena." Two wizards maintaining a fixed range trace an orbital arc whose center tends to drift; sampling pushes off walls locally but doesn't bias toward the center. Lowering tactic preferred ranges so none *requires* a wall position helped but didn't fix it. The real fix is **position reasoning at the tactic layer** — tactics that score candidate destinations against multiple constraints (range, wall clearance, cover, etc.) rather than emitting a scalar preferred range. This is stage 8 of the roadmap above; further sampling-layer tweaks (e.g. adding a center-bias term) would be bandaid work we'd just rip out later.
+**Why not vector summing.** Summing produces the classic "confused standstill" when opposing forces cancel. Score-and-pick-one keeps each frame's behavior committed to one position.
 
-**Future.** As we add obstacles, platforms, and destructible terrain, sampling's scoring gets more factors: obstacle clearance, cover score, platform reachability. Tactics supply weights so different playstyles can lean toward/away from each factor.
+**Center drift — fixed.** With `scoreByArenaCenter` now part of orbit-family tactics, wizards no longer trace ever-larger orbits into walls. The center pull is small enough to lose to tactic goals in the open and big enough to win tiebreakers near walls.
+
+**Future.** As we add obstacles, platforms, and destructible terrain, the scoring toolkit grows: obstacle clearance, cover score, platform reachability. Tactics opt in to whichever scorers fit their goals.
 
 ### Commitment and interrupts
 
@@ -276,10 +288,13 @@ Tactics can also self-yield via an optional `shouldYield(self, world): string | 
 
 **Currently implemented:**
 - `LowHPCrossedDetector` (edge-triggered when HP drops below 40%) + `InterruptOnLowHPHandler` (reflexive terminal, emits `interrupt`). All wizards carry it. Visible effect: when a wizard takes the hit that drops them below 40% HP, they instantly rescore and Retreat (which scores heavily on low HP) usually wins.
-- `DuelistCharge.shouldYield` returns `"no-enemy"` if the target died mid-commit, `"strike-stall"` if stuck in the `strike` phase for more than 5s. Releases Red from a kite-stall so the selector can pick something else.
+- `InterruptOnProjectileHandler` (reflexive non-terminal) — emits an `interrupt` ahead of the dodge handler so AvoidIncoming can win the rescore and decide to blink instead of dash.
+- `DuelistCharge.shouldYield` returns `"arrived"` when within ~55u surface (handing off to CloseQuarters) or `"no-enemy"` if the target died mid-commit.
+- `AntiMageZone.shouldYield` returns `"rush-arrived"` during the rush phase when within ~55u surface so CloseQuarters takes over the post-cast melee.
+- `CloseQuarters.shouldYield` returns `"out-of-range"` if the enemy slips beyond ~150u.
+- `AvoidIncoming.shouldYield` returns `"no-threat"` once no projectile is incoming.
 
 **Planned interrupts** (patterns all of these would use the same two paths):
-- Incoming projectile within the dodge window (already triggers dodge via pipeline; a companion interrupt could let a committed tactic re-plan)
 - Opponent entered / left a critical range band (detector with hysteresis)
 - High-value opportunity (opponent stunned, exposed)
 - Current tactic became impossible (target teleported away) — today this shape is covered by `shouldYield("no-enemy")`
@@ -341,33 +356,35 @@ ML stays *out* of the decision layer — hand-authored utility is more legible a
 
 Movement & physics:
 - Kinematic body + ground physics (accel, friction, turn rate)
-- Movement states (idle, walking, running, sprinting, dodging, charging, recovering) with per-state stats
+- Movement states (idle, walking, running, sprinting, dashing, charging, recovering) with per-state stats. Dash is the neutral mechanism; "dodge" is one reactive use of it.
 - Stamina (short-term) resource — vigor was removed after degenerate-dodge-loop failure mode
 - Facing vector on `Contestant`; attention-driven facing on `BasicWizard`; strafe tax on speed
-- Committed lateral dodges with closest-approach threat filter, stamina-scaled duration, post-dodge recovery
+- Committed lateral dashes with closest-approach threat filter (for the dodge case), stamina-scaled duration, post-dash recovery
 - Sprint commits movement direction; facing can glance off-axis within a 75° cone
 - Charged fireball casts (pre-cast window where the spell follows the caster, released on state exit)
 - Predictive aiming with decaying Gaussian noise (quadratic lead solve, σ decays with shots fired)
 
 AI layer (two-tier slice):
-- Steering primitives library in [src/steering.ts](src/steering.ts): seek / flee / arrive / pursue / evade / circle / wallRepulsion
-- Tactic interface (`update → TacticOutput`, `maybeCast`, `currentPhaseId`) + `CastController` + `PaceHint` + `STATIONARY` in [src/tactics/tactic.ts](src/tactics/tactic.ts)
-- Eleven tactics in [src/tactics/native.ts](src/tactics/native.ts) — seven simple (orbit-at-range) and four stateful (DuelistCharge 2-phase, AntiMageZone 3-phase, BaitAndSwitch with observations, Scrapper with timer-driven chaos)
-- `TacticSelector` with utility scoring, random jitter, commitment dwell, phase-transition logging
-- Each of the four wizards gets a personality-biased roster
+- Steering primitives library in [src/steering.ts](src/steering.ts): seek / flee / arrive / pursue / evade / circle / wallRepulsion / sampleBestDirection (now used only via tactic helpers)
+- Tactic interface (`update → TacticOutput`, `maybeCast`, `currentPhaseId`, `shouldYield`, `dodgePolicy`) + `CastController` + `PaceHint` + `DodgePolicy` + `STATIONARY` in [src/tactics/tactic.ts](src/tactics/tactic.ts)
+- Thirteen tactics in [src/tactics/native.ts](src/tactics/native.ts) — orbit-family (Pressure, Kite, Orbit, Ambush, Retreat, Sniper, Turtle, BaitAndSwitch, Scrapper), DuelistCharge (single-purpose approach), CloseQuarters (close-range fighting), AntiMageZone (3-phase: approach/cast/rush), AvoidIncoming (tag-driven mobility-or-dodge avoidance).
+- `TacticSelector` with utility scoring, random jitter, commitment dwell, phase-transition logging, `forceRescore` for interrupts
+- Each of the four wizards gets a personality-biased roster; Blue carries Blink + AvoidIncoming
 - Movement pace driven entirely by tactic-emitted `PaceHint`; old distance-based "switch to walking at 180u" heuristic removed
 - `CastController` enforces cast legality (state / cooldown / alive) — tactics request casts freely, controller rejects invalid ones
-- Directional sampling (16 directions, intent alignment + cubic wall-clearance scoring) refines the raw move intent each frame
+- Position planning toolkit in [src/tactics/helpers.ts](src/tactics/helpers.ts): candidate sampling (`sampleRing*`, `ringDirections`, `arcDirections`), composable scorers (`scoreByRangeMatch`, `scoreByAngularPreference`, `scoreByReachability`, `scoreByWallClearance`, `scoreByArenaCenter`, `scoreAwayFromProjectiles`), pickers (`pickBest`, `pickSafeDirection`, `steerToward`). Tactics opt in to whichever scorers fit. The wizard no longer applies its own wall-avoidance — it's all tactic-composed.
+- Tactic-authored `dodgePolicy(self, world): "always" | "never"` gates the realization of `forceMovementState: dashing` Changes. Replaced the old `SuppressDodgeHandler` workaround.
 
 Reactive layer (event/handler pipeline):
-- Events + handlers + Changes + tiered pipeline in [src/events/](src/events/) and [src/handlers/](src/handlers/)
-- `ProjectileIncoming` detector + `LateralDodge` handler — dodge behavior-preserving refactored out of `BasicWizard` onto the pipeline
+- Events + handlers + Changes + tiered pipeline in [src/events/](src/events/) and [src/handlers/](src/handlers/). Handlers receive `(self, event, world)` so they can score against world state.
+- `ProjectileIncoming` detector + `LateralDodge` handler — picks dash direction by scoring an arc of candidates with `pickSafeDirection` (away from projectile lines, away from enemies, away from walls). Realization gated by the active tactic's `dodgePolicy`.
+- `InterruptOnProjectileHandler` — common reflexive non-terminal companion that emits an `interrupt` so the active tactic gets a same-frame rescore opportunity (e.g. AvoidIncoming wins selection ahead of the dash).
 - Movement states kept distinct from handlers; handlers emit `forceMovementState` Changes, wizard's state machine realizes them
-- Component system in [src/components.ts](src/components.ts): typed component keys + `getComponent/addComponent/removeComponent` on `Contestant`. `BasicWizard` installs `Charging`, `Dodging`, `Recovering` components on state entry/exit.
+- Component system in [src/components.ts](src/components.ts): typed component keys + `getComponent/addComponent/removeComponent` on `Contestant`. `BasicWizard` installs `Charging`, `Dashing`, `Recovering` components on state entry/exit.
 - Tactic-specific detectors, handlers, `onObserve(key, value)` — tactics can declare their own event interests, bind their own handlers, and consume observations directly into their state-machine state.
 - `OpponentCharging` detector (queries `Charging` component) + `NoteOpponentChargingHandler` (observational, non-terminal) — BaitAndSwitch scores higher while an enemy is winding up a cast, earning selection.
 - Always-on roster detectors: non-active tactic detectors run each tick; only observe-Changes are kept. Tactics can build observations while dormant and earn selection based on them.
-- Interrupts as a first-class Change: `interrupt: { reason }` joins `forceMovementState` / `observe` / `noop` in the pipeline. Handlers emit it; the wizard calls `selector.forceRescore(...)` and bypasses `minDwell` to switch same-frame. Tactics can also self-yield via `shouldYield(self, world): string | null`. Visible example: `LowHPCrossedDetector` + `InterruptOnLowHPHandler` force Retreat when a wizard crosses below 40% HP; `DuelistCharge.shouldYield` releases Red from a dead or stalled commit.
+- Interrupts as a first-class Change: `interrupt: { reason }` joins `forceMovementState` / `observe` / `noop` in the pipeline. Handlers emit it; the wizard calls `selector.forceRescore(...)` and bypasses `minDwell` to switch same-frame. Tactics can also self-yield via `shouldYield(self, world): string | null`. Visible examples: `LowHPCrossedDetector` + `InterruptOnLowHPHandler` force Retreat when a wizard crosses below 40% HP; `InterruptOnProjectileHandler` lets AvoidIncoming take over before a dash fires.
 
 Spells and selection:
 - `SpellMetadata` + `SpellFactory` on spells; every spell carries range / kind / element / chargeTime / cooldown / tags (+ optional `baseSpeed` for projectiles).
@@ -375,10 +392,11 @@ Spells and selection:
 - Tactics pick spells inside `maybeCast(...)` by composing filters + comparators from [src/spells/selection.ts](src/spells/selection.ts), and request casts via `CastController`. No config bundle.
 - `MeleeAttack` self-spell with cone-arc visual, lunge animation, cone hit detection.
 - `ProjectileSlowField` zone spell (translucent blue dome) — first cross-spell interaction. Slows projectiles (25%) while inside, restores on exit. Iterate-and-scale for now; component-based refactor planned.
-- DuelistCharge selector filters by `byTag("melee")` — wizard refuses to cast fireball while in this tactic.
-- AntiMageZone steps through `approach` → `cast` → `rush` phases: casts the zone when in range and ready, then sprints onto the enemy for 4s under the field.
-- DuelistCharge steps through `close` → `strike`: sprint toward enemy, switch to walking melee strikes when within 50u surface distance.
-- Both DuelistCharge and AntiMageZone bind `SuppressDodgeHandler` to keep Red committed to the rush (workaround — will be replaced by tactic-phase dodge policy as a follow-up).
+- CloseQuarters tactic owns close-range fighting (melee on cooldown via `byTag("melee")`); DuelistCharge and AntiMageZone yield to it via `shouldYield("arrived" | "rush-arrived")` once in range. Approach tactics no longer manage strike phases themselves.
+- AntiMageZone steps through `approach` → `cast` → `rush` phases: casts the zone when in range and ready, sprints onto the enemy in the rush window, then yields to CloseQuarters.
+- DuelistCharge is single-purpose: sprint toward enemy with sampling-based approach-angle scoring; yield on arrival.
+- Tactic-authored `dodgePolicy(self, world)` gates the dodge dash realization. Replaced the old `SuppressDodgeHandler` workaround. AvoidIncoming uses a conditional policy ("never" if a mobility spell is ready, "always" otherwise).
+- Blink spell + AvoidIncoming tactic: tag-driven mobility-or-dodge avoidance. Blue blinks away from threats when Blink is ready, falls back to dash via the common pipeline when not.
 - Distances in the tactic layer / spell range / tactic helpers are surface-to-surface (for future size variation).
 
 Visual polish:
@@ -388,21 +406,21 @@ Visual polish:
 
 ### Next
 
-Tactics are now state machines (stage 7). The known center-drift problem is structural (see Navigation) and will be resolved by tactics with position reasoning, not by further tuning of the current system.
+Tactics are state-machine plans with position reasoning (stages 7–9 done). Open work, roughly in priority order:
 
-1. **More events + handlers.** `LowHPCrossed` landed with the interrupt mechanism; `OpportunityStrike`, `TargetLost`, range-band detectors, etc. remain. More reactive hooks for tactics to plan around.
-2. **Position reasoning.** Tactics emit candidate destinations (scored for range + wall clearance + future cover/obstacle factors), not just a scalar preferred range. Fixes center drift.
-3. **Tactic-authored dodge policy.** Per-phase dodge on/off flag on tactics so DuelistCharge / AntiMageZone don't need to bind `SuppressDodgeHandler` explicitly. Retires the current workaround.
-4. **Enemy prediction model** feeding tactic scoring and aim.
-5. **Per-tactic action selection** (actions as named discrete moves with their own commitment — fills in the missing action layer of the three-tier hierarchy).
-6. **Personality vector** wired into tactic and action scoring (currently stand-in: per-wizard roster biases).
-7. **Component-based spell interactions.** Refactor zone effects (slowing field, future auras) to install components on affected spells rather than iterate-and-modify. Enables stacking, spell-controlled responses.
-8. **Projectile kinematics for physical projectiles** (distinct from magical spells; levitated terrain etc.).
-9. **Predicted self-position helper** — generalize the one-off dodge-filter version into a reusable AI helper.
-10. **Reaction-time delay** on AI stimulus response *(likely requires an event queue — defer the design)*.
-11. **Per-contestant persistence** (habit weights on tactics, opponent models, aim skill).
-12. **Opponent reaction modeling.**
-13. **Jumps** + airborne state + air control (when the vertical axis starts to matter).
+1. **More events + handlers.** `OpportunityStrike` (enemy whiffed a cast or stuck in slow-field), `TargetLost`, range-band detectors with hysteresis, `EnteredMeleeRange` if a third tactic ever wants the handoff. More reactive hooks for tactics to plan around.
+2. **More tactics that use mobility tags.** RepositionAggressive / RepositionDefensive — tactic-driven blink, not just reactive blink. Each picks "I want to be there" and uses any tagged mobility spell to get there.
+3. **Enemy prediction model** feeding tactic scoring and aim.
+4. **Per-tactic action selection** (actions as named discrete moves with their own commitment — fills in the missing action layer of the three-tier hierarchy).
+5. **Personality vector** wired into tactic and action scoring (currently stand-in: per-wizard roster biases).
+6. **Component-based spell interactions.** Refactor zone effects (slowing field, future auras) to install components on affected spells rather than iterate-and-modify. Enables stacking, spell-controlled responses.
+7. **Projectile kinematics for physical projectiles** (distinct from magical spells; levitated terrain etc.).
+8. **Predicted self-position helper** — generalize the one-off dodge-filter version into a reusable AI helper.
+9. **Reaction-time delay** on AI stimulus response *(likely requires an event queue — defer the design)*.
+10. **Per-contestant persistence** (habit weights on tactics, opponent models, aim skill).
+11. **Opponent reaction modeling.**
+12. **Jumps** + airborne state + air control (when the vertical axis starts to matter).
+13. **Investigate LOS + facing perception.** Tie awareness to the facing cone so facing management has weight (e.g. blink-backwards becomes a real choice). Flagged for legibility risk — viewers may see less of why the AI does what it does.
 14. *(Later)* MAP-Elites for personality generation.
 15. *(Later)* Learned trajectory predictor.
 16. *(Optional)* LLM commentary over event log.

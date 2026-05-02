@@ -51,7 +51,7 @@ export interface Tactic {
   onObserve?(key: string, value: unknown): void;
   currentPhaseId?(): string | undefined;
   shouldYield?(self: Contestant, world: World): string | null;
-  dodgePolicy?(): DodgePolicy;
+  dodgePolicy?(self: Contestant, world: World): DodgePolicy;
 }
 
 export interface RosterEntry {

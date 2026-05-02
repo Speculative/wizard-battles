@@ -40,7 +40,7 @@ export class TacticSelector {
         if (!event) continue;
         for (const handler of handlers) {
           if (handler.eventId !== event.id) continue;
-          const produced = handler.handle(self, event);
+          const produced = handler.handle(self, event, world);
           for (const c of produced) {
             if (c.type === "observe") {
               tactic.onObserve(c.key, c.value);

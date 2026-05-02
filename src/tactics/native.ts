@@ -25,6 +25,10 @@ import {
   stamina01,
   steerToward,
   surfaceDistance,
+  hasIncomingProjectile,
+  pickSafeDirection,
+  ringDirections,
+  tryMobilityAway,
 } from "./helpers";
 import type {
   CastController,
@@ -601,6 +605,98 @@ export class AntiMageZone implements Tactic {
         .filter(byTag("zone"))
         .filter(byReady(ctx))
         .find(inRange(ctx.distToTarget)) ?? null
+    );
+  }
+}
+
+export interface AvoidIncomingOptions {
+  mobilityTags?: string[];
+  /**
+   * Distance to aim a mobility spell. Defaults to 180 (blink-ish).
+   * Future mobility spells can override per-spell via a tag lookup.
+   */
+  mobilityDistance?: number;
+}
+
+export class AvoidIncoming implements Tactic {
+  readonly id = "avoidincoming";
+  readonly minDwell = 0.3;
+  private readonly mobilityTags: string[];
+  private readonly mobilityDistance: number;
+
+  constructor(opts: AvoidIncomingOptions = {}) {
+    this.mobilityTags = opts.mobilityTags ?? ["blink", "teleport"];
+    this.mobilityDistance = opts.mobilityDistance ?? 180;
+  }
+
+  private readyMobility(self: Contestant): SpellFactory | null {
+    const nowSeconds = performance.now() / 1000;
+    const w = self as Contestant & {
+      getReadyAt?: () => Map<SpellFactory, number>;
+    };
+    const readyAt = w.getReadyAt ? w.getReadyAt() : new Map();
+    for (const factory of spellbook(self)) {
+      const tags = factory.metadata.tags;
+      if (!this.mobilityTags.some((t) => tags.includes(t))) continue;
+      if ((readyAt.get(factory) ?? 0) > nowSeconds) continue;
+      return factory;
+    }
+    return null;
+  }
+
+  score(self: Contestant, world: World): number {
+    if (!hasIncomingProjectile(self, world)) return 0;
+    return 3.5;
+  }
+
+  dodgePolicy(self: Contestant): DodgePolicy {
+    return this.readyMobility(self) ? "never" : "always";
+  }
+
+  update(_dt: number, self: Contestant, world: World): TacticOutput {
+    const enemy = nearestEnemy(self, world);
+    const facingIntent = enemy ? faceContestant(self, enemy) : STATIONARY;
+    const aim = pickSafeDirection(self, world, {
+      distance: 160,
+      directions: ringDirections(16),
+    });
+    if (!aim) {
+      return {
+        moveIntent: STATIONARY,
+        paceHint: "hold",
+        facingIntent,
+      };
+    }
+    return {
+      moveIntent: aim,
+      paceHint: "sprint",
+      facingIntent,
+    };
+  }
+
+  shouldYield(self: Contestant, world: World): string | null {
+    if (!hasIncomingProjectile(self, world)) return "no-threat";
+    if (!this.readyMobility(self)) {
+      // No mobility available — there's no compelling reason to stay in this
+      // tactic beyond one movement-planning frame. The selector will put us
+      // back here if the threat persists, but other tactics are free to act.
+    }
+    return null;
+  }
+
+  maybeCast(
+    _dt: number,
+    self: Contestant,
+    world: World,
+    caster: CastController
+  ): void {
+    const distance = this.mobilityDistance;
+    tryMobilityAway(
+      self,
+      world,
+      caster,
+      (f) => this.mobilityTags.some((t) => f.metadata.tags.includes(t)),
+      () => distance
     );
   }
 }

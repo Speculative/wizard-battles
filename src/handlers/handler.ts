@@ -1,4 +1,5 @@
 import type { Contestant } from "../contestants/contestant";
+import type { World } from "../world";
 import type { GameEvent } from "../events/event";
 import type { Change, HandlerTier } from "./change";
 
@@ -7,5 +8,5 @@ export interface Handler<P = unknown> {
   readonly eventId: string;
   readonly tier: HandlerTier;
   readonly terminal: boolean;
-  handle(self: Contestant, event: GameEvent<P>): Change[];
+  handle(self: Contestant, event: GameEvent<P>, world: World): Change[];
 }

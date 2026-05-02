@@ -13,11 +13,11 @@ export interface ChargingData {
 
 export const Charging: ComponentKey<ChargingData> = { id: "charging" };
 
-export interface DodgingData {
+export interface DashingData {
   remaining: number;
 }
 
-export const Dodging: ComponentKey<DodgingData> = { id: "dodging" };
+export const Dashing: ComponentKey<DashingData> = { id: "dashing" };
 
 export interface RecoveringData {
   remaining: number;

@@ -21,9 +21,25 @@ const GRAVITY = 220;
 const UPWARD_BIAS = 0.35;
 const POINT_SIZE = 14;
 
-let sharedTexture: THREE.Texture | null = null;
-function getPointTexture(): THREE.Texture {
-  if (sharedTexture) return sharedTexture;
+export interface BurstPalette {
+  inner: string;
+  mid: string;
+  outer: string;
+  edge: string;
+}
+
+const FIRE_PALETTE: BurstPalette = {
+  inner: "rgba(255,140,40,1)",
+  mid: "rgba(235,80,10,0.85)",
+  outer: "rgba(180,30,0,0.3)",
+  edge: "rgba(100,10,0,0)",
+};
+
+const textureCache = new Map<string, THREE.Texture>();
+function getPointTexture(palette: BurstPalette): THREE.Texture {
+  const key = `${palette.inner}|${palette.mid}|${palette.outer}|${palette.edge}`;
+  const cached = textureCache.get(key);
+  if (cached) return cached;
   const size = 64;
   const canvas = document.createElement("canvas");
   canvas.width = size;
@@ -37,15 +53,15 @@ function getPointTexture(): THREE.Texture {
     size / 2,
     size / 2
   );
-  grad.addColorStop(0, "rgba(255,140,40,1)");
-  grad.addColorStop(0.3, "rgba(235,80,10,0.85)");
-  grad.addColorStop(0.7, "rgba(180,30,0,0.3)");
-  grad.addColorStop(1, "rgba(100,10,0,0)");
+  grad.addColorStop(0, palette.inner);
+  grad.addColorStop(0.3, palette.mid);
+  grad.addColorStop(0.7, palette.outer);
+  grad.addColorStop(1, palette.edge);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, size, size);
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
-  sharedTexture = tex;
+  textureCache.set(key, tex);
   return tex;
 }
 
@@ -61,7 +77,11 @@ export class ParticleBurst implements Spell {
   private readonly velocities: Float32Array;
   private readonly material: THREE.PointsMaterial;
 
-  constructor(caster: Contestant, origin: THREE.Vector3) {
+  constructor(
+    caster: Contestant,
+    origin: THREE.Vector3,
+    palette: BurstPalette = FIRE_PALETTE
+  ) {
     this.caster = caster;
     this.position = origin.clone();
 
@@ -86,7 +106,7 @@ export class ParticleBurst implements Spell {
     geo.setAttribute("position", new THREE.BufferAttribute(this.positions, 3));
     this.material = new THREE.PointsMaterial({
       size: POINT_SIZE,
-      map: getPointTexture(),
+      map: getPointTexture(palette),
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,

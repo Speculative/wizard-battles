@@ -16,11 +16,13 @@ import {
   Turtle,
   Scrapper,
   AntiMageZone,
+  AvoidIncoming,
 } from "./tactics/native";
 import type { RosterEntry } from "./tactics/tactic";
 import { FireballFactory } from "./spells/fireball";
 import { MeleeFactory } from "./spells/meleeAttack";
 import { ProjectileSlowFieldFactory } from "./spells/projectileSlowField";
+import { BlinkFactory } from "./spells/blink";
 
 const canvas = document.getElementById("arena") as HTMLCanvasElement;
 const gfx = new GameRenderer(canvas);
@@ -41,6 +43,7 @@ function redRoster(): RosterEntry[] {
 
 function blueRoster(): RosterEntry[] {
   return [
+    { tactic: new AvoidIncoming(), bias: 1.0 },
     { tactic: new Sniper(), bias: 1.6 },
     { tactic: new Ambush(), bias: 1.3 },
     { tactic: new Kite(), bias: 1.2 },
@@ -81,6 +84,7 @@ world.addContestant(
     color: 0x2266ff,
     start: new THREE.Vector3(300, 0, 150),
     roster: blueRoster(),
+    spellbook: [FireballFactory, BlinkFactory],
   })
 );
 world.addContestant(

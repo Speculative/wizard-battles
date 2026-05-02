@@ -25,7 +25,7 @@ export function runPipeline(inputs: PipelineInputs): Change[] {
     if (!event) continue;
     for (const handler of orderedHandlers) {
       if (handler.eventId !== event.id) continue;
-      const produced = handler.handle(self, event);
+      const produced = handler.handle(self, event, world);
       for (const c of produced) changes.push(c);
       if (handler.terminal) break;
     }
