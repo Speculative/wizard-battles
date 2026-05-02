@@ -351,6 +351,11 @@ export class CloseQuarters implements Tactic {
   update(_dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
     if (!enemy) return idleOutput();
+    // Sprint while still well outside the engagement band; otherwise run.
+    // The previous forced "walk" let fleeing defenders keep pulling away
+    // because red moved at 60 u/s while a backing-up defender ran at ~52.
+    const gap = Math.abs(surfaceDistance(self, enemy) - CloseQuarters.RANGE);
+    const pace: TacticOutput["paceHint"] = gap > 80 ? "sprint" : "hold";
     return orbitOutput(
       self,
       enemy,
@@ -358,7 +363,7 @@ export class CloseQuarters implements Tactic {
       CloseQuarters.RANGE,
       CloseQuarters.BAND,
       this.dir,
-      "walk"
+      pace
     );
   }
 
