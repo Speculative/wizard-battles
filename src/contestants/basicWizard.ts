@@ -25,6 +25,7 @@ import { InterruptOnLowHPHandler } from "../handlers/interruptOnLowHP";
 import { runPipeline } from "../handlers/pipeline";
 import type { ComponentKey } from "../components";
 import { Charging, Dashing, Recovering } from "../components";
+import { nowSeconds } from "../clock";
 
 function gaussian(): number {
   const u = 1 - Math.random();
@@ -436,7 +437,7 @@ export class BasicWizard implements Contestant {
       if (this.debugLogTimer <= 0) {
         this.debugLogTimer = 0.4;
         const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
-        const nowS = performance.now() / 1000;
+        const nowS = nowSeconds();
         const cooldowns = this.spellbook
           .map((f) => {
             const r = this.readyAt.get(f) ?? 0;
@@ -762,7 +763,7 @@ export class BasicWizard implements Contestant {
   }
   _ccIsReady(factory: SpellFactory): boolean {
     const readyAt = this.readyAt.get(factory) ?? 0;
-    return readyAt <= performance.now() / 1000;
+    return readyAt <= nowSeconds();
   }
 
   private releaseCharge(): void {
@@ -781,7 +782,7 @@ export class BasicWizard implements Contestant {
     this.chargedFactory = null;
     this.chargeTarget = null;
     const cooldown = factory.metadata.cooldown || 1.0;
-    this.readyAt.set(factory, performance.now() / 1000 + cooldown);
+    this.readyAt.set(factory, nowSeconds() + cooldown);
   }
 
   private computeAimDirection(target: Contestant): THREE.Vector3 {

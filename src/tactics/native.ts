@@ -38,6 +38,7 @@ import type {
 } from "./tactic";
 import { STATIONARY } from "./tactic";
 import type { Vec2 } from "../steering";
+import { nowMs, nowSeconds } from "../clock";
 
 function directionTo(self: Contestant, enemy: Contestant): {
   x: number;
@@ -239,7 +240,7 @@ export class BaitAndSwitch implements Tactic {
     const dist = surfaceDistance(self, enemy);
     const midRange = dist > 200 && dist < 380 ? 1 : 0.4;
     const staminaOk = stamina01(self) > 0.6 ? 1 : 0.5;
-    const staleness = (performance.now() - this.lastObservedAt) / 1000;
+    const staleness = (nowMs() - this.lastObservedAt) / 1000;
     const opportunityBoost =
       staleness < 0.5 && this.enemyChargingRemaining > 0 ? 2.5 : 1;
     return 0.5 * midRange * staminaOk * opportunityBoost;
@@ -248,7 +249,7 @@ export class BaitAndSwitch implements Tactic {
   onObserve(key: string, value: unknown): void {
     if (key === "opponentChargingRemaining" && typeof value === "number") {
       this.enemyChargingRemaining = value;
-      this.lastObservedAt = performance.now();
+      this.lastObservedAt = nowMs();
     }
   }
 
@@ -497,7 +498,7 @@ export class AntiMageZone implements Tactic {
     const sweetRange = dist > 60 && dist < 180 ? 1.4 : 0.3;
     const staminaOk = stamina01(self) > 0.5 ? 1 : 0.5;
     const recentCastPenalty =
-      (performance.now() - this.lastCastAt) / 1000 < 6 ? 0.15 : 1;
+      (nowMs() - this.lastCastAt) / 1000 < 6 ? 0.15 : 1;
     return 0.75 * sweetRange * staminaOk * recentCastPenalty;
   }
 
@@ -525,7 +526,7 @@ export class AntiMageZone implements Tactic {
       return idleOutput();
     }
     const dist = surfaceDistance(self, enemy);
-    const sinceCast = (performance.now() - this.lastCastAt) / 1000;
+    const sinceCast = (nowMs() - this.lastCastAt) / 1000;
     const inRushWindow =
       this.lastCastAt > 0 && sinceCast < AntiMageZone.RUSH_WINDOW_SECONDS;
 
@@ -577,13 +578,13 @@ export class AntiMageZone implements Tactic {
     const factory = this.pickZoneFactory(self, enemy);
     if (!factory) return;
     if (caster.requestCast(factory, enemy, directionTo(self, enemy))) {
-      this.lastCastAt = performance.now();
+      this.lastCastAt = nowMs();
     }
   }
 
   private zoneReady(self: Contestant): boolean {
     const book = spellbook(self);
-    const nowSeconds = performance.now() / 1000;
+    const t = nowSeconds();
     const w = self as Contestant & {
       getReadyAt?: () => Map<SpellFactory, number>;
     };
@@ -591,7 +592,7 @@ export class AntiMageZone implements Tactic {
     return book.some(
       (f) =>
         f.metadata.tags.includes("zone") &&
-        (readyAt.get(f) ?? 0) <= nowSeconds
+        (readyAt.get(f) ?? 0) <= t
     );
   }
 
@@ -630,15 +631,15 @@ export class AvoidIncoming implements Tactic {
   }
 
   private readyMobility(self: Contestant): SpellFactory | null {
-    const nowSeconds = performance.now() / 1000;
+    const t = nowSeconds();
     const w = self as Contestant & {
       getReadyAt?: () => Map<SpellFactory, number>;
     };
     const readyAt = w.getReadyAt ? w.getReadyAt() : new Map();
     for (const factory of spellbook(self)) {
       const tags = factory.metadata.tags;
-      if (!this.mobilityTags.some((t) => tags.includes(t))) continue;
-      if ((readyAt.get(factory) ?? 0) > nowSeconds) continue;
+      if (!this.mobilityTags.some((t2) => tags.includes(t2))) continue;
+      if ((readyAt.get(factory) ?? 0) > t) continue;
       return factory;
     }
     return null;

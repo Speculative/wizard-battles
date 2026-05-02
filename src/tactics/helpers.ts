@@ -6,6 +6,7 @@ import type { CastController, PaceHint } from "./tactic";
 import { STATIONARY } from "./tactic";
 import type { SelectionContext } from "../spells/selection";
 import { ARENA } from "../config";
+import { nowSeconds } from "../clock";
 import { ProjectileIncomingDetector } from "../events/projectileIncoming";
 
 export interface Candidate {
@@ -51,7 +52,7 @@ export function selectionContext(
     target,
     distToTarget: surfaceDistance(self, target),
     readyAt: w.getReadyAt ? w.getReadyAt() : new Map(),
-    nowSeconds: performance.now() / 1000,
+    nowSeconds: nowSeconds(),
   };
 }
 

@@ -35,11 +35,14 @@ const FIRE_PALETTE: BurstPalette = {
   edge: "rgba(100,10,0,0)",
 };
 
-const textureCache = new Map<string, THREE.Texture>();
-function getPointTexture(palette: BurstPalette): THREE.Texture {
+const textureCache = new Map<string, THREE.Texture | null>();
+function getPointTexture(palette: BurstPalette): THREE.Texture | null {
   const key = `${palette.inner}|${palette.mid}|${palette.outer}|${palette.edge}`;
-  const cached = textureCache.get(key);
-  if (cached) return cached;
+  if (textureCache.has(key)) return textureCache.get(key) ?? null;
+  if (typeof document === "undefined") {
+    textureCache.set(key, null);
+    return null;
+  }
   const size = 64;
   const canvas = document.createElement("canvas");
   canvas.width = size;
