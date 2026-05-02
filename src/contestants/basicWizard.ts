@@ -46,6 +46,7 @@ const STAMINA_MAX = 3.0;
 const STAMINA_SPRINT_DRAIN = 1.0;
 const STAMINA_REGEN = 0.6;
 const SPRINT_MIN_STAMINA_TO_START = 0.8;
+const SPRINT_MIN_STAMINA_TO_HOLD = 0.3;
 const RECOVERY_DURATION = 1.2;
 
 const DASH_DURATION_MAX = 0.22;
@@ -511,7 +512,16 @@ export class BasicWizard implements Contestant {
     const angle = Math.acos(clamped);
     if (angle <= maxAngle) return new THREE.Vector3(dx, 0, dz);
     const cross = rx * dz - rz * dx;
-    const sign = cross >= 0 ? 1 : -1;
+    let sign: 1 | -1;
+    if (Math.abs(cross) < 0.1) {
+      // Desired is near-antiparallel to reference; cross sign would flip
+      // every frame from velocity wobble, snapping facing across the body.
+      // Pick the hemisphere matching the current facing for stability.
+      const facingCross = rx * this.facing.z - rz * this.facing.x;
+      sign = facingCross >= 0 ? 1 : -1;
+    } else {
+      sign = cross >= 0 ? 1 : -1;
+    }
     const rot = maxAngle * sign;
     const cos = Math.cos(rot);
     const sin = Math.sin(rot);
@@ -646,7 +656,15 @@ export class BasicWizard implements Contestant {
       return;
     }
 
-    const wantsSprint =
+    // Hysteresis: entering sprint requires being well-rested
+    // (SPRINT_MIN_STAMINA_TO_START), but once sprinting we keep going
+    // until stamina drops below SPRINT_MIN_STAMINA_TO_HOLD. Without this,
+    // the wizard flickers across a single threshold every frame, which
+    // makes facing oscillate (the cone clamp toggles with state).
+    const wantsSprintHold =
+      paceHint === "sprint" &&
+      this.stamina > SPRINT_MIN_STAMINA_TO_HOLD;
+    const wantsSprintEntry =
       paceHint === "sprint" &&
       this.stamina > SPRINT_MIN_STAMINA_TO_START;
 
@@ -657,13 +675,13 @@ export class BasicWizard implements Contestant {
         this.setState("recovering", RECOVERY_DURATION);
         return;
       }
-      if (!wantsSprint) this.setState("running");
+      if (!wantsSprintHold) this.setState("running");
       return;
     }
 
     this.stamina = Math.min(STAMINA_MAX, this.stamina + STAMINA_REGEN * dt);
 
-    if (wantsSprint) {
+    if (wantsSprintEntry) {
       this.setState("sprinting");
       return;
     }
