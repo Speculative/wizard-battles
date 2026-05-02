@@ -2,6 +2,7 @@ import * as THREE from "three";
 import type { Spell, SpellFactory, SpellMetadata } from "./spell";
 import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
+import { emit } from "../telemetry";
 
 const SWING_DURATION = 0.18;
 const RECOVERY_DURATION = 0.22;
@@ -153,7 +154,16 @@ export class MeleeAttack implements Spell {
       const cos = (dx * this.aim.x + dz * this.aim.z) / Math.max(dist, 1e-3);
       if (cos < Math.cos(CONE_HALF_ANGLE)) continue;
       c.hp -= DAMAGE;
-      if (c.hp <= 0) c.alive = false;
+      emit("damage", this.caster.id, {
+        victim: c.id,
+        amount: DAMAGE,
+        spell: MELEE_METADATA.id,
+        hpAfter: c.hp,
+      });
+      if (c.hp <= 0) {
+        c.alive = false;
+        emit("death", c.id, { killer: this.caster.id, spell: MELEE_METADATA.id });
+      }
       this.hasHit = true;
     }
   }

@@ -4,6 +4,7 @@ import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
 import { Explosion } from "./explosion";
 import { ParticleBurst } from "./particleBurst";
+import { emit } from "../telemetry";
 
 export const FIREBALL_SPEED = 260;
 const SPEED = FIREBALL_SPEED;
@@ -151,7 +152,16 @@ export class Fireball implements Spell {
       if (c === this.caster || !c.alive) continue;
       if (c.position.distanceTo(this.position) < c.radius + RADIUS) {
         c.hp -= DAMAGE;
-        if (c.hp <= 0) c.alive = false;
+        emit("damage", this.caster.id, {
+          victim: c.id,
+          amount: DAMAGE,
+          spell: FIREBALL_METADATA.id,
+          hpAfter: c.hp,
+        });
+        if (c.hp <= 0) {
+          c.alive = false;
+          emit("death", c.id, { killer: this.caster.id, spell: FIREBALL_METADATA.id });
+        }
         this.explode(world);
         return;
       }

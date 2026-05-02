@@ -26,6 +26,7 @@ import { runPipeline } from "../handlers/pipeline";
 import type { ComponentKey } from "../components";
 import { Charging, Dashing, Recovering } from "../components";
 import { nowSeconds } from "../clock";
+import { emit } from "../telemetry";
 
 function gaussian(): number {
   const u = 1 - Math.random();
@@ -300,6 +301,12 @@ export class BasicWizard implements Contestant {
   }
   getReadyAt(): Map<SpellFactory, number> {
     return this.readyAt;
+  }
+  getMovementState(): string {
+    return this.state;
+  }
+  getCurrentTacticId(): string {
+    return this.tacticSelector.currentTactic.id;
   }
 
   update(dt: number, world: World): void {
@@ -718,15 +725,38 @@ export class BasicWizard implements Contestant {
     target: Contestant | null,
     aim: Vec2
   ): boolean {
-    if (!this.alive) return false;
+    if (!this.alive) {
+      emit("cast_request", this.id, {
+        factory: factory.metadata.id,
+        targetId: target?.id ?? null,
+        accepted: false,
+        reason: "dead",
+      });
+      return false;
+    }
     if (
       this.state === "sprinting" ||
       this.state === "recovering" ||
       this.state === "dashing" ||
       this.state === "charging"
-    )
+    ) {
+      emit("cast_request", this.id, {
+        factory: factory.metadata.id,
+        targetId: target?.id ?? null,
+        accepted: false,
+        reason: `state:${this.state}`,
+      });
       return false;
-    if (!this._ccIsReady(factory)) return false;
+    }
+    if (!this._ccIsReady(factory)) {
+      emit("cast_request", this.id, {
+        factory: factory.metadata.id,
+        targetId: target?.id ?? null,
+        accepted: false,
+        reason: "cooldown",
+      });
+      return false;
+    }
 
     this.chargeTarget = target;
     const aimVec = new THREE.Vector3(aim.x, 0, aim.z);
@@ -742,6 +772,22 @@ export class BasicWizard implements Contestant {
       "charging",
       factory.metadata.chargeTime || CHARGE_DURATION
     );
+    emit("cast_request", this.id, {
+      factory: factory.metadata.id,
+      targetId: target?.id ?? null,
+      accepted: true,
+      distToTarget: target
+        ? Math.max(
+            0,
+            Math.hypot(
+              target.position.x - this.body.position.x,
+              target.position.z - this.body.position.z
+            ) -
+              this.radius -
+              target.radius
+          )
+        : null,
+    });
     return true;
   }
   _ccCancelCharging(): void {
@@ -783,6 +829,10 @@ export class BasicWizard implements Contestant {
     this.chargeTarget = null;
     const cooldown = factory.metadata.cooldown || 1.0;
     this.readyAt.set(factory, nowSeconds() + cooldown);
+    emit("cast_release", this.id, {
+      factory: factory.metadata.id,
+      targetId: target?.id ?? null,
+    });
   }
 
   private computeAimDirection(target: Contestant): THREE.Vector3 {
@@ -868,6 +918,7 @@ export class BasicWizard implements Contestant {
     this.dashDir.copy(direction);
     this.body.velocity.x = this.dashDir.x * DASH_IMPULSE_SPEED;
     this.body.velocity.z = this.dashDir.z * DASH_IMPULSE_SPEED;
+    emit("dash", this.id, { dirX: direction.x, dirZ: direction.z });
     const staminaFrac = Math.min(1, this.stamina / DASH_STAMINA_COST);
     this.stamina = Math.max(
       0,

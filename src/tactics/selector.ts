@@ -1,6 +1,7 @@
 import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
 import type { RosterEntry, Tactic } from "./tactic";
+import { emit } from "../telemetry";
 
 const EVAL_INTERVAL = 1.0;
 const RANDOM_JITTER = 0.35;
@@ -54,6 +55,7 @@ export class TacticSelector {
 
   forceRescore(self: Contestant, world: World, reason: string): void {
     console.log(`${this.label} interrupt: ${reason}`);
+    emit("interrupt", this.label, { reason, currentTactic: this.current.id });
     this.rescore(self, world);
   }
 
@@ -69,6 +71,11 @@ export class TacticSelector {
       console.log(
         `${this.label} ${this.current.id} phase ${this.lastPhaseId ?? "-"} -> ${phaseId ?? "-"}`
       );
+      emit("tactic_phase", this.label, {
+        tactic: this.current.id,
+        from: this.lastPhaseId ?? null,
+        to: phaseId ?? null,
+      });
       this.lastPhaseId = phaseId;
     }
   }
@@ -92,6 +99,11 @@ export class TacticSelector {
       this.dwellLeft = best.minDwell;
       this.lastPhaseId = best.currentPhaseId?.();
       console.log(`${this.label} ${prev} -> ${best.id}`);
+      emit("tactic_switch", this.label, {
+        from: prev,
+        to: best.id,
+        score: bestScore,
+      });
     } else {
       this.dwellLeft = best.minDwell;
     }

@@ -7,9 +7,11 @@
     "dev": "vite --host",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "sim": "tsx src/harness.ts"
+    "sim": "tsx src/harness.ts",
+    "q": "tsx scripts/duckq.ts"
   },
   "devDependencies": {
+    "@duckdb/node-api": "^1.5.2-r.1",
     "@types/node": "^25.6.0",
     "@types/three": "^0.184.0",
     "tsx": "^4.21.0",

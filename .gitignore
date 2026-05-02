@@ -25,3 +25,10 @@ dist-ssr
 
 # Carthage's per-build hash cache
 .carthage/last-build-hash
+
+# Per-session Claude Code settings (machine-local)
+.claude/settings.local.json
+
+# Headless-harness output (runs are ephemeral, see docs/HARNESS.md)
+runs/
+runs-*/
