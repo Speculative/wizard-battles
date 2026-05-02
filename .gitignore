@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Carthage's per-build hash cache
+.carthage/last-build-hash
