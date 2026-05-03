@@ -414,7 +414,7 @@ export class Sniper implements Tactic {
   private static readonly COMMIT_RADIUS = 70;
   private static readonly HEAVY_MIN_DISTANCE = 250;
   private static readonly HEAVY_MIN_HP = 0.3;
-  private static readonly HEAVY_PROBABILITY = 0.4;
+  private static readonly HEAVY_PROBABILITY = 0.6;
 
   score(self: Contestant, world: World): number {
     const enemy = nearestEnemy(self, world);
@@ -494,12 +494,29 @@ export class Sniper implements Tactic {
     self: Contestant,
     enemy: Contestant
   ): SpellModifier | undefined {
-    const heavy = modifiers(self).find((m) => m.tags.includes("heavy"));
-    if (!heavy) return undefined;
-    if (hp01(self) < Sniper.HEAVY_MIN_HP) return undefined;
-    if (surfaceDistance(self, enemy) < Sniper.HEAVY_MIN_DISTANCE) return undefined;
+    const pool = modifiers(self);
+    if (pool.length === 0) return undefined;
+    const eligible = pool.filter((m) =>
+      this.isEligibleModifier(m, self, enemy)
+    );
+    if (eligible.length === 0) return undefined;
     if (Math.random() >= Sniper.HEAVY_PROBABILITY) return undefined;
-    return heavy;
+    return eligible[Math.floor(Math.random() * eligible.length)];
+  }
+
+  private isEligibleModifier(
+    m: SpellModifier,
+    self: Contestant,
+    enemy: Contestant
+  ): boolean {
+    if (m.tags.includes("heavy")) {
+      // Heavy is the longest charge — only commit if not at melee threat.
+      if (hp01(self) < Sniper.HEAVY_MIN_HP) return false;
+      if (surfaceDistance(self, enemy) < Sniper.HEAVY_MIN_DISTANCE) return false;
+    }
+    // Other multi-shot modifiers (spread/swarm/gatling) have shorter
+    // charges; permit at any range.
+    return true;
   }
 }
 

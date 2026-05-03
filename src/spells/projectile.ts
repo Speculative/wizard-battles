@@ -32,6 +32,19 @@ export interface ProjectileAOESpec {
 
 export type ProjectileAimMode = "intercept" | "groundTarget";
 
+export interface ProjectileEmission {
+  count: number;
+  spreadAngle: number;
+  interval: number;
+  followCaster?: boolean;
+  perChildAimJitter?: number;
+}
+
+export interface ProjectileHoming {
+  turnRate: number;
+  range: number;
+}
+
 export interface ProjectileSpec {
   id: string;
   element: SpellElement;
@@ -48,6 +61,8 @@ export interface ProjectileSpec {
   visual: ProjectileVisualSpec;
   aimMode?: ProjectileAimMode;
   aimNoiseScale?: number;
+  emission?: ProjectileEmission;
+  homing?: ProjectileHoming;
 }
 
 export interface ProjectileModifier extends SpellModifier {
@@ -132,6 +147,10 @@ export class Projectile implements Spell {
   private readonly telegraph: TelegraphCircle | null;
   private telegraphAge = 0;
   private telegraphAttached = false;
+  private emitterBaseDir = new THREE.Vector3(1, 0, 0);
+  private emitterFired = 0;
+  private emitterTimer = 0;
+  private emitterActive = false;
 
   constructor(
     caster: Contestant,
@@ -190,12 +209,21 @@ export class Projectile implements Spell {
   setVelocityFromDirection(direction: THREE.Vector3): void {
     const len = Math.hypot(direction.x, direction.y, direction.z);
     if (len < 1e-6) return;
-    const s = this.spec.speed;
-    this.velocity.set(
-      (direction.x / len) * s,
-      (direction.y / len) * s,
-      (direction.z / len) * s
-    );
+    const inv = 1 / len;
+    const dx = direction.x * inv;
+    const dy = direction.y * inv;
+    const dz = direction.z * inv;
+    if (this.spec.emission) {
+      // Emitter mode: store base aim, fire children from update().
+      this.emitterBaseDir.set(dx, 0, dz);
+      this.emitterActive = true;
+      this.emitterTimer = 0;
+      this.emitterFired = 0;
+      this.velocity.set(0, 0, 0);
+    } else {
+      const s = this.spec.speed;
+      this.velocity.set(dx * s, dy * s, dz * s);
+    }
     this.launchOrigin.copy(this.position);
   }
 
@@ -209,11 +237,22 @@ export class Projectile implements Spell {
       return;
     }
     this.detachTelegraph();
+
+    if (this.emitterActive) {
+      this.updateEmitter(dt, world);
+      return;
+    }
+
     this.age += dt;
     if (this.age >= this.spec.lifetime) {
       this.dead = true;
       return;
     }
+
+    if (this.spec.homing) {
+      this.applyHoming(dt, world);
+    }
+
     this.position.addScaledVector(this.velocity, dt);
     this.head.position.copy(this.position);
 
@@ -255,6 +294,143 @@ export class Projectile implements Spell {
         this.explode(world, null);
       }
     }
+  }
+
+  private updateEmitter(dt: number, world: World): void {
+    const plan = this.spec.emission;
+    if (!plan) {
+      this.dead = true;
+      return;
+    }
+
+    if (plan.followCaster) {
+      // Track caster position so successive shots emerge from current pos.
+      this.position.set(
+        this.caster.position.x,
+        this.caster.position.y,
+        this.caster.position.z
+      );
+      this.head.position.copy(this.position);
+      // Re-aim each tick at the caster's current nearest enemy. Without
+      // this, a gatling burst sticks with the original aim while the
+      // target moves out of the line — most shots miss late in the burst.
+      let bestDist = Infinity;
+      let target: Contestant | null = null;
+      for (const c of world.contestants) {
+        if (c === this.caster || !c.alive) continue;
+        const dx = c.position.x - this.caster.position.x;
+        const dz = c.position.z - this.caster.position.z;
+        const d = Math.hypot(dx, dz);
+        if (d < bestDist) {
+          bestDist = d;
+          target = c;
+        }
+      }
+      if (target) {
+        const dx = target.position.x - this.caster.position.x;
+        const dz = target.position.z - this.caster.position.z;
+        const len = Math.hypot(dx, dz);
+        if (len > 1e-3) {
+          this.emitterBaseDir.set(dx / len, 0, dz / len);
+        }
+      }
+    }
+
+    this.emitterTimer -= dt;
+    while (this.emitterFired < plan.count && this.emitterTimer <= 0) {
+      this.fireOneChild(world, plan);
+      this.emitterFired++;
+      this.emitterTimer += plan.interval;
+      if (plan.interval <= 0) break;
+    }
+
+    if (this.emitterFired >= plan.count) {
+      // For instant burst (interval=0) we'd loop above; this also catches
+      // the timed case after the last child has been fired.
+      this.dead = true;
+    }
+  }
+
+  private fireOneChild(world: World, plan: ProjectileEmission): void {
+    const childSpec: ProjectileSpec = { ...this.spec };
+    delete childSpec.emission;
+    delete childSpec.telegraph;
+
+    const baseAngle = Math.atan2(
+      this.emitterBaseDir.z,
+      this.emitterBaseDir.x
+    );
+    const halfSpread = plan.spreadAngle / 2;
+    const t =
+      plan.count <= 1
+        ? 0
+        : (this.emitterFired / (plan.count - 1)) * 2 - 1;
+    let angle = baseAngle + t * halfSpread;
+    if (plan.perChildAimJitter) {
+      angle += (Math.random() * 2 - 1) * plan.perChildAimJitter;
+    }
+    const dir = new THREE.Vector3(Math.cos(angle), 0, Math.sin(angle));
+    const origin = new THREE.Vector3(
+      this.position.x + dir.x * (this.caster.radius + 4),
+      this.caster.position.y,
+      this.position.z + dir.z * (this.caster.radius + 4)
+    );
+    const child = new Projectile(this.caster, dir, origin, childSpec);
+    child.setVelocityFromDirection(dir);
+    world.addSpell(child);
+    emit("projectile_emit", this.caster.id, {
+      spell: this.spec.id,
+      childIndex: this.emitterFired,
+      childOf: childSpec.id,
+    });
+  }
+
+  private applyHoming(dt: number, world: World): void {
+    const homing = this.spec.homing;
+    if (!homing) return;
+    let target: Contestant | null = null;
+    let bestDist = homing.range;
+    for (const c of world.contestants) {
+      if (c === this.caster || !c.alive) continue;
+      const d = Math.hypot(
+        c.position.x - this.position.x,
+        c.position.z - this.position.z
+      );
+      if (d < bestDist) {
+        bestDist = d;
+        target = c;
+      }
+    }
+    if (!target) return;
+    const desiredX = target.position.x - this.position.x;
+    const desiredZ = target.position.z - this.position.z;
+    const desiredLen = Math.hypot(desiredX, desiredZ);
+    if (desiredLen < 1e-3) return;
+    const dxn = desiredX / desiredLen;
+    const dzn = desiredZ / desiredLen;
+    const speed = Math.hypot(this.velocity.x, this.velocity.z);
+    if (speed < 1e-3) return;
+    const vxn = this.velocity.x / speed;
+    const vzn = this.velocity.z / speed;
+    const dot = Math.max(-1, Math.min(1, vxn * dxn + vzn * dzn));
+    const angleBetween = Math.acos(dot);
+    const maxRot = homing.turnRate * dt;
+    let newX: number;
+    let newZ: number;
+    if (angleBetween <= maxRot) {
+      newX = dxn;
+      newZ = dzn;
+    } else {
+      const cross = vxn * dzn - vzn * dxn;
+      const sign = cross >= 0 ? 1 : -1;
+      const rot = maxRot * sign;
+      const c = Math.cos(rot);
+      const s = Math.sin(rot);
+      newX = vxn * c - vzn * s;
+      newZ = vxn * s + vzn * c;
+    }
+    this.velocity.x = newX * speed;
+    this.velocity.z = newZ * speed;
   }
 
   private updateTelegraph(dt: number, world: World): void {
