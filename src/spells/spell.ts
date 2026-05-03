@@ -10,6 +10,8 @@ export interface SpellRange {
   max: number;
 }
 
+export type CastMode = "charge" | "channel";
+
 export interface SpellMetadata {
   id: string;
   kind: SpellKind;
@@ -19,6 +21,7 @@ export interface SpellMetadata {
   cooldown: number;
   tags: string[];
   baseSpeed?: number;
+  castMode?: CastMode;
 }
 
 export interface Spell {

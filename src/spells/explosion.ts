@@ -7,10 +7,15 @@ const DURATION = 0.32;
 const DEFAULT_START_RADIUS = 8;
 const DEFAULT_PEAK_RADIUS = 38;
 
+const DEFAULT_CORE_COLOR = 0xffb040;
+const DEFAULT_HALO_COLOR = 0xc02000;
+
 export interface ExplosionOptions {
   startRadius?: number;
   peakRadius?: number;
   duration?: number;
+  coreColor?: number;
+  haloColor?: number;
 }
 
 const EXPLOSION_METADATA: SpellMetadata = {
@@ -52,12 +57,12 @@ export class Explosion implements Spell {
 
     const geo = new THREE.SphereGeometry(1, 16, 12);
     this.coreMat = new THREE.MeshBasicMaterial({
-      color: 0xffb040,
+      color: options.coreColor ?? DEFAULT_CORE_COLOR,
       transparent: true,
       opacity: 1,
     });
     this.haloMat = new THREE.MeshBasicMaterial({
-      color: 0xc02000,
+      color: options.haloColor ?? DEFAULT_HALO_COLOR,
       transparent: true,
       opacity: 0.55,
       blending: THREE.AdditiveBlending,

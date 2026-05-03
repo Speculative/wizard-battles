@@ -7,6 +7,8 @@ import { FireballFactory } from "./spells/fireball";
 import { MeleeFactory } from "./spells/meleeAttack";
 import { ProjectileSlowFieldFactory } from "./spells/projectileSlowField";
 import { BlinkFactory } from "./spells/blink";
+import { IceShardFactory } from "./spells/iceShard";
+import { IceBoltFactory } from "./spells/iceBolt";
 import { Heavy, Spread, Swarm, Gatling } from "./spells/modifiers";
 import { useVirtualClock, advanceVirtualClock, nowSeconds } from "./clock";
 import { setTelemetry, emit, emitFrame } from "./telemetry";
@@ -60,6 +62,8 @@ function makeWorld(): World {
       color: 0x22cc55,
       start: new THREE.Vector3(-300, 0, 200),
       roster: greenRoster(),
+      spellbook: [IceShardFactory, IceBoltFactory],
+      modifiers: [Spread],
     })
   );
   world.addContestant(

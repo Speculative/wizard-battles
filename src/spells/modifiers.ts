@@ -164,10 +164,16 @@ export const Heavy: ProjectileModifier = {
       aimNoiseScale: HEAVY_AIM_NOISE_SCALE,
       visual: {
         ...base.visual,
-        layers: base.visual.layers.map((l) => ({
-          ...l,
-          opacity: Math.min(1, l.opacity * 1.15),
-        })),
+        shape:
+          base.visual.shape.kind === "fire-spheres"
+            ? {
+                ...base.visual.shape,
+                layers: base.visual.shape.layers.map((l) => ({
+                  ...l,
+                  opacity: Math.min(1, l.opacity * 1.15),
+                })),
+              }
+            : base.visual.shape,
       },
     };
   },

@@ -19,12 +19,15 @@ export const FIREBALL_SPEC: ProjectileSpec = {
   cooldown: 1.4,
   tags: ["ranged", "projectile"],
   visual: {
-    layers: [
-      { scale: 0.55, color: 0xffb040, opacity: 1.0 },
-      { scale: 0.85, color: 0xff5008, opacity: 0.55 },
-      { scale: 1.1, color: 0xc02000, opacity: 0.35 },
-      { scale: 1.35, color: 0x600400, opacity: 0.18 },
-    ],
+    shape: {
+      kind: "fire-spheres",
+      layers: [
+        { scale: 0.55, color: 0xffb040, opacity: 1.0 },
+        { scale: 0.85, color: 0xff5008, opacity: 0.55 },
+        { scale: 1.1, color: 0xc02000, opacity: 0.35 },
+        { scale: 1.35, color: 0x600400, opacity: 0.18 },
+      ],
+    },
     trailColor: 0xff6622,
   },
 };

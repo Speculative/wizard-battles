@@ -24,3 +24,12 @@ export interface RecoveringData {
 }
 
 export const Recovering: ComponentKey<RecoveringData> = { id: "recovering" };
+
+export interface ChannelingData {
+  target: Contestant | null;
+  remaining: number;
+  totalDuration: number;
+  spellId: string;
+}
+
+export const Channeling: ComponentKey<ChannelingData> = { id: "channeling" };

@@ -25,7 +25,7 @@ import { LowHPCrossedDetector } from "../events/lowHPCrossed";
 import { InterruptOnLowHPHandler } from "../handlers/interruptOnLowHP";
 import { runPipeline } from "../handlers/pipeline";
 import type { ComponentKey } from "../components";
-import { Charging, Dashing, Recovering } from "../components";
+import { Channeling, Charging, Dashing, Recovering } from "../components";
 import { nowSeconds } from "../clock";
 import { emit } from "../telemetry";
 
@@ -85,6 +85,7 @@ type MovementState =
   | "sprinting"
   | "dashing"
   | "charging"
+  | "channeling"
   | "recovering";
 
 const STATE_STATS: Record<MovementState, MovementStats> = {
@@ -118,6 +119,15 @@ const STATE_STATS: Record<MovementState, MovementStats> = {
     acceleration: 250,
     friction: 400,
     turnRate: Math.PI * 1.8,
+  },
+  channeling: {
+    // Fully rooted: caster can rotate to face target but does not translate.
+    // Future "break concentration" interactions will react to damage taken
+    // while in this state (see Channeling component).
+    maxSpeed: 0,
+    acceleration: 0,
+    friction: 1500,
+    turnRate: Math.PI * 1.5,
   },
   recovering: {
     maxSpeed: 15,
@@ -659,6 +669,14 @@ export class BasicWizard implements Contestant {
       if (this.stateTimer <= 0) this.setState("running");
       return;
     }
+    if (this.state === "channeling") {
+      this.stateTimer -= dt;
+      this.stamina = Math.min(STAMINA_MAX, this.stamina + STAMINA_REGEN * dt);
+      const c = this.getComponent(Channeling);
+      if (c) c.remaining = this.stateTimer;
+      if (this.stateTimer <= 0) this.setState("running");
+      return;
+    }
     if (this.state === "recovering") {
       this.stateTimer -= dt;
       this.stamina = Math.min(STAMINA_MAX, this.stamina + STAMINA_REGEN * dt);
@@ -726,6 +744,7 @@ export class BasicWizard implements Contestant {
     if (stateDuration > 0) this.stateTimer = stateDuration;
 
     if (prev === "charging") this.removeComponent(Charging);
+    if (prev === "channeling") this.removeComponent(Channeling);
     if (prev === "dashing") this.removeComponent(Dashing);
     if (prev === "recovering") this.removeComponent(Recovering);
 
@@ -734,6 +753,13 @@ export class BasicWizard implements Contestant {
         target: this.chargeTarget,
         remaining: stateDuration > 0 ? stateDuration : CHARGE_DURATION,
         totalDuration: stateDuration > 0 ? stateDuration : CHARGE_DURATION,
+      });
+    } else if (next === "channeling") {
+      this.addComponent(Channeling, {
+        target: this.chargeTarget,
+        remaining: stateDuration > 0 ? stateDuration : CHARGE_DURATION,
+        totalDuration: stateDuration > 0 ? stateDuration : CHARGE_DURATION,
+        spellId: this.chargedFactory?.metadata.id ?? "",
       });
     } else if (next === "dashing") {
       this.addComponent(Dashing, { remaining: stateDuration });
@@ -754,7 +780,7 @@ export class BasicWizard implements Contestant {
         this.body.position.z + aim.z * (this.radius + 6)
       );
     }
-    if (this.state !== "charging") {
+    if (this.state !== "charging" && this.state !== "channeling") {
       this.releaseCharge();
     }
   }
@@ -781,7 +807,8 @@ export class BasicWizard implements Contestant {
       this.state === "sprinting" ||
       this.state === "recovering" ||
       this.state === "dashing" ||
-      this.state === "charging"
+      this.state === "charging" ||
+      this.state === "channeling"
     ) {
       emit("cast_request", this.id, {
         factory: factory.metadata.id,
@@ -817,10 +844,9 @@ export class BasicWizard implements Contestant {
     this.chargedModifier = modifier ?? null;
     this.chargedSpeed = effective.baseSpeed ?? 0;
     this._cachedWorldForCast?.addSpell(spell);
-    this.setState(
-      "charging",
-      effective.chargeTime || CHARGE_DURATION
-    );
+    const castMode: MovementState =
+      effective.castMode === "channel" ? "channeling" : "charging";
+    this.setState(castMode, effective.chargeTime || CHARGE_DURATION);
     emit("cast_request", this.id, {
       factory: factory.metadata.id,
       modifier: modifier?.id ?? null,
@@ -851,7 +877,9 @@ export class BasicWizard implements Contestant {
     this.chargedModifier = null;
     this.chargedSpeed = 0;
     this.chargeTarget = null;
-    if (this.state === "charging") this.setState("running");
+    if (this.state === "charging" || this.state === "channeling") {
+      this.setState("running");
+    }
   }
   _ccUpdateAim(target: Contestant | null, _aim: Vec2): void {
     this.chargeTarget = target;
@@ -994,7 +1022,8 @@ export class BasicWizard implements Contestant {
     if (
       this.state === "dashing" ||
       this.state === "recovering" ||
-      this.state === "charging"
+      this.state === "charging" ||
+      this.state === "channeling"
     )
       return;
     if (this.dashCooldown > 0) return;

@@ -36,10 +36,11 @@ export function blueRoster(): RosterEntry[] {
 
 export function greenRoster(): RosterEntry[] {
   return [
-    { tactic: new Turtle(), bias: 1.5 },
-    { tactic: new Retreat(), bias: 1.3 },
-    { tactic: new Orbit(), bias: 1 },
-    { tactic: new Kite(), bias: 0.9 },
+    { tactic: new Sniper(), bias: 1.7 },
+    { tactic: new Turtle(), bias: 1.2 },
+    { tactic: new Retreat(), bias: 1.0 },
+    { tactic: new Orbit(), bias: 0.8 },
+    { tactic: new Kite(), bias: 0.7 },
   ];
 }
 

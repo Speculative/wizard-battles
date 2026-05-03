@@ -10,12 +10,34 @@ import type {
 import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
 import { Explosion } from "./explosion";
-import { ParticleBurst } from "./particleBurst";
+import { ParticleBurst, type BurstPalette } from "./particleBurst";
 import { emit } from "../telemetry";
 
+export type ProjectileShape =
+  | {
+      kind: "fire-spheres";
+      layers: Array<{ scale: number; color: number; opacity: number }>;
+    }
+  | {
+      kind: "ice-shard";
+      bodyColor: number;
+      edgeColor: number;
+      lengthScale?: number;
+      widthScale?: number;
+    };
+
+export interface ProjectileImpactSpec {
+  palette?: BurstPalette;
+  explosionCoreColor?: number;
+  explosionHaloColor?: number;
+}
+
 export interface ProjectileVisualSpec {
-  layers: Array<{ scale: number; color: number; opacity: number }>;
+  shape: ProjectileShape;
   trailColor: number;
+  trailScale?: number;
+  trailOpacity?: number;
+  impact?: ProjectileImpactSpec;
 }
 
 export type ProjectileTelegraphSpec =
@@ -188,7 +210,7 @@ export class Projectile implements Spell {
     this.velocity = direction.clone().normalize().multiplyScalar(spec.speed);
 
     this.head = new THREE.Group();
-    buildFireSphere(this.head, spec.radius, spec.visual.layers);
+    buildProjectileMesh(this.head, spec.radius, spec.visual.shape);
     this.head.position.copy(this.position);
 
     this.trailGroup = new THREE.Group();
@@ -279,6 +301,7 @@ export class Projectile implements Spell {
 
     this.position.addScaledVector(this.velocity, dt);
     this.head.position.copy(this.position);
+    this.orientToVelocity();
 
     this.trailTimer -= dt;
     if (this.trailTimer <= 0) {
@@ -475,6 +498,17 @@ export class Projectile implements Spell {
     this.velocity.z = newZ * speed;
   }
 
+  private orientToVelocity(): void {
+    if (this.spec.visual.shape.kind !== "ice-shard") return;
+    const vx = this.velocity.x;
+    const vz = this.velocity.z;
+    const len = Math.hypot(vx, vz);
+    if (len < 1e-3) return;
+    // Mesh built pointing +X (after rotateZ in builder). After Y-rotation
+    // by atan2(-vz, vx), +X aligns with (vx, vz) in world space.
+    this.head.rotation.y = Math.atan2(-vz / len, vx / len);
+  }
+
   private updateTelegraph(dt: number, world: World): void {
     if (!this.telegraph) return;
     if (!this.telegraphAttached) {
@@ -523,6 +557,8 @@ export class Projectile implements Spell {
   }
 
   private updateTrailNodes(dt: number): void {
+    const trailScale = this.spec.visual.trailScale ?? 1;
+    const trailOpacity = this.spec.visual.trailOpacity ?? 0.45;
     for (const n of this.trailNodes) {
       if (!n.active) continue;
       n.age += dt;
@@ -534,9 +570,9 @@ export class Projectile implements Spell {
         continue;
       }
       const fade = 1 - t;
-      const scale = this.spec.radius * (0.9 + 0.4 * t);
+      const scale = this.spec.radius * (0.9 + 0.4 * t) * trailScale;
       n.mesh.scale.setScalar(scale);
-      n.material.opacity = 0.45 * fade * fade;
+      n.material.opacity = trailOpacity * fade * fade;
     }
   }
 
@@ -557,14 +593,17 @@ export class Projectile implements Spell {
     const explosionRadius = this.spec.aoe
       ? this.spec.aoe.radius
       : this.spec.radius * 3.8;
+    const impact = this.spec.visual.impact;
     world.addSpell(
       new Explosion(this.caster, this.position, {
         startRadius: this.spec.radius * 0.8,
         peakRadius: explosionRadius,
+        coreColor: impact?.explosionCoreColor,
+        haloColor: impact?.explosionHaloColor,
       })
     );
     world.addSpell(
-      new ParticleBurst(this.caster, this.position, undefined, {
+      new ParticleBurst(this.caster, this.position, impact?.palette, {
         speedScale: this.spec.aoe ? 2.0 : 1,
       })
     );
@@ -1002,10 +1041,22 @@ class TelegraphStack implements Telegraph {
   }
 }
 
+function buildProjectileMesh(
+  target: THREE.Group,
+  r: number,
+  shape: ProjectileShape
+): void {
+  if (shape.kind === "ice-shard") {
+    buildIceShardMesh(target, r, shape);
+  } else {
+    buildFireSphere(target, r, shape.layers);
+  }
+}
+
 function buildFireSphere(
   target: THREE.Group,
   r: number,
-  layers: ProjectileVisualSpec["layers"]
+  layers: Array<{ scale: number; color: number; opacity: number }>
 ): void {
   for (const l of layers) {
     const mesh = new THREE.Mesh(
@@ -1021,4 +1072,36 @@ function buildFireSphere(
     );
     target.add(mesh);
   }
+}
+
+function buildIceShardMesh(
+  target: THREE.Group,
+  r: number,
+  shape: Extract<ProjectileShape, { kind: "ice-shard" }>
+): void {
+  const length = shape.lengthScale ?? 2.2;
+  const width = shape.widthScale ?? 0.55;
+  const geo = new THREE.OctahedronGeometry(r, 0);
+  geo.scale(width, length, width);
+  // Geometry is built elongated along Y; rotate so the long axis aligns
+  // with +X. Then orientToVelocity rotates the head around Y to point in
+  // travel direction.
+  geo.rotateZ(-Math.PI / 2);
+
+  const bodyMat = new THREE.MeshBasicMaterial({
+    color: shape.bodyColor,
+    transparent: true,
+    opacity: 0.5,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  target.add(new THREE.Mesh(geo, bodyMat));
+
+  const edgesGeo = new THREE.EdgesGeometry(geo);
+  const edgesMat = new THREE.LineBasicMaterial({
+    color: shape.edgeColor,
+    transparent: true,
+    opacity: 0.85,
+  });
+  target.add(new THREE.LineSegments(edgesGeo, edgesMat));
 }
