@@ -151,6 +151,18 @@ export function sampleRingAroundEnemy(
   );
 }
 
+export function sampleRingAroundSelf(
+  self: Contestant,
+  radius: number,
+  count = 16
+): Candidate[] {
+  return sampleRing(
+    { x: self.position.x, z: self.position.z },
+    radius,
+    count
+  );
+}
+
 export function singleCandidate(pos: Vec2): Candidate[] {
   return [{ pos, score: 0 }];
 }
@@ -249,6 +261,53 @@ export function scoreByRangeMatch(
     const gap = Math.abs(d - target);
     if (gap <= band) return weight;
     return weight * Math.max(0, 1 - (gap - band) / Math.max(1, band));
+  });
+}
+
+/**
+ * Soft variant of scoreByRangeMatch: gradient never goes flat.
+ * Even candidates far from the target range get a tilt toward the target.
+ * Useful for tactics that may be sampled near self (within commit radius)
+ * when target range is far away — the harsh band-clipped scorer gives 0
+ * for all near-self candidates and loses directional information.
+ */
+export function scoreByRangeMatchSoft(
+  candidates: Candidate[],
+  self: Contestant,
+  enemy: Contestant,
+  preferredSurfaceRange: number,
+  weight = 0.6,
+  scale = 120
+): Candidate[] {
+  const target = preferredSurfaceRange + self.radius + enemy.radius;
+  const ex = enemy.position.x;
+  const ez = enemy.position.z;
+  return score(candidates, (c) => {
+    const d = Math.hypot(c.pos.x - ex, c.pos.z - ez);
+    const err = Math.abs(d - target);
+    return weight * (1 - Math.tanh(err / scale));
+  });
+}
+
+export function scoreAwayFromEnemiesPublic(
+  candidates: Candidate[],
+  self: Contestant,
+  world: World,
+  weight = 0.4,
+  horizon = 200
+): Candidate[] {
+  return score(candidates, (c) => {
+    let nearest = Infinity;
+    for (const other of world.contestants) {
+      if (other === self || !other.alive) continue;
+      const d = Math.hypot(
+        c.pos.x - other.position.x,
+        c.pos.z - other.position.z
+      );
+      if (d < nearest) nearest = d;
+    }
+    if (!Number.isFinite(nearest)) return 0;
+    return weight * Math.min(1, nearest / horizon);
   });
 }
 

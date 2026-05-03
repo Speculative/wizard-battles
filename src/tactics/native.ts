@@ -14,10 +14,13 @@ import {
   paceForRange,
   pickBest,
   sampleRingAroundEnemy,
+  sampleRingAroundSelf,
+  scoreAwayFromEnemiesPublic,
   scoreAwayFromProjectiles,
   scoreByAngularPreference,
   scoreByArenaCenter,
   scoreByRangeMatch,
+  scoreByRangeMatchSoft,
   scoreByReachability,
   scoreByWallClearance,
   selectionContext,
@@ -406,9 +409,9 @@ export class CloseQuarters implements Tactic {
 export class Sniper implements Tactic {
   readonly id = "sniper";
   readonly minDwell = 4;
-  private readonly dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
   private static readonly RANGE = 350;
   private static readonly BAND = 50;
+  private static readonly COMMIT_RADIUS = 70;
   private static readonly HEAVY_MIN_DISTANCE = 250;
   private static readonly HEAVY_MIN_HP = 0.3;
   private static readonly HEAVY_PROBABILITY = 0.4;
@@ -423,7 +426,42 @@ export class Sniper implements Tactic {
   update(_dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
     if (!enemy) return idleOutput();
-    return orbitOutput(self, enemy, world, Sniper.RANGE, Sniper.BAND, this.dir);
+    // Sample candidates within walking radius of self plus stay-put.
+    // Sampling around the enemy at preferred range produces "stay 350u
+    // away" candidates that are sometimes outside the arena (when enemy
+    // is near a wall) — the algorithm then picks a far in-bounds point
+    // and the wizard sprints across the map. Self-centered sampling
+    // keeps the commitment local; soft scoring carries direction-of-
+    // improvement even when no candidate is near preferred range.
+    const candidates0 = sampleRingAroundSelf(self, Sniper.COMMIT_RADIUS, 16);
+    candidates0.push({
+      pos: { x: self.position.x, z: self.position.z },
+      score: 0,
+    });
+    let candidates = scoreByRangeMatchSoft(
+      candidates0,
+      self,
+      enemy,
+      Sniper.RANGE,
+      0.7,
+      120
+    );
+    candidates = scoreAwayFromEnemiesPublic(candidates, self, world, 0.5, 220);
+    candidates = scoreByWallClearance(candidates, 1.6, 120);
+    candidates = scoreByArenaCenter(candidates, 0.25);
+    candidates = scoreAwayFromProjectiles(candidates, self, world, 0.6, 180);
+    const best = pickBest(candidates);
+    const moveIntent: Vec2 = best ? steerToward(self, best.pos) : STATIONARY;
+    const dist = surfaceDistance(self, enemy);
+    const gap = Math.abs(dist - Sniper.RANGE);
+    // Sniper never sprints — it commits to charged shots, not high-speed
+    // navigation. "hold" defaults to running.
+    const pace: TacticOutput["paceHint"] = gap < Sniper.BAND ? "walk" : "hold";
+    return {
+      moveIntent,
+      paceHint: pace,
+      facingIntent: faceContestant(self, enemy),
+    };
   }
 
   maybeCast(
