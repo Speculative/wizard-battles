@@ -350,6 +350,153 @@ ML stays *out* of the decision layer — hand-authored utility is more legible a
 - No paired-opposite personality axes
 - No optimizing for win rate at the expense of readability
 
+## Combat dynamics & spell design
+
+Discussed 2026-05-03.
+
+### The diagnosis
+
+Mid-range fireball duels stalemate. Two wizards parked at ~300u each
+spam fireballs while the other dodges; aim noise eventually grinds out
+a kill but it can take many minutes of simulated time, and the action
+during that window doesn't read as intentional. Root cause is the
+ratio between dodge stamina recovery and fireball cooldown — they're
+similar, so the equilibrium is "shoot, dodge, shoot, dodge" with no
+mechanism for either side to break it. Compounding factor: all
+offensive spells are projectile-shaped, so a single dodge mechanism
+handles the entire offensive game.
+
+A dodge-and-shoot exchange is fine as a *component* of a fight; the
+problem is when it's the whole fight.
+
+### Design principles for combat
+
+- **Legibility first.** A viewer should be able to name what each
+  wizard is doing and why. Random per-frame reactions are
+  anti-pattern; visible commitment is the pattern.
+- **"Intentional-looking" has a timing signature.** Slow telegraphed
+  decisions read as plans; fast frequently-changing ones read as
+  panic. Most "looks unintentional" issues are timing problems —
+  decisions made too often, telegraphs too short, transitions too
+  reactive.
+- **Setup → payoff.** Good exchanges have visible buildup and a
+  visible resolution. "Drop a slow field, lure enemy in, fireball
+  through it" reads as choreography. Atomic spells back-to-back read
+  as spam. AntiMageZone's `approach → cast → rush` hints at this
+  shape; we want it pervasive.
+- **The fantasy target is choreographed mage battles** (Frieren's are
+  a good reference) emerging from a simulator that has no writer.
+  Beats have to emerge from mechanics: visible buildup, visible
+  commitment, visible resolution, and consistent personality.
+
+### Spell diversity is next major priority
+
+Adding more dodge-able projectiles doesn't fix the dodge/cooldown
+equilibrium — the equilibrium just shifts. Adding spells with
+*different dodge profiles* changes the equilibrium shape. Categories
+worth adding (in rough order of likely impact on the staleness
+problem):
+
+- **Telegraphed AOEs.** 1–2s wind-up paints a region; the region
+  becomes lethal for a brief window. Can't be dodged sideways — the
+  defender has to *vacate the area*. Forces snipers off parked
+  positions. Pre-cast magic circle is the natural visual telegraph.
+- **Mobility-denial fields.** Slow / root / barrier zones that change
+  what the opponent's options are. Setup tools for combos.
+- **Push / pull.** Removes target's positional commitment.
+- **Charged beam / piercing line.** Long telegraph, fixed direction,
+  high reward against kited targets.
+
+Each new *dodge profile* multiplies the strategic surface more than a
+new spell of the same shape.
+
+### Metamagic modifiers (planned first investment)
+
+Hypothesis: most of the spell-variety value is unlocked by
+*per-spell-class modifiers* on the existing spell shapes, before
+designing entirely new spells. Same base spell, different
+commitment-vs-payoff tradeoffs.
+
+Examples on a projectile (fireball-class):
+- **Heavy / channeled.** Long charge, big payoff (huge AOE / extra
+  damage / persistent zone on impact). Caster rooted during charge —
+  naturally telegraphs the commitment.
+- **Flurry / split.** Short charge, multiple small projectiles in a
+  spread, longer cooldown. Spammable harassment trade.
+- **Curved / lobbed.** Indirect trajectory; harder to dodge by
+  sidestepping; requires longer setup.
+- **Accelerating.** Slow projectile that ramps up after launch; fakes
+  out dodge timing.
+- **Remote.** Magic circle attached to caster, projectile emerges from
+  a distant circle. Telegraphs early, hits an unexpected angle.
+
+Modifiers are **per-spell-class** (projectile, ground-targeting,
+self-targeting, beam). A modifier is a property of the class, not of
+fireball specifically — it composes with future projectile spells.
+
+**Selection is up to the tactic.** Some tactics commit to one modifier
+("Heavy Sniper" always casts heavy fireballs); others mix
+situationally ("Trap & Kill" drops a slow field, then casts a heavy
+projectile through it). The tactic owns the modifier choice because
+the tactic owns the *plan*; the modifier is part of how the plan
+executes. Naive random or score-based modifier selection will look
+exactly as unintentional as the head-shake did — modifier choice
+needs to be tactic-context-driven.
+
+**Tells vary by modifier.** Heavy spells get long pre-cast magic
+circles ("everyone in the arena can see this is happening"). Flurry
+spells are near-instant. Remote spells get a circle on the caster +
+circle at the target. The tell *is* the legibility — viewers should
+know what's coming before it lands. Tells also create counterplay
+opportunity (interrupt the channel, escape the AOE).
+
+**MVP plan.** Pick one modifier (heavy/channeled fireball) and ship
+it end-to-end before generalizing the abstraction. Add a sibling
+factory; wire one tactic to prefer it; verify in the harness whether
+matches with at least one heavy-fireball wizard show fewer mid-range
+stalemates. The right shape for the modifier abstraction will fall
+out of the duplication once we have the second factory in hand. The
+existing `charging` movement state and pre-cast spell hookup (used by
+fireball today) covers most of the visible-commitment piece for free.
+
+### Narrative arcs without a writer
+
+Producing choreographed-feeling sequences from emergent simulation
+needs:
+
+- **Multi-phase tactics where each phase reads as a beat.** AntiMageZone
+  is the prototype; we want this shape to be the norm, not the
+  exception.
+- **Variable pacing.** Periods of buildup and reset, not constant
+  action. Hard to hit if every frame must contain a decision; easier
+  if the system explicitly has "preparing" and "executing" beats.
+- **Personality consistency.** The same wizard makes the same kind of
+  call repeatedly. Reckless wizards always commit early; patient ones
+  always wait for setup; clever ones always feint. The Personality
+  vector axes (already designed) bias tactic and modifier choice to
+  produce this. Wire personality through after metamagic lands —
+  they compose multiplicatively.
+
+### Deferred mechanics
+
+- **Endurance / long-term resource.** Tempting as a stalemate-breaker,
+  but only worth adding if its main effect is *forcing commitment*
+  (low-endurance wizards must gamble on big moves), not slowing
+  baseline output. The "fight slower as you tire" version produces
+  slogs — worse than the staleness it solves. Revisit after spell
+  diversity lands; if mid-range duels still drag, endurance should
+  trigger desperate-tactic preferences below a threshold, not reduce
+  damage output uniformly.
+- **Momentum / weight system.** Improves engagement quality
+  (over-committed dashes are punishable, fast-moving fighters can't
+  pivot) but doesn't directly address mid-range stalemates. Defer
+  until the spell mix is settled; adding momentum first risks tuning
+  every new spell around momentum constraints we may not want.
+- **Mana pool.** Skipped. The cases mana usually justifies (spend
+  reserves for a big move) are better served by long cooldowns and
+  charge times we already have. Adds bookkeeping without proportionate
+  drama.
+
 ## TODO
 
 ### Done
@@ -408,20 +555,22 @@ Visual polish:
 
 Tactics are state-machine plans with position reasoning (stages 7–9 done). Open work, roughly in priority order:
 
-1. **More events + handlers.** `OpportunityStrike` (enemy whiffed a cast or stuck in slow-field), `TargetLost`, range-band detectors with hysteresis, `EnteredMeleeRange` if a third tactic ever wants the handoff. More reactive hooks for tactics to plan around.
-2. **More tactics that use mobility tags.** RepositionAggressive / RepositionDefensive — tactic-driven blink, not just reactive blink. Each picks "I want to be there" and uses any tagged mobility spell to get there.
-3. **Enemy prediction model** feeding tactic scoring and aim.
-4. **Per-tactic action selection** (actions as named discrete moves with their own commitment — fills in the missing action layer of the three-tier hierarchy).
-5. **Personality vector** wired into tactic and action scoring (currently stand-in: per-wizard roster biases).
-6. **Component-based spell interactions.** Refactor zone effects (slowing field, future auras) to install components on affected spells rather than iterate-and-modify. Enables stacking, spell-controlled responses.
-7. **Projectile kinematics for physical projectiles** (distinct from magical spells; levitated terrain etc.).
-8. **Predicted self-position helper** — generalize the one-off dodge-filter version into a reusable AI helper.
-9. **Reaction-time delay** on AI stimulus response *(likely requires an event queue — defer the design)*.
-10. **Per-contestant persistence** (habit weights on tactics, opponent models, aim skill).
-11. **Opponent reaction modeling.**
-12. **Jumps** + airborne state + air control (when the vertical axis starts to matter).
-13. **Investigate LOS + facing perception.** Tie awareness to the facing cone so facing management has weight (e.g. blink-backwards becomes a real choice). Flagged for legibility risk — viewers may see less of why the AI does what it does.
-14. *(Later)* MAP-Elites for personality generation.
-15. *(Later)* Learned trajectory predictor.
-16. *(Optional)* LLM commentary over event log.
+1. **Metamagic MVP.** Heavy/channeled fireball as a sibling projectile factory; wire one tactic to prefer it; harness-verify whether it breaks mid-range stalemates. Generalize to a `Modifier<Kind>` abstraction once we have ≥2 modifiers in hand. See the *Combat dynamics & spell design* section.
+2. **Telegraphed AOE spell.** First non-projectile-shaped offensive spell — a different dodge profile than fireball. Magic-circle wind-up, area becomes lethal for a brief window. Forces parked snipers to relocate.
+3. **More events + handlers.** `OpportunityStrike` (enemy whiffed a cast or stuck in slow-field), `TargetLost`, range-band detectors with hysteresis, `EnteredMeleeRange` if a third tactic ever wants the handoff. More reactive hooks for tactics to plan around.
+4. **More tactics that use mobility tags.** RepositionAggressive / RepositionDefensive — tactic-driven blink, not just reactive blink. Each picks "I want to be there" and uses any tagged mobility spell to get there.
+5. **Enemy prediction model** feeding tactic scoring and aim.
+6. **Per-tactic action selection** (actions as named discrete moves with their own commitment — fills in the missing action layer of the three-tier hierarchy).
+7. **Personality vector** wired into tactic and action scoring (currently stand-in: per-wizard roster biases). Composes with metamagic — per-wizard modifier preferences as personality expression.
+8. **Component-based spell interactions.** Refactor zone effects (slowing field, future auras) to install components on affected spells rather than iterate-and-modify. Enables stacking, spell-controlled responses.
+9. **Projectile kinematics for physical projectiles** (distinct from magical spells; levitated terrain etc.).
+10. **Predicted self-position helper** — generalize the one-off dodge-filter version into a reusable AI helper.
+11. **Reaction-time delay** on AI stimulus response *(likely requires an event queue — defer the design)*.
+12. **Per-contestant persistence** (habit weights on tactics, opponent models, aim skill).
+13. **Opponent reaction modeling.**
+14. **Jumps** + airborne state + air control (when the vertical axis starts to matter).
+15. **Investigate LOS + facing perception.** Tie awareness to the facing cone so facing management has weight (e.g. blink-backwards becomes a real choice). Flagged for legibility risk — viewers may see less of why the AI does what it does.
+16. *(Later)* MAP-Elites for personality generation.
+17. *(Later)* Learned trajectory predictor.
+18. *(Optional)* LLM commentary over event log.
 
