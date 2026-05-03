@@ -50,8 +50,18 @@ world.addContestant(
   })
 );
 
-let last = performance.now();
+// Seed `last` from the first RAF callback, not from script time. RAF's
+// `now` parameter is the frame-start timestamp, which can be earlier
+// than `performance.now()` read during script execution — using a
+// script-time `last` against a frame-start `now` produces a negative
+// dt on tick 1 and the kinematic body integrates backward.
+let last: number | null = null;
 function tick(now: number): void {
+  if (last === null) {
+    last = now;
+    requestAnimationFrame(tick);
+    return;
+  }
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
   world.update(dt);
