@@ -30,6 +30,8 @@ export interface ProjectileAOESpec {
   falloff: "linear" | "quadratic" | "constant";
 }
 
+export type ProjectileAimMode = "intercept" | "groundTarget";
+
 export interface ProjectileSpec {
   id: string;
   element: SpellElement;
@@ -44,6 +46,8 @@ export interface ProjectileSpec {
   aoe?: ProjectileAOESpec;
   telegraph?: ProjectileTelegraphSpec;
   visual: ProjectileVisualSpec;
+  aimMode?: ProjectileAimMode;
+  aimNoiseScale?: number;
 }
 
 export interface ProjectileModifier extends SpellModifier {
@@ -119,6 +123,8 @@ export class Projectile implements Spell {
   private age = 0;
   dead = false;
   private exploded = false;
+  private detonateAt: { x: number; z: number; dist: number } | null = null;
+  private launchOrigin = new THREE.Vector3();
   private readonly head: THREE.Group;
   private readonly trailGroup: THREE.Group;
   private readonly trailNodes: TrailNode[] = [];
@@ -190,6 +196,11 @@ export class Projectile implements Spell {
       (direction.y / len) * s,
       (direction.z / len) * s
     );
+    this.launchOrigin.copy(this.position);
+  }
+
+  setDetonationPoint(x: number, z: number, dist: number): void {
+    this.detonateAt = { x, z, dist };
   }
 
   update(dt: number, world: World): void {
@@ -232,6 +243,16 @@ export class Projectile implements Spell {
       ) {
         this.explode(world, c);
         return;
+      }
+    }
+
+    if (this.detonateAt) {
+      const traveled = Math.hypot(
+        this.position.x - this.launchOrigin.x,
+        this.position.z - this.launchOrigin.z
+      );
+      if (traveled >= this.detonateAt.dist) {
+        this.explode(world, null);
       }
     }
   }

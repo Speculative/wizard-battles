@@ -876,8 +876,20 @@ export class BasicWizard implements Contestant {
     if (!spell || !factory) return;
 
     if (spell instanceof Projectile && target) {
-      const aim = this.computeAimDirection(target, projectileSpeed);
-      spell.setVelocityFromDirection(aim);
+      const noiseScale = spell.spec.aimNoiseScale ?? 1;
+      const solution = this.computeAimSolution(
+        target,
+        projectileSpeed,
+        noiseScale
+      );
+      spell.setVelocityFromDirection(solution.direction);
+      if (spell.spec.aimMode === "groundTarget") {
+        spell.setDetonationPoint(
+          this.body.position.x + solution.leadX,
+          this.body.position.z + solution.leadZ,
+          solution.leadDistance
+        );
+      }
       this.shotsFired++;
     }
     spell.frozen = false;
@@ -897,10 +909,11 @@ export class BasicWizard implements Contestant {
     });
   }
 
-  private computeAimDirection(
+  private computeAimSolution(
     target: Contestant,
-    projectileSpeed: number
-  ): THREE.Vector3 {
+    projectileSpeed: number,
+    noiseScale: number
+  ): { direction: THREE.Vector3; leadX: number; leadZ: number; leadDistance: number } {
     const dx = target.position.x - this.body.position.x;
     const dz = target.position.z - this.body.position.z;
     const vx = target.velocity.x;
@@ -937,15 +950,22 @@ export class BasicWizard implements Contestant {
     }
 
     const sigma =
-      AIM_NOISE_SIGMA_MIN +
-      (AIM_NOISE_SIGMA_MAX - AIM_NOISE_SIGMA_MIN) *
-        Math.exp(-this.shotsFired / AIM_NOISE_DECAY_SHOTS);
+      (AIM_NOISE_SIGMA_MIN +
+        (AIM_NOISE_SIGMA_MAX - AIM_NOISE_SIGMA_MIN) *
+          Math.exp(-this.shotsFired / AIM_NOISE_DECAY_SHOTS)) *
+      noiseScale;
     const noise = gaussian() * sigma;
     const cos = Math.cos(noise);
     const sin = Math.sin(noise);
     const rx = leadX * cos - leadZ * sin;
     const rz = leadX * sin + leadZ * cos;
-    return new THREE.Vector3(rx, 0, rz);
+    const leadDistance = Math.hypot(leadX, leadZ);
+    return {
+      direction: new THREE.Vector3(rx, 0, rz),
+      leadX,
+      leadZ,
+      leadDistance,
+    };
   }
 
   private enforceArenaBounds(world: World): void {

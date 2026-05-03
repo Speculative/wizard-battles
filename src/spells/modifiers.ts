@@ -4,8 +4,9 @@ const HEAVY_CHARGE_MUL = 4.5;
 const HEAVY_COOLDOWN_MUL = 3.5;
 const HEAVY_DAMAGE_MUL = 1.8;
 const HEAVY_RADIUS_MUL = 1.6;
-const HEAVY_SPEED_MUL = 0.7;
-const HEAVY_AOE_RADIUS = 80;
+const HEAVY_SPEED_MUL = 0.85;
+const HEAVY_AOE_RADIUS = 110;
+const HEAVY_AIM_NOISE_SCALE = 0.2;
 const HEAVY_TELEGRAPH_COLOR = 0xff7020;
 
 export const Heavy: ProjectileModifier = {
@@ -34,6 +35,8 @@ export const Heavy: ProjectileModifier = {
         color: HEAVY_TELEGRAPH_COLOR,
         maxRadius: aoeRadius,
       },
+      aimMode: "groundTarget",
+      aimNoiseScale: HEAVY_AIM_NOISE_SCALE,
       visual: {
         ...base.visual,
         layers: base.visual.layers.map((l) => ({
