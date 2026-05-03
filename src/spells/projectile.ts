@@ -36,6 +36,14 @@ export type ProjectileTelegraphSpec =
       count: number;
       orbitRadius: number;
       orbSize: number;
+    }
+  | {
+      kind: "stacked-orbs";
+      color: number;
+      count: number;
+      orbSize: number;
+      baseY?: number;
+      spacing?: number;
     };
 
 export interface ProjectileAOESpec {
@@ -249,12 +257,15 @@ export class Projectile implements Spell {
       this.updateTelegraph(dt, world);
       return;
     }
-    this.detachTelegraph();
 
     if (this.emitterActive) {
+      // Telegraph survives across the firing burst (it drains as shots
+      // fire). updateEmitter handles its lifecycle.
       this.updateEmitter(dt, world);
       return;
     }
+
+    this.detachTelegraph();
 
     this.age += dt;
     if (this.age >= this.spec.lifetime) {
@@ -357,9 +368,27 @@ export class Projectile implements Spell {
       if (plan.interval <= 0) break;
     }
 
+    // Drive the telegraph through the firing burst so it can drain as
+    // shots fire (e.g. gatling stack). Charge time is fully elapsed by
+    // now so we hold t at 1.0 and pass live emission progress.
+    if (this.telegraph && this.telegraphAttached) {
+      TELEGRAPH_AIM_SCRATCH.set(
+        this.emitterBaseDir.x,
+        0,
+        this.emitterBaseDir.z
+      );
+      this.telegraph.update(
+        this.caster.position,
+        TELEGRAPH_AIM_SCRATCH,
+        1.0,
+        { fired: this.emitterFired, total: plan.count }
+      );
+    }
+
     if (this.emitterFired >= plan.count) {
       // For instant burst (interval=0) we'd loop above; this also catches
       // the timed case after the last child has been fired.
+      this.detachTelegraph();
       this.dead = true;
     }
   }
@@ -611,15 +640,26 @@ export class Projectile implements Spell {
   }
 }
 
+interface TelegraphEmissionProgress {
+  fired: number;
+  total: number;
+}
+
 interface Telegraph {
   readonly mesh: THREE.Object3D;
-  update(casterPos: THREE.Vector3, aimDir: THREE.Vector3, t: number): void;
+  update(
+    casterPos: THREE.Vector3,
+    aimDir: THREE.Vector3,
+    t: number,
+    emission?: TelegraphEmissionProgress
+  ): void;
   dispose(): void;
 }
 
 function createTelegraph(spec: ProjectileTelegraphSpec): Telegraph {
   if (spec.kind === "ground-fan") return new TelegraphFan(spec);
   if (spec.kind === "orbiting-orbs") return new TelegraphOrbiters(spec);
+  if (spec.kind === "stacked-orbs") return new TelegraphStack(spec);
   return new TelegraphCircle(spec);
 }
 
@@ -646,7 +686,12 @@ class TelegraphCircle implements Telegraph {
     this.mesh = mesh;
   }
 
-  update(casterPos: THREE.Vector3, _aimDir: THREE.Vector3, t: number): void {
+  update(
+    casterPos: THREE.Vector3,
+    _aimDir: THREE.Vector3,
+    t: number,
+    _emission?: TelegraphEmissionProgress
+  ): void {
     if (this.disposed) return;
     const radius = this.maxRadius * t;
     this.mesh.scale.set(radius, radius, 1);
@@ -698,7 +743,12 @@ class TelegraphFan implements Telegraph {
     this.mesh = mesh;
   }
 
-  update(casterPos: THREE.Vector3, aimDir: THREE.Vector3, t: number): void {
+  update(
+    casterPos: THREE.Vector3,
+    aimDir: THREE.Vector3,
+    t: number,
+    _emission?: TelegraphEmissionProgress
+  ): void {
     if (this.disposed) return;
     const radius = this.length * t;
     this.mesh.scale.set(radius, 1, radius);
@@ -762,7 +812,12 @@ class TelegraphOrbiters implements Telegraph {
     this.mesh = group;
   }
 
-  update(casterPos: THREE.Vector3, aimDir: THREE.Vector3, t: number): void {
+  update(
+    casterPos: THREE.Vector3,
+    aimDir: THREE.Vector3,
+    t: number,
+    _emission?: TelegraphEmissionProgress
+  ): void {
     if (this.disposed) return;
     const aimLen = Math.hypot(aimDir.x, aimDir.z);
     if (aimLen < 1e-4) return;
@@ -838,6 +893,104 @@ class TelegraphOrbiters implements Telegraph {
 
     const pulse = 0.7 + 0.3 * Math.sin(t * Math.PI * 10);
     this.material.opacity = (0.45 + 0.5 * t) * pulse;
+  }
+
+  dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.mesh.removeFromParent();
+    this.material.dispose();
+    this.geometry.dispose();
+  }
+}
+
+class TelegraphStack implements Telegraph {
+  readonly mesh: THREE.Group;
+  private readonly orbs: THREE.Mesh[];
+  private readonly material: THREE.MeshBasicMaterial;
+  private readonly geometry: THREE.SphereGeometry;
+  private readonly count: number;
+  private readonly baseY: number;
+  private readonly spacing: number;
+  private disposed = false;
+
+  constructor(spec: {
+    color: number;
+    count: number;
+    orbSize: number;
+    baseY?: number;
+    spacing?: number;
+  }) {
+    this.count = spec.count;
+    this.baseY = spec.baseY ?? 30;
+    this.spacing = spec.spacing ?? 11;
+    this.geometry = new THREE.SphereGeometry(spec.orbSize, 12, 8);
+    this.material = new THREE.MeshBasicMaterial({
+      color: spec.color,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    this.orbs = [];
+    const group = new THREE.Group();
+    for (let i = 0; i < spec.count; i++) {
+      const m = new THREE.Mesh(this.geometry, this.material);
+      m.renderOrder = 6;
+      m.visible = false;
+      group.add(m);
+      this.orbs.push(m);
+    }
+    this.mesh = group;
+  }
+
+  update(
+    casterPos: THREE.Vector3,
+    _aimDir: THREE.Vector3,
+    t: number,
+    emission?: TelegraphEmissionProgress
+  ): void {
+    if (this.disposed) return;
+    // All N orbs born by 90% of charge, evenly spaced. Each orb pops in
+    // (scale 0 → 1) over a brief window after its birth, then floats in
+    // place with a small bob. During the firing burst (emission set),
+    // orbs at the top of the stack are hidden first — feeds top-to-
+    // bottom into the caster like a magazine into a chamber.
+    const allBornBy = 0.9;
+    const popDur = 0.08;
+    const fired = emission?.fired ?? 0;
+    const topVisibleIdx = this.count - fired;
+
+    for (let i = 0; i < this.count; i++) {
+      const orb = this.orbs[i];
+
+      if (i >= topVisibleIdx) {
+        orb.visible = false;
+        continue;
+      }
+
+      const birth =
+        this.count <= 1 ? 0 : (i / (this.count - 1)) * allBornBy;
+      if (t < birth) {
+        orb.visible = false;
+        continue;
+      }
+      orb.visible = true;
+
+      const popProgress = Math.min(1, (t - birth) / popDur);
+      const scale = popProgress;
+
+      const bob = Math.sin(t * Math.PI * 4 + i * 0.6) * 1.2;
+      orb.position.set(
+        casterPos.x,
+        casterPos.y + this.baseY + i * this.spacing + bob,
+        casterPos.z
+      );
+      orb.scale.setScalar(scale);
+    }
+
+    const pulse = 0.7 + 0.3 * Math.sin(t * Math.PI * 12);
+    this.material.opacity = (0.5 + 0.4 * t) * pulse;
   }
 
   dispose(): void {

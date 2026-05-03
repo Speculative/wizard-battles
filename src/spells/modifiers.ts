@@ -101,6 +101,8 @@ const GATLING_DAMAGE_MUL = 0.5;
 const GATLING_RADIUS_MUL = 0.7;
 const GATLING_CHARGE_MUL = 1.5;
 const GATLING_COOLDOWN_MUL = 3.5;
+const GATLING_TELEGRAPH_COLOR = 0xffa040;
+const GATLING_TELEGRAPH_ORB_SIZE = 4.5;
 
 export const Gatling: ProjectileModifier = {
   id: "gatling",
@@ -120,6 +122,12 @@ export const Gatling: ProjectileModifier = {
         interval: GATLING_INTERVAL,
         followCaster: true,
         perChildAimJitter: 0.04,
+      },
+      telegraph: {
+        kind: "stacked-orbs",
+        color: GATLING_TELEGRAPH_COLOR,
+        count: GATLING_COUNT,
+        orbSize: GATLING_TELEGRAPH_ORB_SIZE,
       },
       aimNoiseScale: 0.35,
     };
