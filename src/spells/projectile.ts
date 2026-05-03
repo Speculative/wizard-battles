@@ -29,6 +29,13 @@ export type ProjectileTelegraphSpec =
       color: number;
       length: number;
       arcRadians: number;
+    }
+  | {
+      kind: "orbiting-orbs";
+      color: number;
+      count: number;
+      orbitRadius: number;
+      orbSize: number;
     };
 
 export interface ProjectileAOESpec {
@@ -612,6 +619,7 @@ interface Telegraph {
 
 function createTelegraph(spec: ProjectileTelegraphSpec): Telegraph {
   if (spec.kind === "ground-fan") return new TelegraphFan(spec);
+  if (spec.kind === "orbiting-orbs") return new TelegraphOrbiters(spec);
   return new TelegraphCircle(spec);
 }
 
@@ -715,6 +723,129 @@ class TelegraphFan implements Telegraph {
     this.mesh.removeFromParent();
     this.material.dispose();
     (this.mesh.geometry as THREE.BufferGeometry).dispose();
+  }
+}
+
+class TelegraphOrbiters implements Telegraph {
+  readonly mesh: THREE.Group;
+  private readonly orbs: THREE.Mesh[];
+  private readonly material: THREE.MeshBasicMaterial;
+  private readonly geometry: THREE.SphereGeometry;
+  private readonly orbitRadius: number;
+  private readonly count: number;
+  private disposed = false;
+
+  constructor(spec: {
+    color: number;
+    count: number;
+    orbitRadius: number;
+    orbSize: number;
+  }) {
+    this.orbitRadius = spec.orbitRadius;
+    this.count = spec.count;
+    this.geometry = new THREE.SphereGeometry(spec.orbSize, 12, 8);
+    this.material = new THREE.MeshBasicMaterial({
+      color: spec.color,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    this.orbs = [];
+    const group = new THREE.Group();
+    for (let i = 0; i < spec.count; i++) {
+      const m = new THREE.Mesh(this.geometry, this.material);
+      m.renderOrder = 6;
+      group.add(m);
+      this.orbs.push(m);
+    }
+    this.mesh = group;
+  }
+
+  update(casterPos: THREE.Vector3, aimDir: THREE.Vector3, t: number): void {
+    if (this.disposed) return;
+    const aimLen = Math.hypot(aimDir.x, aimDir.z);
+    if (aimLen < 1e-4) return;
+    const ax = aimDir.x / aimLen;
+    const az = aimDir.z / aimLen;
+    const aimAngle = Math.atan2(az, ax);
+
+    // Three phases over the charge window:
+    //   [0, spawnEnd]            — orbs born one-by-one from facing direction
+    //   each orb takes spiralDur after birth to spiral out into its slot
+    //   [spawnEnd+spiralDur, collectStart]  — all 8 in stable orbit
+    //   [collectStart, 1]        — orbit shrinks and drifts forward into a
+    //                              tight cluster ahead of caster
+    const spawnEnd = 0.5;
+    const spiralDur = 0.15;
+    const collectStart = 0.78;
+    const orbitRotations = 3;
+    const orbitPhase = 2 * Math.PI * orbitRotations * t;
+
+    // Orbit center & radius depend only on global phase, not per-orb.
+    let cx = casterPos.x;
+    let cz = casterPos.z;
+    let radius = this.orbitRadius;
+    if (t > collectStart) {
+      const cp = Math.min(1, (t - collectStart) / (1 - collectStart));
+      const eased = cp * cp;
+      cx += ax * this.orbitRadius * 0.7 * eased;
+      cz += az * this.orbitRadius * 0.7 * eased;
+      radius = this.orbitRadius * (1 - eased * 0.85);
+    }
+
+    for (let i = 0; i < this.count; i++) {
+      const orb = this.orbs[i];
+      const birth =
+        this.count <= 1 ? 0 : (i / (this.count - 1)) * spawnEnd;
+      const slotAngle = (i / this.count) * Math.PI * 2;
+      const spiralEnd = birth + spiralDur;
+
+      if (t < birth) {
+        orb.visible = false;
+        continue;
+      }
+      orb.visible = true;
+
+      let px: number;
+      let pz: number;
+      if (t < spiralEnd) {
+        // Spiral out from caster along facing direction. The end angle is
+        // chosen so the orb seamlessly joins its orbit slot at the moment
+        // it finishes spiraling — extra +4π adds two visible rotations
+        // during the spiral arc.
+        const progress = (t - birth) / spiralDur;
+        const eased = 1 - (1 - progress) * (1 - progress);
+        const orbitAngleAtJoin =
+          slotAngle + 2 * Math.PI * orbitRotations * spiralEnd;
+        const endAngle = orbitAngleAtJoin + 4 * Math.PI;
+        const angle = aimAngle + (endAngle - aimAngle) * eased;
+        const orbR = this.orbitRadius * eased;
+        px = casterPos.x + Math.cos(angle) * orbR;
+        pz = casterPos.z + Math.sin(angle) * orbR;
+      } else {
+        const angle = slotAngle + orbitPhase;
+        px = cx + Math.cos(angle) * radius;
+        pz = cz + Math.sin(angle) * radius;
+      }
+
+      orb.position.set(
+        px,
+        casterPos.y + 2 * Math.sin(slotAngle + t * Math.PI * 2),
+        pz
+      );
+    }
+
+    const pulse = 0.7 + 0.3 * Math.sin(t * Math.PI * 10);
+    this.material.opacity = (0.45 + 0.5 * t) * pulse;
+  }
+
+  dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.mesh.removeFromParent();
+    this.material.dispose();
+    this.geometry.dispose();
   }
 }
 

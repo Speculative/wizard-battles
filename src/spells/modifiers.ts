@@ -55,6 +55,9 @@ const SWARM_CHARGE_MUL = 2.0;
 const SWARM_COOLDOWN_MUL = 3.2;
 const SWARM_HOMING_TURN_RATE = 1.6;
 const SWARM_HOMING_RANGE = 500;
+const SWARM_TELEGRAPH_COLOR = 0xff6030;
+const SWARM_TELEGRAPH_ORBIT_RADIUS = 38;
+const SWARM_TELEGRAPH_ORB_SIZE = 4;
 
 export const Swarm: ProjectileModifier = {
   id: "swarm",
@@ -78,6 +81,13 @@ export const Swarm: ProjectileModifier = {
       homing: {
         turnRate: SWARM_HOMING_TURN_RATE,
         range: SWARM_HOMING_RANGE,
+      },
+      telegraph: {
+        kind: "orbiting-orbs",
+        color: SWARM_TELEGRAPH_COLOR,
+        count: SWARM_COUNT,
+        orbitRadius: SWARM_TELEGRAPH_ORBIT_RADIUS,
+        orbSize: SWARM_TELEGRAPH_ORB_SIZE,
       },
       aimNoiseScale: 0.3,
     };
