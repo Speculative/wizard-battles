@@ -15,6 +15,8 @@ const SPREAD_DAMAGE_MUL = 0.45;
 const SPREAD_RADIUS_MUL = 0.75;
 const SPREAD_CHARGE_MUL = 1.6;
 const SPREAD_COOLDOWN_MUL = 2.5;
+const SPREAD_TELEGRAPH_LENGTH = 320;
+const SPREAD_TELEGRAPH_COLOR = 0xff7020;
 
 export const Spread: ProjectileModifier = {
   id: "spread",
@@ -32,6 +34,12 @@ export const Spread: ProjectileModifier = {
         count: SPREAD_COUNT,
         spreadAngle: SPREAD_FAN,
         interval: 0,
+      },
+      telegraph: {
+        kind: "ground-fan",
+        color: SPREAD_TELEGRAPH_COLOR,
+        length: SPREAD_TELEGRAPH_LENGTH,
+        arcRadians: SPREAD_FAN,
       },
       aimNoiseScale: 0.4,
     };

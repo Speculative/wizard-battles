@@ -18,11 +18,18 @@ export interface ProjectileVisualSpec {
   trailColor: number;
 }
 
-export interface ProjectileTelegraphSpec {
-  kind: "ground-circle";
-  color: number;
-  maxRadius: number;
-}
+export type ProjectileTelegraphSpec =
+  | {
+      kind: "ground-circle";
+      color: number;
+      maxRadius: number;
+    }
+  | {
+      kind: "ground-fan";
+      color: number;
+      length: number;
+      arcRadians: number;
+    };
 
 export interface ProjectileAOESpec {
   radius: number;
@@ -119,6 +126,7 @@ const TRAIL_COUNT = 7;
 const TRAIL_SAMPLE_INTERVAL = 0.025;
 const TRAIL_LIFETIME = TRAIL_SAMPLE_INTERVAL * TRAIL_COUNT;
 const TELEGRAPH_GROUND_Y = 0.4;
+const TELEGRAPH_AIM_SCRATCH = new THREE.Vector3();
 
 interface TrailNode {
   mesh: THREE.Mesh;
@@ -144,7 +152,7 @@ export class Projectile implements Spell {
   private readonly trailGroup: THREE.Group;
   private readonly trailNodes: TrailNode[] = [];
   private trailTimer = 0;
-  private readonly telegraph: TelegraphCircle | null;
+  private readonly telegraph: Telegraph | null;
   private telegraphAge = 0;
   private telegraphAttached = false;
   private emitterBaseDir = new THREE.Vector3(1, 0, 0);
@@ -196,9 +204,7 @@ export class Projectile implements Spell {
     group.add(this.head);
     this.mesh = group;
 
-    this.telegraph = spec.telegraph
-      ? new TelegraphCircle(spec.telegraph)
-      : null;
+    this.telegraph = spec.telegraph ? createTelegraph(spec.telegraph) : null;
   }
 
   setPosition(x: number, y: number, z: number): void {
@@ -443,7 +449,16 @@ export class Projectile implements Spell {
     this.telegraphAge += dt;
     const totalCharge = Math.max(0.001, this.spec.chargeTime);
     const t = Math.min(1, this.telegraphAge / totalCharge);
-    this.telegraph.update(this.position, t);
+    // The frozen projectile is positioned by the wizard each frame at
+    // caster.position + aim*offset, so (this.position - caster.position)
+    // is the aim direction.
+    const aim = TELEGRAPH_AIM_SCRATCH;
+    aim.set(
+      this.position.x - this.caster.position.x,
+      0,
+      this.position.z - this.caster.position.z
+    );
+    this.telegraph.update(this.caster.position, aim, t);
   }
 
   private detachTelegraph(): void {
@@ -589,13 +604,24 @@ export class Projectile implements Spell {
   }
 }
 
-class TelegraphCircle {
+interface Telegraph {
+  readonly mesh: THREE.Object3D;
+  update(casterPos: THREE.Vector3, aimDir: THREE.Vector3, t: number): void;
+  dispose(): void;
+}
+
+function createTelegraph(spec: ProjectileTelegraphSpec): Telegraph {
+  if (spec.kind === "ground-fan") return new TelegraphFan(spec);
+  return new TelegraphCircle(spec);
+}
+
+class TelegraphCircle implements Telegraph {
   readonly mesh: THREE.Mesh;
   private readonly material: THREE.MeshBasicMaterial;
   private readonly maxRadius: number;
   private disposed = false;
 
-  constructor(spec: ProjectileTelegraphSpec) {
+  constructor(spec: { color: number; maxRadius: number }) {
     this.maxRadius = spec.maxRadius;
     const geo = new THREE.RingGeometry(0.85, 1.0, 48, 1);
     this.material = new THREE.MeshBasicMaterial({
@@ -612,13 +638,75 @@ class TelegraphCircle {
     this.mesh = mesh;
   }
 
-  update(casterPos: THREE.Vector3, t: number): void {
+  update(casterPos: THREE.Vector3, _aimDir: THREE.Vector3, t: number): void {
     if (this.disposed) return;
     const radius = this.maxRadius * t;
     this.mesh.scale.set(radius, radius, 1);
     this.mesh.position.set(casterPos.x, TELEGRAPH_GROUND_Y, casterPos.z);
     const pulse = 0.6 + 0.4 * Math.sin(t * Math.PI * 8);
     this.material.opacity = (0.35 + 0.5 * t) * pulse;
+  }
+
+  dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.mesh.removeFromParent();
+    this.material.dispose();
+    (this.mesh.geometry as THREE.BufferGeometry).dispose();
+  }
+}
+
+class TelegraphFan implements Telegraph {
+  readonly mesh: THREE.Mesh;
+  private readonly material: THREE.MeshBasicMaterial;
+  private readonly length: number;
+  private disposed = false;
+
+  constructor(spec: { color: number; length: number; arcRadians: number }) {
+    this.length = spec.length;
+    // Pie-slice built as a partial ring with near-zero inner radius, then
+    // baked flat into the XZ plane so we only need to spin the mesh
+    // around Y to point at the aim direction.
+    const segments = 24;
+    const geo = new THREE.RingGeometry(
+      0.001,
+      1.0,
+      segments,
+      1,
+      -spec.arcRadians / 2,
+      spec.arcRadians
+    );
+    geo.rotateX(-Math.PI / 2);
+    this.material = new THREE.MeshBasicMaterial({
+      color: spec.color,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const mesh = new THREE.Mesh(geo, this.material);
+    mesh.renderOrder = 5;
+    this.mesh = mesh;
+  }
+
+  update(casterPos: THREE.Vector3, aimDir: THREE.Vector3, t: number): void {
+    if (this.disposed) return;
+    const radius = this.length * t;
+    this.mesh.scale.set(radius, 1, radius);
+    this.mesh.position.set(casterPos.x, TELEGRAPH_GROUND_Y, casterPos.z);
+    const len = Math.hypot(aimDir.x, aimDir.z);
+    if (len > 1e-4) {
+      // RingGeometry was built centered on +X (in XY before rotateX). After
+      // baking the X rotation, the wedge points along world +X. To align
+      // its forward direction with (aimDir.x, aimDir.z), rotate around Y by
+      // atan2(-aim.z, aim.x) — see derivation in commit message.
+      const ax = aimDir.x / len;
+      const az = aimDir.z / len;
+      this.mesh.rotation.y = Math.atan2(-az, ax);
+    }
+    const pulse = 0.6 + 0.4 * Math.sin(t * Math.PI * 8);
+    this.material.opacity = (0.25 + 0.45 * t) * pulse;
   }
 
   dispose(): void {
