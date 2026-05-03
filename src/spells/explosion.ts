@@ -4,8 +4,14 @@ import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
 
 const DURATION = 0.32;
-const START_RADIUS = 8;
-const PEAK_RADIUS = 38;
+const DEFAULT_START_RADIUS = 8;
+const DEFAULT_PEAK_RADIUS = 38;
+
+export interface ExplosionOptions {
+  startRadius?: number;
+  peakRadius?: number;
+  duration?: number;
+}
 
 const EXPLOSION_METADATA: SpellMetadata = {
   id: "explosion",
@@ -29,10 +35,20 @@ export class Explosion implements Spell {
   private readonly haloMat: THREE.MeshBasicMaterial;
   private readonly core: THREE.Mesh;
   private readonly halo: THREE.Mesh;
+  private readonly startRadius: number;
+  private readonly peakRadius: number;
+  private readonly duration: number;
 
-  constructor(caster: Contestant, origin: THREE.Vector3) {
+  constructor(
+    caster: Contestant,
+    origin: THREE.Vector3,
+    options: ExplosionOptions = {}
+  ) {
     this.caster = caster;
     this.position = origin.clone();
+    this.startRadius = options.startRadius ?? DEFAULT_START_RADIUS;
+    this.peakRadius = options.peakRadius ?? DEFAULT_PEAK_RADIUS;
+    this.duration = options.duration ?? DURATION;
 
     const geo = new THREE.SphereGeometry(1, 16, 12);
     this.coreMat = new THREE.MeshBasicMaterial({
@@ -58,13 +74,14 @@ export class Explosion implements Spell {
 
   update(dt: number, _world: World): void {
     this.age += dt;
-    const t = this.age / DURATION;
+    const t = this.age / this.duration;
     if (t >= 1) {
       this.dead = true;
       return;
     }
     const ease = 1 - (1 - t) * (1 - t);
-    const coreR = START_RADIUS + (PEAK_RADIUS - START_RADIUS) * ease;
+    const coreR =
+      this.startRadius + (this.peakRadius - this.startRadius) * ease;
     const haloR = coreR * 1.7;
     this.core.scale.setScalar(coreR);
     this.halo.scale.setScalar(haloR);

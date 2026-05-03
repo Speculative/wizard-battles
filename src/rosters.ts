@@ -4,12 +4,10 @@ import {
   Orbit,
   Ambush,
   Retreat,
-  BaitAndSwitch,
   DuelistCharge,
   CloseQuarters,
   Sniper,
   Turtle,
-  Scrapper,
   AntiMageZone,
   AvoidIncoming,
 } from "./tactics/native";
@@ -47,9 +45,9 @@ export function greenRoster(): RosterEntry[] {
 
 export function yellowRoster(): RosterEntry[] {
   return [
-    { tactic: new Scrapper(), bias: 1.6 },
-    { tactic: new BaitAndSwitch(), bias: 1.3 },
-    { tactic: new Pressure(), bias: 1 },
-    { tactic: new Orbit(), bias: 0.8 },
+    { tactic: new Sniper(), bias: 1.8 },
+    { tactic: new Ambush(), bias: 1.2 },
+    { tactic: new Kite(), bias: 1.0 },
+    { tactic: new Retreat(), bias: 0.7 },
   ];
 }

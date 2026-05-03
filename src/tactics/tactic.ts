@@ -1,7 +1,7 @@
 import type { Contestant } from "../contestants/contestant";
 import type { EventDetector } from "../events/event";
 import type { Handler } from "../handlers/handler";
-import type { SpellFactory } from "../spells/spell";
+import type { SpellFactory, SpellModifier } from "../spells/spell";
 import type { Vec2 } from "../steering";
 import type { World } from "../world";
 
@@ -25,7 +25,8 @@ export interface CastController {
   requestCast(
     factory: SpellFactory,
     target: Contestant | null,
-    aim: Vec2
+    aim: Vec2,
+    modifier?: SpellModifier
   ): boolean;
   cancelCharging(): void;
   updateAim(target: Contestant | null, aim: Vec2): void;

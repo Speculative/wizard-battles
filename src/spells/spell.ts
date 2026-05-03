@@ -31,7 +31,17 @@ export interface Spell {
   update(dt: number, world: World): void;
 }
 
+export interface SpellModifier {
+  readonly id: string;
+  readonly tags: string[];
+}
+
 export interface SpellFactory {
   readonly metadata: SpellMetadata;
-  create(caster: Contestant, target: Contestant | null, aim: THREE.Vector3): Spell;
+  create(
+    caster: Contestant,
+    target: Contestant | null,
+    aim: THREE.Vector3,
+    modifier?: SpellModifier
+  ): Spell;
 }

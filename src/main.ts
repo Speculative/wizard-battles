@@ -8,6 +8,7 @@ import { FireballFactory } from "./spells/fireball";
 import { MeleeFactory } from "./spells/meleeAttack";
 import { ProjectileSlowFieldFactory } from "./spells/projectileSlowField";
 import { BlinkFactory } from "./spells/blink";
+import { Heavy } from "./spells/modifiers";
 
 const canvas = document.getElementById("arena") as HTMLCanvasElement;
 const gfx = new GameRenderer(canvas);
@@ -47,6 +48,8 @@ world.addContestant(
     color: 0xffdd22,
     start: new THREE.Vector3(300, 0, -200),
     roster: yellowRoster(),
+    spellbook: [FireballFactory],
+    modifiers: [Heavy],
   })
 );
 

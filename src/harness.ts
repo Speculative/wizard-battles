@@ -7,6 +7,7 @@ import { FireballFactory } from "./spells/fireball";
 import { MeleeFactory } from "./spells/meleeAttack";
 import { ProjectileSlowFieldFactory } from "./spells/projectileSlowField";
 import { BlinkFactory } from "./spells/blink";
+import { Heavy } from "./spells/modifiers";
 import { useVirtualClock, advanceVirtualClock, nowSeconds } from "./clock";
 import { setTelemetry, emit, emitFrame } from "./telemetry";
 import { JsonlSink } from "./telemetrySink";
@@ -67,6 +68,8 @@ function makeWorld(): World {
       color: 0xffdd22,
       start: new THREE.Vector3(300, 0, -200),
       roster: yellowRoster(),
+      spellbook: [FireballFactory],
+      modifiers: [Heavy],
     })
   );
 

@@ -1,5 +1,5 @@
 import type { Contestant } from "../contestants/contestant";
-import type { SpellFactory } from "../spells/spell";
+import type { SpellFactory, SpellModifier } from "../spells/spell";
 import type { World } from "../world";
 import { type Vec2 } from "../steering";
 import type { CastController, PaceHint } from "./tactic";
@@ -19,6 +19,7 @@ export interface WizardAccessors {
   hp01?: () => number;
   getShotsFired?: () => number;
   getSpellbook?: () => readonly SpellFactory[];
+  getModifiers?: () => readonly SpellModifier[];
   getReadyAt?: () => Map<SpellFactory, number>;
 }
 
@@ -40,6 +41,11 @@ export function shotsFired(self: Contestant): number {
 export function spellbook(self: Contestant): readonly SpellFactory[] {
   const w = self as Contestant & WizardAccessors;
   return w.getSpellbook ? w.getSpellbook() : [];
+}
+
+export function modifiers(self: Contestant): readonly SpellModifier[] {
+  const w = self as Contestant & WizardAccessors;
+  return w.getModifiers ? w.getModifiers() : [];
 }
 
 export function selectionContext(

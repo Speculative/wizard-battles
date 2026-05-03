@@ -1,14 +1,15 @@
 import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
-import type { SpellFactory } from "../spells/spell";
+import type { SpellFactory, SpellModifier } from "../spells/spell";
 import { NoteOpponentChargingHandler } from "../handlers/noteOpponentCharging";
 import { OpponentChargingDetector } from "../events/opponentCharging";
 import type { EventDetector } from "../events/event";
 import type { Handler } from "../handlers/handler";
-import { byTag, byReady, inRange, defaultSelector } from "../spells/selection";
+import { byKind, byTag, byReady, inRange, defaultSelector } from "../spells/selection";
 import {
   faceContestant,
   hp01,
+  modifiers,
   nearestEnemy,
   paceForRange,
   pickBest,
@@ -408,6 +409,9 @@ export class Sniper implements Tactic {
   private readonly dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
   private static readonly RANGE = 350;
   private static readonly BAND = 50;
+  private static readonly HEAVY_MIN_DISTANCE = 250;
+  private static readonly HEAVY_MIN_HP = 0.3;
+  private static readonly HEAVY_PROBABILITY = 0.4;
 
   score(self: Contestant, world: World): number {
     const enemy = nearestEnemy(self, world);
@@ -421,7 +425,44 @@ export class Sniper implements Tactic {
     if (!enemy) return idleOutput();
     return orbitOutput(self, enemy, world, Sniper.RANGE, Sniper.BAND, this.dir);
   }
-  maybeCast = tryDefaultCast;
+
+  maybeCast(
+    _dt: number,
+    self: Contestant,
+    world: World,
+    caster: CastController
+  ): void {
+    if (caster.isCharging()) return;
+    const enemy = nearestEnemy(self, world);
+    if (!enemy) return;
+    const ctx = selectionContext(self, enemy);
+    const projectile =
+      spellbook(self)
+        .filter(byKind("projectile"))
+        .filter(byReady(ctx))
+        .find(inRange(ctx.distToTarget)) ?? null;
+    if (!projectile) {
+      // No projectile available — fall back to whatever is ready.
+      const fallback = defaultSelector(spellbook(self), ctx);
+      if (!fallback) return;
+      caster.requestCast(fallback, enemy, directionTo(self, enemy));
+      return;
+    }
+    const modifier = this.pickHeavyIfRight(self, enemy);
+    caster.requestCast(projectile, enemy, directionTo(self, enemy), modifier);
+  }
+
+  private pickHeavyIfRight(
+    self: Contestant,
+    enemy: Contestant
+  ): SpellModifier | undefined {
+    const heavy = modifiers(self).find((m) => m.tags.includes("heavy"));
+    if (!heavy) return undefined;
+    if (hp01(self) < Sniper.HEAVY_MIN_HP) return undefined;
+    if (surfaceDistance(self, enemy) < Sniper.HEAVY_MIN_DISTANCE) return undefined;
+    if (Math.random() >= Sniper.HEAVY_PROBABILITY) return undefined;
+    return heavy;
+  }
 }
 
 export class Turtle implements Tactic {

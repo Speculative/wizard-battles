@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import type { Contestant } from "./contestant";
 import type { World } from "../world";
-import { Fireball, FIREBALL_SPEED, FireballFactory } from "../spells/fireball";
-import type { Spell, SpellFactory } from "../spells/spell";
+import { FireballFactory } from "../spells/fireball";
+import { Projectile, isProjectileFactory, isProjectileModifier, specToMetadata } from "../spells/projectile";
+import type { Spell, SpellFactory, SpellMetadata, SpellModifier } from "../spells/spell";
 import { getToonGradient, makeOutline } from "../materials";
 import { KinematicBody, type MovementStats } from "../kinematics";
 import { StatusDisplay } from "../statusDisplay";
@@ -32,6 +33,17 @@ function gaussian(): number {
   const u = 1 - Math.random();
   const v = Math.random();
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+function computeEffectiveMetadata(
+  factory: SpellFactory,
+  modifier: SpellModifier | undefined
+): SpellMetadata {
+  if (!modifier) return factory.metadata;
+  if (isProjectileFactory(factory) && isProjectileModifier(modifier)) {
+    return specToMetadata(modifier.apply(factory.spec));
+  }
+  return factory.metadata;
 }
 
 const RADIUS = 22;
@@ -121,6 +133,7 @@ export interface BasicWizardOptions {
   start: THREE.Vector3;
   roster: RosterEntry[];
   spellbook?: SpellFactory[];
+  modifiers?: SpellModifier[];
 }
 
 class WizardCastController implements CastController {
@@ -132,9 +145,10 @@ class WizardCastController implements CastController {
   requestCast(
     factory: SpellFactory,
     target: Contestant | null,
-    aim: Vec2
+    aim: Vec2,
+    modifier?: SpellModifier
   ): boolean {
-    return this.wizard._ccRequestCast(factory, target, aim);
+    return this.wizard._ccRequestCast(factory, target, aim, modifier);
   }
   cancelCharging(): void {
     this.wizard._ccCancelCharging();
@@ -170,8 +184,11 @@ export class BasicWizard implements Contestant {
   private readonly readyAt = new Map<SpellFactory, number>();
   private turnTimer = 0;
   private readonly spellbook: SpellFactory[];
+  private readonly modifiers: SpellModifier[];
   private chargedSpell: (Spell & { frozen: boolean }) | null = null;
   private chargedFactory: SpellFactory | null = null;
+  private chargedModifier: SpellModifier | null = null;
+  private chargedSpeed = 0;
   private chargeTarget: Contestant | null = null;
   private shotsFired = 0;
   private dashCooldown = 0;
@@ -228,6 +245,7 @@ export class BasicWizard implements Contestant {
   constructor(opts: BasicWizardOptions) {
     this.id = opts.id;
     this.spellbook = opts.spellbook ?? [FireballFactory];
+    this.modifiers = opts.modifiers ?? [];
     this.body = new KinematicBody({ ...STATE_STATS.running }, opts.start);
     this.body.position.y = FLOAT_HEIGHT;
     this.tacticSelector = new TacticSelector(opts.roster, opts.id);
@@ -299,6 +317,9 @@ export class BasicWizard implements Contestant {
   }
   getSpellbook(): readonly SpellFactory[] {
     return this.spellbook;
+  }
+  getModifiers(): readonly SpellModifier[] {
+    return this.modifiers;
   }
   getReadyAt(): Map<SpellFactory, number> {
     return this.readyAt;
@@ -726,7 +747,7 @@ export class BasicWizard implements Contestant {
     const aim = this.chargeTarget
       ? this.chargeTarget.position.clone().sub(this.body.position).normalize()
       : this.facing;
-    if (this.chargedSpell instanceof Fireball) {
+    if (this.chargedSpell instanceof Projectile) {
       this.chargedSpell.setPosition(
         this.body.position.x + aim.x * (this.radius + 6),
         this.body.position.y + 8,
@@ -741,11 +762,15 @@ export class BasicWizard implements Contestant {
   _ccRequestCast(
     factory: SpellFactory,
     target: Contestant | null,
-    aim: Vec2
+    aim: Vec2,
+    modifier?: SpellModifier
   ): boolean {
+    const effective = computeEffectiveMetadata(factory, modifier);
     if (!this.alive) {
       emit("cast_request", this.id, {
         factory: factory.metadata.id,
+        modifier: modifier?.id ?? null,
+        effectiveSpellId: effective.id,
         targetId: target?.id ?? null,
         accepted: false,
         reason: "dead",
@@ -760,6 +785,8 @@ export class BasicWizard implements Contestant {
     ) {
       emit("cast_request", this.id, {
         factory: factory.metadata.id,
+        modifier: modifier?.id ?? null,
+        effectiveSpellId: effective.id,
         targetId: target?.id ?? null,
         accepted: false,
         reason: `state:${this.state}`,
@@ -769,6 +796,8 @@ export class BasicWizard implements Contestant {
     if (!this._ccIsReady(factory)) {
       emit("cast_request", this.id, {
         factory: factory.metadata.id,
+        modifier: modifier?.id ?? null,
+        effectiveSpellId: effective.id,
         targetId: target?.id ?? null,
         accepted: false,
         reason: "cooldown",
@@ -779,21 +808,27 @@ export class BasicWizard implements Contestant {
     this.chargeTarget = target;
     const aimVec = new THREE.Vector3(aim.x, 0, aim.z);
     if (aimVec.lengthSq() < 1e-6) aimVec.set(1, 0, 0);
-    const spell = factory.create(this, target, aimVec) as Spell & {
+    const spell = factory.create(this, target, aimVec, modifier) as Spell & {
       frozen: boolean;
     };
     spell.frozen = true;
     this.chargedSpell = spell;
     this.chargedFactory = factory;
+    this.chargedModifier = modifier ?? null;
+    this.chargedSpeed = effective.baseSpeed ?? 0;
     this._cachedWorldForCast?.addSpell(spell);
     this.setState(
       "charging",
-      factory.metadata.chargeTime || CHARGE_DURATION
+      effective.chargeTime || CHARGE_DURATION
     );
     emit("cast_request", this.id, {
       factory: factory.metadata.id,
+      modifier: modifier?.id ?? null,
+      effectiveSpellId: effective.id,
       targetId: target?.id ?? null,
       accepted: true,
+      chargeTime: effective.chargeTime,
+      cooldown: effective.cooldown,
       distToTarget: target
         ? Math.max(
             0,
@@ -813,6 +848,8 @@ export class BasicWizard implements Contestant {
     this.chargedSpell.dead = true;
     this.chargedSpell = null;
     this.chargedFactory = null;
+    this.chargedModifier = null;
+    this.chargedSpeed = 0;
     this.chargeTarget = null;
     if (this.state === "charging") this.setState("running");
   }
@@ -833,32 +870,42 @@ export class BasicWizard implements Contestant {
   private releaseCharge(): void {
     const spell = this.chargedSpell;
     const factory = this.chargedFactory;
+    const modifier = this.chargedModifier;
     const target = this.chargeTarget;
+    const projectileSpeed = this.chargedSpeed;
     if (!spell || !factory) return;
 
-    if (spell instanceof Fireball && target) {
-      const aim = this.computeAimDirection(target);
+    if (spell instanceof Projectile && target) {
+      const aim = this.computeAimDirection(target, projectileSpeed);
       spell.setVelocityFromDirection(aim);
       this.shotsFired++;
     }
     spell.frozen = false;
     this.chargedSpell = null;
     this.chargedFactory = null;
+    this.chargedModifier = null;
+    this.chargedSpeed = 0;
     this.chargeTarget = null;
-    const cooldown = factory.metadata.cooldown || 1.0;
+    const effective = computeEffectiveMetadata(factory, modifier ?? undefined);
+    const cooldown = effective.cooldown || 1.0;
     this.readyAt.set(factory, nowSeconds() + cooldown);
     emit("cast_release", this.id, {
       factory: factory.metadata.id,
+      modifier: modifier?.id ?? null,
+      effectiveSpellId: effective.id,
       targetId: target?.id ?? null,
     });
   }
 
-  private computeAimDirection(target: Contestant): THREE.Vector3 {
+  private computeAimDirection(
+    target: Contestant,
+    projectileSpeed: number
+  ): THREE.Vector3 {
     const dx = target.position.x - this.body.position.x;
     const dz = target.position.z - this.body.position.z;
     const vx = target.velocity.x;
     const vz = target.velocity.z;
-    const s = FIREBALL_SPEED;
+    const s = projectileSpeed;
     const a = vx * vx + vz * vz - s * s;
     const b = 2 * (dx * vx + dz * vz);
     const c = dx * dx + dz * dz;

@@ -83,17 +83,20 @@ export class ParticleBurst implements Spell {
   constructor(
     caster: Contestant,
     origin: THREE.Vector3,
-    palette: BurstPalette = FIRE_PALETTE
+    palette: BurstPalette = FIRE_PALETTE,
+    options: { speedScale?: number } = {}
   ) {
     this.caster = caster;
     this.position = origin.clone();
+    const speedScale = options.speedScale ?? 1;
 
     this.positions = new Float32Array(PARTICLE_COUNT * 3);
     this.velocities = new Float32Array(PARTICLE_COUNT * 3);
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
-      const speed = SPEED_MIN + Math.random() * (SPEED_MAX - SPEED_MIN);
+      const speed =
+        (SPEED_MIN + Math.random() * (SPEED_MAX - SPEED_MIN)) * speedScale;
       const sx = Math.sin(phi) * Math.cos(theta);
       const sy = Math.cos(phi);
       const sz = Math.sin(phi) * Math.sin(theta);
