@@ -210,7 +210,13 @@ export class Retreat implements Tactic {
     if (hp > 0.4) return 0.05;
     const danger = 1 - hp;
     const needsRest = stamina01(self) < 0.3 ? 1.2 : 1;
-    return 1.4 * danger * needsRest;
+    // Once we've successfully retreated, urgency drops so that other
+    // tactics (orbit, pressure) can take over and decide whether to
+    // re-engage from range. Without this, low-HP wizards stay parked at
+    // preferred range forever and matches stalemate.
+    const dist = surfaceDistance(self, enemy);
+    const stillFleeing = dist < 300 ? 1.0 : 0.2;
+    return 1.4 * danger * needsRest * stillFleeing;
   }
   update(_dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
