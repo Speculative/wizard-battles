@@ -28,3 +28,5 @@ body {
   height: 100%;
   display: block;
 }
+
+.experiment-link { position: fixed; left: 16px; bottom: 16px; color: #37315d; background: #fff; border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; font-size: 13px; }

@@ -11,7 +11,10 @@
     "q": "tsx scripts/duckq.ts",
     "capture": "tsx scripts/capture.ts",
     "test": "tsx --test tests/*.test.ts",
-    "check:browser": "tsx scripts/check-browser.ts"
+    "check:browser": "tsx scripts/check-browser.ts",
+    "experiment": "tsx scripts/experiment.ts",
+    "check:comparison": "tsx scripts/check-comparison.ts",
+    "capture:comparison": "tsx scripts/capture-comparison.ts"
   },
   "devDependencies": {
     "@duckdb/node-api": "^1.5.2-r.1",

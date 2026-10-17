@@ -1,4 +1,5 @@
 import { Vector3 } from './math';
+import { variantDefinition } from './experiment';
 import { World, type WorldOptions } from './world';
 import { BasicWizard, type BasicWizardOptions } from './contestants/basicWizard';
 import { redRoster, blueRoster, greenRoster, yellowRoster } from './rosters';
@@ -28,9 +29,7 @@ export function createScenario(options: ScenarioOptions = {}): World {
   if (options.scenario && !SCENARIO_IDS.includes(options.scenario as typeof SCENARIO_IDS[number])) {
     throw new Error(`Unknown scenario: ${options.scenario}`);
   }
-  if (options.variant && options.variant !== 'baseline') {
-    throw new Error(`Unknown variant: ${options.variant}`);
-  }
+  const variant = variantDefinition(options.variant ?? 'baseline');
   if (options.rotation !== undefined && !Number.isFinite(options.rotation)) throw new Error('rotation must be finite');
   const world = new World(options);
   const random = world.random;
@@ -38,22 +37,26 @@ export function createScenario(options: ScenarioOptions = {}): World {
     world, id: 'red', color: 0xff2244, start: new Vector3(-300, 0, -150),
     roster: redRoster(random), spellbook: [MeleeFactory, ProjectileSlowFieldFactory, FireballFactory],
     ...options.wizards?.red,
+    movement: { ...variant.movement, ...options.wizards?.red?.movement },
   }));
   world.addContestant(new BasicWizard({
     world, id: 'blue', color: 0x2266ff, start: new Vector3(300, 0, 150),
     roster: blueRoster(random), spellbook: [FireballFactory, BlinkFactory],
     ...options.wizards?.blue,
+    movement: { ...variant.movement, ...options.wizards?.blue?.movement },
   }));
   if (options.scenario !== 'duel') {
   world.addContestant(new BasicWizard({
     world, id: 'green', color: 0x22cc55, start: new Vector3(-300, 0, 200),
     roster: greenRoster(random), spellbook: [IceShardFactory, IceBoltFactory], modifiers: [Spread],
     ...options.wizards?.green,
+    movement: { ...variant.movement, ...options.wizards?.green?.movement },
   }));
   world.addContestant(new BasicWizard({
     world, id: 'yellow', color: 0xffdd22, start: new Vector3(300, 0, -200),
     roster: yellowRoster(random), spellbook: [FireballFactory], modifiers: [Heavy, Spread, Swarm, Gatling],
     ...options.wizards?.yellow,
+    movement: { ...variant.movement, ...options.wizards?.yellow?.movement },
   }));
   }
   const rotation = options.rotation ?? 0;

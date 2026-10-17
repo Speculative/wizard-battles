@@ -8,7 +8,7 @@ export class GameRenderer {
   private readonly canvas: HTMLCanvasElement;
   private readonly onResize = () => { this.resize(); this.render(); };
 
-  constructor(canvas: HTMLCanvasElement, options: { pixelRatio?: number } = {}) {
+  constructor(canvas: HTMLCanvasElement, options: { pixelRatio?: number; shadowMapSize?: number } = {}) {
     this.canvas = canvas;
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xffffff);
@@ -30,12 +30,12 @@ export class GameRenderer {
     );
     this.camera.lookAt(0, ARENA.height / 2, 0);
 
-    this.addLights();
+    this.addLights(options.shadowMapSize ?? 2048);
     this.resize();
     window.addEventListener("resize", this.onResize);
   }
 
-  private addLights(): void {
+  private addLights(shadowMapSize: number): void {
     const ambient = new THREE.AmbientLight(0xffffff, 0.5);
     this.scene.add(ambient);
 
@@ -53,7 +53,7 @@ export class GameRenderer {
     spot.decay = 0;
     spot.distance = 0;
     spot.castShadow = true;
-    spot.shadow.mapSize.set(2048, 2048);
+    spot.shadow.mapSize.set(shadowMapSize, shadowMapSize);
     spot.shadow.camera.near = 1;
     spot.shadow.camera.far = ARENA.height * 4;
     spot.shadow.bias = 0;
