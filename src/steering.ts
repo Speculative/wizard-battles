@@ -184,7 +184,8 @@ export function sampleBestDirection(
     const closeness = 1 - Math.min(1, wallDist / ctx.wallHorizon);
     const wallPenalty = closeness * closeness * closeness;
     const score = ctx.intentWeight * alignment - ctx.wallWeight * wallPenalty;
-    if (score > bestScore) {
+    // Preserve sampling order for numerically tied directions.
+    if (score > bestScore + 1e-10) {
       bestScore = score;
       bestX = dx;
       bestZ = dz;

@@ -376,7 +376,7 @@ export class BasicWizard implements Contestant {
       // every frame from velocity wobble, snapping facing across the body.
       // Pick the hemisphere matching the current facing for stability.
       const facingCross = rx * this.facing.z - rz * this.facing.x;
-      sign = facingCross >= 0 ? 1 : -1;
+      sign = facingCross >= -1e-10 ? 1 : -1;
     } else {
       sign = cross >= 0 ? 1 : -1;
     }
@@ -411,7 +411,8 @@ export class BasicWizard implements Contestant {
       this.facing.set(tx, 0, tz);
     } else {
       const cross = this.facing.x * tz - this.facing.z * tx;
-      const sign = cross >= 0 ? 1 : -1;
+      // A nearly antiparallel heading needs a stable turn-side tie.
+      const sign = cross >= -1e-10 ? 1 : -1;
       const rot = maxRotate * sign;
       const cos = Math.cos(rot);
       const sin = Math.sin(rot);

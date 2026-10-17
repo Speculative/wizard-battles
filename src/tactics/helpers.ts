@@ -361,8 +361,9 @@ export function scoreAwayFromProjectiles(
 export function pickBest(candidates: Candidate[]): Candidate | null {
   if (candidates.length === 0) return null;
   let best = candidates[0];
+  // Keep the first candidate when scores differ only by rounding noise.
   for (let i = 1; i < candidates.length; i++) {
-    if (candidates[i].score > best.score) best = candidates[i];
+    if (candidates[i].score > best.score + 1e-10) best = candidates[i];
   }
   return best;
 }

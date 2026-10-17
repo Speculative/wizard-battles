@@ -35,7 +35,9 @@ export class LateralDodgeHandler
     const relX = self.position.x - spell.position.x;
     const relZ = self.position.z - spell.position.z;
     const side = dx * relZ - dz * relX;
-    const sign = side >= 0 ? 1 : -1;
+    // A centered shot has no preferred lateral side. Tiny transcendental
+    // differences between JS engines must not flip a full-speed dodge.
+    const sign = side >= -1e-8 ? 1 : -1;
     const perp = { x: -dz * sign, z: dx * sign };
     const directions = arcDirections(perp, DODGE_ARC, DODGE_ARC_SAMPLES);
     const aim =

@@ -52,7 +52,8 @@ export class KinematicBody {
         const maxRotate = turnRate * dt;
         if (angleBetween > maxRotate) {
           const cross = vxn * this.intent.z - vzn * this.intent.x;
-          const sign = cross >= 0 ? 1 : -1;
+          // Resolve an antiparallel turn consistently across JS engines.
+          const sign = cross >= -1e-10 ? 1 : -1;
           const rot = maxRotate * sign;
           const cos = Math.cos(rot);
           const sin = Math.sin(rot);
