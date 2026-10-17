@@ -1,0 +1,85 @@
+{
+  "schema": "wizard-battles-persona-review-v1",
+  "persona": "Systems-curious spectator: causal understanding and honest evidence",
+  "model": "gpt-6.1-sol",
+  "source": "sha256:c818e1626474c535cf8c552ee5a650ae70f70eda3c9a4b65857abc9d6a45f55f",
+  "authorship": "Initial criticism from independent persona_systems reviewer messages retained in round1-notes.json. Root retained this report and performed the explicitly labeled corrected-evidence follow-up below.",
+  "overallVerdict": "The loop produced a useful evidence-integrity finding, now fixed. Measured duel seed1 remains a non-progress failure. No movement profile is established as more interesting, and individual dodge effectiveness remains unmeasured.",
+  "initialReview": {
+    "evidence": "Pre-fix report/raw logs and six sampled duel-seed1 stills, as reported by the independent reviewer; exact six frame filenames were not retained in its messages.",
+    "observations": [
+      "The old headless measured duel1 timed out with119 releases and82 dashes, only fireball damage, and red20/blue100 final HP. Activity counts did not imply progress.",
+      "The captured measured duel1 at19s had red30/blue56, while the old batch had red40/blue100. The reviewer checked source snapshots and narrowed changed inputs to tooling/viewer files rather than simulation files.",
+      "The source discrepancy prevented attributing browser spectacle to that batch. Root isolated engine-scale numerical differences selecting opposite directions at a tie."
+    ]
+  },
+  "followUp": {
+    "reviewer": "root (gpt-6.1-sol)",
+    "method": "Actual view_image inspection of four corrected stills, plus capture manifests and published report; no continuous video viewing.",
+    "evidenceInspected": [
+      "runs-captures/duel-s1-fixed/frame-00060.png",
+      "runs-captures/duel-s1-fixed/frame-00084.png",
+      "runs-captures/duel-s1-fixed/frame-00114.png",
+      "runs-captures/duel-s1-fixed-late/frame-00000.png",
+      "public/experiments/movement-pacing-v1/report.json",
+      "public/experiments/movement-pacing-v1/validation.json"
+    ],
+    "observations": [
+      {
+        "runId": "duel-s1-r0-measured",
+        "time": "10s",
+        "expectations": [
+          "WB-E004"
+        ],
+        "fact": "B shows red60/blue100, with separation and orange projectile cues. A holds its9.8s red win; C remains active. This agrees with matching capture state and curated damage evidence."
+      },
+      {
+        "runId": "duel-s1-r0-measured",
+        "time": "14s",
+        "expectations": [
+          "WB-E004",
+          "WB-E006"
+        ],
+        "fact": "B shows a conspicuous pale blue ground circle and red40/blue100. The field is easier to distinguish than the small orange projectiles; a still cannot establish successful defense attribution."
+      },
+      {
+        "runId": "duel-s1-r0-measured",
+        "time": "19s and90s",
+        "expectations": [
+          "WB-E004",
+          "WB-E007"
+        ],
+        "fact": "Both sampled B states show red30/blue90, consistent with final report HP and the long damage gap. At90s orange projectiles remain visible, so this is continuing activity without damage progress, not a frozen panel."
+      }
+    ],
+    "verification": "Centered dodge/turn/score ties fixed in c94ede0. Root verified72 full-match Node/Chromium cases in development and production; reported source now matches inspected fixed captures. This verifies selected configurations, not universal cross-engine bit identity."
+  },
+  "preference": {
+    "choice": "unsure; no adoption recommendation",
+    "reason": "Measured exposes a useful failure; fresh validation also finds baseline/burst timeouts. Duration and event counts cannot settle taste.",
+    "ownerPreference": "unknown"
+  },
+  "rankedConcerns": [
+    {
+      "rank": 1,
+      "concern": "Evidence must describe the same source and configuration.",
+      "status": "fixed for delivered packet; retain provenance discipline"
+    },
+    {
+      "rank": 2,
+      "concern": "Long repeated exchanges may stop changing stakes.",
+      "status": "retain as a failure example; investigate mechanisms in a later experiment"
+    },
+    {
+      "rank": 3,
+      "concern": "Unique attack/projectile lineage missing.",
+      "status": "deferred under existing runner scope; do not claim specific successful dodges"
+    }
+  ],
+  "evidenceLimits": [
+    "Sampled stills and logs, not continuous clip viewing.",
+    "Initial reviewer messages are retained excerpts, not a fabricated full original report.",
+    "No owner calibration or broad matchup validation.",
+    "Qualitative interpretation remains uncertain; individual attack causality is unavailable."
+  ]
+}

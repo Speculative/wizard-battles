@@ -1,0 +1,47 @@
+{
+  "schema": "wizard-battles-review-triage-v1",
+  "experiment": "movement-pacing-v1",
+  "source": "sha256:c818e1626474c535cf8c552ee5a650ae70f70eda3c9a4b65857abc9d6a45f55f",
+  "ownerPreference": "unknown; no approach approved",
+  "findings": [
+    {
+      "status": "Fixed and verified",
+      "finding": "Pre-fix headless results and browser viewing could describe different fights.",
+      "action": "Stabilized centered dodge, turn and candidate-score ties (c94ede0). Complete-match Node/Chromium agreement now passes72 matched cases, including24 fresh-seed cases. Regenerated matching reports/captures; retained original criticism separately."
+    },
+    {
+      "status": "Accepted; next experiment",
+      "finding": "Small spell/impact cues compete with the grid and do not consistently communicate anticipation/payoff.",
+      "action": "Keep this as a presentation hypothesis for a closer-framing/committed-exchange comparison. Enlargement is available now. Do not silently change all three profiles during the movement experiment."
+    },
+    {
+      "status": "Accepted; retained failure",
+      "finding": "Measured movement can create prolonged non-progress rather than meaningful tension.",
+      "action": "Keep duel seed1 and quarter-turn failure available. Fresh-seed baseline/burst stalls show this is not exclusive to one profile. No timeout count or damage-gap metric is a fun objective."
+    },
+    {
+      "status": "Deferred to existing runner scope",
+      "finding": "Current logs identify spell types, not unique attack/projectile lineage.",
+      "action": "Documented in both reports; do not attribute a nearby dodge to a particular successful defense. Continue causal-ID work under z8kh-x168 when needed."
+    },
+    {
+      "status": "Deferred until owner viewing",
+      "finding": "Persona preference is uncalibrated against the owner.",
+      "action": "Keep all seven expectations approved independently of satisfaction. Preserve dissent and uncertainty; user feedback uses timestamped notes/JSON. No forced rating threshold or automatic variant selection."
+    }
+  ],
+  "validation": {
+    "unitTests": 21,
+    "completeMatchCases": 72,
+    "developmentComparison": "passed",
+    "productionComparison": "passed",
+    "screeningMatches": 48,
+    "freshSeedMatches": 24,
+    "captureEvidence": "synchronized panels; sampled stills and clips with source/browser/frame-state manifests"
+  },
+  "limits": [
+    "Not customer validation or purchase-intent evidence.",
+    "Sampled stills cannot establish continuous pacing or subtle animation quality.",
+    "Numeric tie handling improves tested cross-engine agreement without promising all future engines/seeds are identical."
+  ]
+}

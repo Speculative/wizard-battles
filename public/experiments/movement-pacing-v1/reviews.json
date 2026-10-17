@@ -1,0 +1,903 @@
+{
+  "schema": "wizard-battles-persona-round-v1",
+  "experiment": "movement-pacing-v1",
+  "source": "sha256:c818e1626474c535cf8c552ee5a650ae70f70eda3c9a4b65857abc9d6a45f55f",
+  "rubric": "docs/PERSONA_REVIEW.md v1",
+  "ownerPreference": "unknown",
+  "reviews": [
+    {
+      "persona": "Fighting-game spectator focused on pressure, commitment, and readability",
+      "model": "gpt-6.1-sol",
+      "source": "sha256:c818e1626474c535cf8c552ee5a650ae70f70eda3c9a4b65857abc9d6a45f55f",
+      "reviewedAt": "2026-10-17T20:44:49.081197+00:00",
+      "variantMap": {
+        "A": "baseline",
+        "B": "measured",
+        "C": "burst"
+      },
+      "evidenceInspected": [
+        {
+          "path": "/workspace/runs-captures/duel-s1-fixed/frame-00048.png",
+          "requestedTime": 8,
+          "method": "view_image"
+        },
+        {
+          "path": "/workspace/runs-captures/duel-s1-fixed/frame-00060.png",
+          "requestedTime": 10,
+          "method": "view_image"
+        },
+        {
+          "path": "/workspace/runs-captures/duel-s1-fixed/frame-00084.png",
+          "requestedTime": 14,
+          "method": "view_image"
+        },
+        {
+          "path": "/workspace/runs-captures/duel-s1-fixed/frame-00114.png",
+          "requestedTime": 19,
+          "method": "view_image"
+        },
+        {
+          "path": "/workspace/runs-captures/duel-s1-fixed-late/frame-00000.png",
+          "requestedTime": 90,
+          "method": "view_image"
+        },
+        {
+          "path": "/workspace/runs-captures/duel-s1-fixed/capture.json",
+          "scope": "capture metadata and panel states for frames 48,60,84,114"
+        },
+        {
+          "path": "/workspace/runs-captures/duel-s1-fixed-late/capture.json",
+          "scope": "capture metadata and panel states for frame 0"
+        },
+        {
+          "path": "/workspace/public/experiments/movement-pacing-v1/report.json",
+          "scope": "duel seed 1 rotation 0 summaries and curated evidence; rotation 1 summaries and curated evidence also returned; long output partially truncated"
+        }
+      ],
+      "overallVerdict": "WB-E004: Not established visually. A/C show decisive outcomes and damage logs support consequential melee pressure, but sampled stills do not explain commitments, hits, or counters. B is worse on sustained consequence: 120-second timeout with a reported 103-second maximum damage gap. WB-E005: Partial positional readability, insufficient pressure readability. Separate red/blue figures make spacing legible in B/C, but tiny fighters, health bars, and projectiles make attack state and initiative difficult to infer. B late activity lacks changing stakes.",
+      "observations": [
+        {
+          "timeSeconds": 8,
+          "visual": "A fighters nearly overlap; B/C have visible separation. A/C blue is at 34 HP, B blue at 100 HP. Color and spacing read more readily than attack state.",
+          "interpretation": "A/C have established meaningful damage; no sampled pose identifies a punishable commitment."
+        },
+        {
+          "timeSeconds": 10,
+          "visual": "A shows red wins at 9.8 seconds. B has red 60/blue 100; C red 80/blue 34. B/C remain separated.",
+          "interpretation": "Outcome text supplies clear consequence for A. B has a readable health disadvantage for red, but spatial separation alone does not prove a richer exchange."
+        },
+        {
+          "timeSeconds": 14,
+          "visual": "A/C show completed red wins. B shows a broad blue floor circle below red, blue above, with red 40/blue 100.",
+          "logSupport": "B report records red projectileSlowField release at 13.383 seconds and blue damage to red at 14.267 seconds.",
+          "interpretation": "The floor circle is the clearest sampled arena cue, but its owner, duration, and tactical impact are not evident from the still."
+        },
+        {
+          "timeSeconds": 19,
+          "visual": "B shows separated fighters and small orange projectiles; red 30/blue 90. A/C remain frozen at their win states.",
+          "interpretation": "B now has damage in both directions, but projectile direction, who has initiative, and whether either fighter is committed remain unclear."
+        },
+        {
+          "timeSeconds": 90,
+          "visual": "B remains in progress with small orange projectiles and the same red 30/blue 90 as at 19 seconds.",
+          "logSupport": "B rotation 0 ends by timeout at 120 seconds, eight damage events, maximum damage gap 103.0167 seconds.",
+          "interpretation": "This reverses my willingness to prefer B for spectator pressure: apparent activity has not converted into changing health stakes. Still-to-still HP equality alone would not prove absence of intervening damage; the report supports the concern."
+        }
+      ],
+      "preference": {
+        "choice": "No adoption recommendation; A/C preferred over B for demonstrated consequence in this seed, with no defensible visual ranking between A and C from these samples.",
+        "researchDirection": "Keep B only as a spacing/telegraph research branch after resolving long non-damaging loops. Its separation is useful but does not outweigh the stalled outcome.",
+        "priorOpinion": "Earlier tentative preference for B is not retained after inspecting the 90-second state and timeout summary.",
+        "ownerPreference": "Unknown",
+        "uncertainty": "High for moment-to-moment readability and commitment; moderate for rejecting B sustained pressure in this particular duel seed. No numeric fun score."
+      },
+      "rankedConcerns": [
+        {
+          "rank": 1,
+          "concern": "B loses consequential pressure after early damage; long timeout with unchanged late health undermines momentum.",
+          "criteria": [
+            "WB-E004",
+            "WB-E005"
+          ]
+        },
+        {
+          "rank": 2,
+          "concern": "Commitment, recovery, impact, and attack ownership are too weak to identify reliably at captured panel scale.",
+          "criteria": [
+            "WB-E004",
+            "WB-E005"
+          ]
+        },
+        {
+          "rank": 3,
+          "concern": "A close overlap obscures who initiates or responds; C separation helps but does not establish readable counterplay.",
+          "criteria": [
+            "WB-E005"
+          ]
+        }
+      ],
+      "evidenceLimits": [
+        "Five sampled stills and selected metadata/logs only; no continuous clip viewing or temporal cadence judgment.",
+        "Single duel seed and displayed rotation; report summaries do not establish general balance or enjoyment.",
+        "No unique cast/projectile causal IDs; no attribution of a dodge or projectile to a particular attack.",
+        "UI clamps defeated HP to zero while metadata records -10; finished A/C panels preserve their terminal time rather than requested sample time.",
+        "No direct owner preference or playtest evidence."
+      ],
+      "overallVerdictByExpectation": {
+        "WB-E004": "Not established visually. A/C show decisive outcomes and damage logs support consequential melee pressure, but sampled stills do not explain commitments, hits, or counters. B is worse on sustained consequence: 120-second timeout with a reported 103-second maximum damage gap.",
+        "WB-E005": "Partial positional readability, insufficient pressure readability. Separate red/blue figures make spacing legible in B/C, but tiny fighters, health bars, and projectiles make attack state and initiative difficult to infer. B late activity lacks changing stakes."
+      }
+    },
+    {
+      "schema": "wizard-battles-persona-review-v1",
+      "persona": "Anime mage-fight fan: recognizable magic, buildup/payoff, surprising answers",
+      "model": "gpt-6.1-sol",
+      "roleStatement": "Simulated critical perspective, not a human customer, owner preference, or purchase-intent measurement.",
+      "experiment": "movement-pacing-v1",
+      "evidenceSources": [
+        {
+          "capture": "runs-captures/duel-s1/capture.json",
+          "scenario": "duel",
+          "seed": 1,
+          "rotation": 0,
+          "metadata": {
+            "experiment": "movement-pacing-v1",
+            "source": "sha256:f1be1b202375e5eead57ae30de21c35597a57a09b0fbcb278caf21701232a8c9",
+            "dt": 0.016666666666666666,
+            "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+          },
+          "viewport": {
+            "width": 1440,
+            "height": 1050
+          },
+          "fps": 6,
+          "duration": 20,
+          "samples": [
+            {
+              "path": "runs-captures/duel-s1/frame-00000.png",
+              "requestedTime": 0,
+              "panelTimes": {
+                "baseline": 0,
+                "measured": 0,
+                "burst": 0
+              }
+            },
+            {
+              "path": "runs-captures/duel-s1/frame-00006.png",
+              "requestedTime": 1,
+              "panelTimes": {
+                "baseline": 1.0000000000000013,
+                "measured": 1.0000000000000013,
+                "burst": 1.0000000000000013
+              }
+            },
+            {
+              "path": "runs-captures/duel-s1/frame-00012.png",
+              "requestedTime": 2,
+              "panelTimes": {
+                "baseline": 1.9999999999999978,
+                "measured": 1.9999999999999978,
+                "burst": 1.9999999999999978
+              }
+            },
+            {
+              "path": "runs-captures/duel-s1/frame-00018.png",
+              "requestedTime": 3,
+              "panelTimes": {
+                "baseline": 2.9999999999999942,
+                "measured": 2.9999999999999942,
+                "burst": 2.9999999999999942
+              }
+            },
+            {
+              "path": "runs-captures/duel-s1/frame-00024.png",
+              "requestedTime": 4,
+              "panelTimes": {
+                "baseline": 3.9999999999999907,
+                "measured": 3.9999999999999907,
+                "burst": 3.9999999999999907
+              }
+            },
+            {
+              "path": "runs-captures/duel-s1/frame-00030.png",
+              "requestedTime": 5,
+              "panelTimes": {
+                "baseline": 4.999999999999988,
+                "measured": 4.999999999999988,
+                "burst": 4.999999999999988
+              }
+            },
+            {
+              "path": "runs-captures/duel-s1/frame-00036.png",
+              "requestedTime": 6,
+              "panelTimes": {
+                "baseline": 5.999999999999984,
+                "measured": 5.999999999999984,
+                "burst": 5.999999999999984
+              }
+            },
+            {
+              "path": "runs-captures/duel-s1/frame-00048.png",
+              "requestedTime": 8,
+              "panelTimes": {
+                "baseline": 7.999999999999977,
+                "measured": 7.999999999999977,
+                "burst": 7.999999999999977
+              }
+            },
+            {
+              "path": "runs-captures/duel-s1/frame-00060.png",
+              "requestedTime": 10,
+              "panelTimes": {
+                "baseline": 9.766666666666731,
+                "measured": 10.000000000000076,
+                "burst": 10.000000000000076
+              }
+            },
+            {
+              "path": "runs-captures/duel-s1/frame-00084.png",
+              "requestedTime": 14,
+              "panelTimes": {
+                "baseline": 9.766666666666731,
+                "measured": 14.000000000000275,
+                "burst": 11.866666666666836
+              }
+            },
+            {
+              "path": "runs-captures/duel-s1/frame-00108.png",
+              "requestedTime": 18,
+              "panelTimes": {
+                "baseline": 9.766666666666731,
+                "measured": 18.00000000000026,
+                "burst": 11.866666666666836
+              }
+            },
+            {
+              "path": "runs-captures/duel-s1/frame-00119.png",
+              "requestedTime": 19.833333333333332,
+              "panelTimes": {
+                "baseline": 9.766666666666731,
+                "measured": 19.83333333333349,
+                "burst": 11.866666666666836
+              }
+            }
+          ]
+        },
+        {
+          "capture": "runs-captures/spectacle-four19/capture.json",
+          "scenario": "four-wizards",
+          "seed": 19,
+          "rotation": 0,
+          "metadata": {
+            "experiment": "movement-pacing-v1",
+            "source": "sha256:f1be1b202375e5eead57ae30de21c35597a57a09b0fbcb278caf21701232a8c9",
+            "dt": 0.016666666666666666,
+            "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+          },
+          "viewport": {
+            "width": 1440,
+            "height": 1050
+          },
+          "fps": 2,
+          "duration": 20,
+          "samples": [
+            {
+              "path": "runs-captures/spectacle-four19/frame-00000.png",
+              "requestedTime": 0,
+              "panelTimes": {
+                "baseline": 0,
+                "measured": 0,
+                "burst": 0
+              }
+            },
+            {
+              "path": "runs-captures/spectacle-four19/frame-00004.png",
+              "requestedTime": 2,
+              "panelTimes": {
+                "baseline": 1.9999999999999978,
+                "measured": 1.9999999999999978,
+                "burst": 1.9999999999999978
+              }
+            },
+            {
+              "path": "runs-captures/spectacle-four19/frame-00008.png",
+              "requestedTime": 4,
+              "panelTimes": {
+                "baseline": 3.9999999999999907,
+                "measured": 3.9999999999999907,
+                "burst": 3.9999999999999907
+              }
+            },
+            {
+              "path": "runs-captures/spectacle-four19/frame-00012.png",
+              "requestedTime": 6,
+              "panelTimes": {
+                "baseline": 5.999999999999984,
+                "measured": 5.999999999999984,
+                "burst": 5.999999999999984
+              }
+            },
+            {
+              "path": "runs-captures/spectacle-four19/frame-00016.png",
+              "requestedTime": 8,
+              "panelTimes": {
+                "baseline": 7.999999999999977,
+                "measured": 7.999999999999977,
+                "burst": 7.999999999999977
+              }
+            },
+            {
+              "path": "runs-captures/spectacle-four19/frame-00024.png",
+              "requestedTime": 12,
+              "panelTimes": {
+                "baseline": 12.000000000000176,
+                "measured": 12.000000000000176,
+                "burst": 12.000000000000176
+              }
+            },
+            {
+              "path": "runs-captures/spectacle-four19/frame-00032.png",
+              "requestedTime": 16,
+              "panelTimes": {
+                "baseline": 16.000000000000373,
+                "measured": 16.000000000000373,
+                "burst": 16.000000000000373
+              }
+            },
+            {
+              "path": "runs-captures/spectacle-four19/frame-00039.png",
+              "requestedTime": 19.5,
+              "panelTimes": {
+                "baseline": 19.500000000000174,
+                "measured": 19.500000000000174,
+                "burst": 19.500000000000174
+              }
+            }
+          ]
+        }
+      ],
+      "evidenceInspected": {
+        "method": "Ordered sampled still sequences inspected directly with view_image; no continuous video watched.",
+        "frameCount": 20,
+        "pathsAndTimes": [
+          {
+            "path": "runs-captures/duel-s1/frame-00000.png",
+            "requestedTime": 0,
+            "panelTimes": {
+              "baseline": 0,
+              "measured": 0,
+              "burst": 0
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1/frame-00006.png",
+            "requestedTime": 1,
+            "panelTimes": {
+              "baseline": 1.0000000000000013,
+              "measured": 1.0000000000000013,
+              "burst": 1.0000000000000013
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1/frame-00012.png",
+            "requestedTime": 2,
+            "panelTimes": {
+              "baseline": 1.9999999999999978,
+              "measured": 1.9999999999999978,
+              "burst": 1.9999999999999978
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1/frame-00018.png",
+            "requestedTime": 3,
+            "panelTimes": {
+              "baseline": 2.9999999999999942,
+              "measured": 2.9999999999999942,
+              "burst": 2.9999999999999942
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1/frame-00024.png",
+            "requestedTime": 4,
+            "panelTimes": {
+              "baseline": 3.9999999999999907,
+              "measured": 3.9999999999999907,
+              "burst": 3.9999999999999907
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1/frame-00030.png",
+            "requestedTime": 5,
+            "panelTimes": {
+              "baseline": 4.999999999999988,
+              "measured": 4.999999999999988,
+              "burst": 4.999999999999988
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1/frame-00036.png",
+            "requestedTime": 6,
+            "panelTimes": {
+              "baseline": 5.999999999999984,
+              "measured": 5.999999999999984,
+              "burst": 5.999999999999984
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1/frame-00048.png",
+            "requestedTime": 8,
+            "panelTimes": {
+              "baseline": 7.999999999999977,
+              "measured": 7.999999999999977,
+              "burst": 7.999999999999977
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1/frame-00060.png",
+            "requestedTime": 10,
+            "panelTimes": {
+              "baseline": 9.766666666666731,
+              "measured": 10.000000000000076,
+              "burst": 10.000000000000076
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1/frame-00084.png",
+            "requestedTime": 14,
+            "panelTimes": {
+              "baseline": 9.766666666666731,
+              "measured": 14.000000000000275,
+              "burst": 11.866666666666836
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1/frame-00108.png",
+            "requestedTime": 18,
+            "panelTimes": {
+              "baseline": 9.766666666666731,
+              "measured": 18.00000000000026,
+              "burst": 11.866666666666836
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1/frame-00119.png",
+            "requestedTime": 19.833333333333332,
+            "panelTimes": {
+              "baseline": 9.766666666666731,
+              "measured": 19.83333333333349,
+              "burst": 11.866666666666836
+            }
+          },
+          {
+            "path": "runs-captures/spectacle-four19/frame-00000.png",
+            "requestedTime": 0,
+            "panelTimes": {
+              "baseline": 0,
+              "measured": 0,
+              "burst": 0
+            }
+          },
+          {
+            "path": "runs-captures/spectacle-four19/frame-00004.png",
+            "requestedTime": 2,
+            "panelTimes": {
+              "baseline": 1.9999999999999978,
+              "measured": 1.9999999999999978,
+              "burst": 1.9999999999999978
+            }
+          },
+          {
+            "path": "runs-captures/spectacle-four19/frame-00008.png",
+            "requestedTime": 4,
+            "panelTimes": {
+              "baseline": 3.9999999999999907,
+              "measured": 3.9999999999999907,
+              "burst": 3.9999999999999907
+            }
+          },
+          {
+            "path": "runs-captures/spectacle-four19/frame-00012.png",
+            "requestedTime": 6,
+            "panelTimes": {
+              "baseline": 5.999999999999984,
+              "measured": 5.999999999999984,
+              "burst": 5.999999999999984
+            }
+          },
+          {
+            "path": "runs-captures/spectacle-four19/frame-00016.png",
+            "requestedTime": 8,
+            "panelTimes": {
+              "baseline": 7.999999999999977,
+              "measured": 7.999999999999977,
+              "burst": 7.999999999999977
+            }
+          },
+          {
+            "path": "runs-captures/spectacle-four19/frame-00024.png",
+            "requestedTime": 12,
+            "panelTimes": {
+              "baseline": 12.000000000000176,
+              "measured": 12.000000000000176,
+              "burst": 12.000000000000176
+            }
+          },
+          {
+            "path": "runs-captures/spectacle-four19/frame-00032.png",
+            "requestedTime": 16,
+            "panelTimes": {
+              "baseline": 16.000000000000373,
+              "measured": 16.000000000000373,
+              "burst": 16.000000000000373
+            }
+          },
+          {
+            "path": "runs-captures/spectacle-four19/frame-00039.png",
+            "requestedTime": 19.5,
+            "panelTimes": {
+              "baseline": 19.500000000000174,
+              "measured": 19.500000000000174,
+              "burst": 19.500000000000174
+            }
+          }
+        ],
+        "additionalReading": [
+          "src/expectations.ts",
+          "docs/EXPERIMENTS.md",
+          "public/experiments/movement-pacing-v1/report.json"
+        ],
+        "batchProvenance": {
+          "source": "sha256:a39d445ba071859a97d2b0273b7c92f921e8631116763e9c6b765dd90649d901",
+          "commit": "6f70b0bce5e50c5a0c0578c7b9fa5d89b6e475f8",
+          "createdAt": "2026-10-17T20:35:48.055Z",
+          "dt": 0.016666666666666666,
+          "maxSeconds": 120,
+          "seeds": [
+            1,
+            7,
+            19,
+            42
+          ],
+          "scenarios": [
+            "duel",
+            "four-wizards"
+          ],
+          "rotations": [
+            0,
+            1.5707963267948966
+          ],
+          "node": "v20.20.2",
+          "sampleHz": 10
+        }
+      },
+      "observations": [
+        {
+          "scene": "duel",
+          "seed": 1,
+          "time": "0\u20138s",
+          "panels": [
+            "A/baseline",
+            "B/measured",
+            "C/burst"
+          ],
+          "expectations": [
+            "WB-E001",
+            "WB-E006"
+          ],
+          "judgment": "partial support",
+          "finding": "Across ordered samples, red approaches blue while small orange projectiles travel through the arena. Blue reads as a ranged caster and red as a pursuer. Color and repeated spatial behavior create a thin identity, but shared tiny silhouettes and weak visible spell anticipation keep this from feeling like recognizable, characterful mage combat. In A, blue HP is 34 at 5s while red is 90; the consequence reads from the status text much more clearly than the hit itself."
+        },
+        {
+          "scene": "duel",
+          "seed": 1,
+          "time": "8\u201319.83s",
+          "panels": [
+            "A/baseline",
+            "B/measured",
+            "C/burst"
+          ],
+          "expectations": [
+            "WB-E001",
+            "WB-E002"
+          ],
+          "judgment": "inconclusive",
+          "finding": "A freezes with red winning at 9.8s; C freezes at 11.9s. B continues through 19.8s. B has a broad blue ground ring around red at 14s, which is one of the stronger distinct visual cues in this sequence. Longer spacing gives room for reading, but these samples do not establish whether the extra time builds tension or merely repeats pursuit. I would not penalize it simply for lasting longer."
+        },
+        {
+          "scene": "four-wizards",
+          "seed": 19,
+          "time": "2\u20138s",
+          "panels": [
+            "A/baseline",
+            "B/measured",
+            "C/burst"
+          ],
+          "expectations": [
+            "WB-E001",
+            "WB-E006"
+          ],
+          "judgment": "partial support",
+          "finding": "Pale blue marks near green/red and multiple orange projectiles near blue/yellow provide more varied magic than the duel. Red stays near green, while blue/yellow occupy the other side. At 8s green is gone in A, at 78 HP in B, and 12 HP in C. This gives the variants distinct consequences and makes red a recognizable threat, although small effects on the grid compete for attention."
+        },
+        {
+          "scene": "four-wizards",
+          "seed": 19,
+          "time": "12\u201319.5s",
+          "panels": [
+            "A/baseline",
+            "B/measured",
+            "C/burst"
+          ],
+          "expectations": [
+            "WB-E001",
+            "WB-E002",
+            "WB-E006"
+          ],
+          "judgment": "mixed",
+          "finding": "B still has all four fighters at 16s, while A has red/yellow and C has red/blue. B shows the large blue ground ring near red at 12s; C shows a similar ring at 16s. Multiple active threats and more surviving specialists make B worth exploring, but survival diversity is not visual quality by itself. A has a legible sequence of red pursuing green, then blue, then yellow; it risks feeling like one repeated answer."
+        },
+        {
+          "scene": "duel and four-wizards",
+          "seed": [
+            1,
+            19
+          ],
+          "time": "inspected intervals above",
+          "panels": [
+            "A/baseline",
+            "B/measured",
+            "C/burst"
+          ],
+          "expectations": [
+            "WB-E007"
+          ],
+          "judgment": "unsupported in this evidence",
+          "finding": "I did not see a surprise that clearly reinterprets an established ability or habit. Repositioning and different elimination order occur, but a viewer cannot reliably connect them to a planted tactical expectation from these sampled sequences. This is a gap for my assigned persona, not proof that such moments never occur."
+        }
+      ],
+      "expectationAssessment": [
+        {
+          "id": "WB-E001",
+          "state": "inconclusive",
+          "reason": "Functional comparison exposes differences, but this persona wants much clearer spell anticipation and visible payoff before endorsing watchability."
+        },
+        {
+          "id": "WB-E002",
+          "state": "supported as evaluation principle; build effect inconclusive",
+          "reason": "Longer B encounters are not automatically worse. The inspected frames cannot establish felt tension or continuous rhythm."
+        },
+        {
+          "id": "WB-E006",
+          "state": "partial support",
+          "reason": "Red pursuit and blue projectile use are recognizable habits. Shared silhouettes and small spell cues limit richer attachment."
+        },
+        {
+          "id": "WB-E007",
+          "state": "unsupported in inspected evidence",
+          "reason": "No clearly communicated established-ability reversal observed; broader continuous review needed."
+        }
+      ],
+      "preference": {
+        "choice": "unsure",
+        "tentativeDirection": "Keep B/measured as a contrasting research direction; no variant approved.",
+        "reason": "B preserves more specialists in the inspected four-way opening and exposes a readable ground cue. A/C communicate a clearer dominant pursuer but too little spellcraft payoff. Movement alone has not resolved this persona\u2019s core concern.",
+        "confidence": "low",
+        "ownerPreference": "unknown"
+      },
+      "rankedConcerns": [
+        {
+          "rank": 1,
+          "concern": "Anticipation and payoff are hard to read at three-panel scale.",
+          "evidence": "Duel s1 A at 3\u20135s: HP drops without a distinct readable hit in the sampled stills.",
+          "suggestion": "Next presentation experiment should give one consequential spell a clear buildup, release and impact silhouette, evaluated enlarged and side by side."
+        },
+        {
+          "rank": 2,
+          "concern": "Tactical identities need more than color and repeated pursuit.",
+          "evidence": "Four-wizards s19 A 8\u201319.5s: red advances through opponents with similar close-range answers.",
+          "suggestion": "Test a recognizable defensive answer or counterplay property, rather than only changing speed."
+        },
+        {
+          "rank": 3,
+          "concern": "No demonstrated planted surprise.",
+          "evidence": "Both inspected scenes, all three panels.",
+          "suggestion": "Have reviewers name the expectation formed before a reversal and cite where the reversal becomes legible; retain failure to name one."
+        }
+      ],
+      "usabilityFindings": {
+        "blockingIssues": [],
+        "nonblocking": [
+          "Tiny actors and effects at simultaneous panel scale; Enlarge exists but was not exercised in this visual-only pass.",
+          "Text HP/status supplies consequences more clearly than many sampled effects."
+        ]
+      },
+      "evidenceLimits": [
+        "Sampled stills are not continuous playback. Timing, motion appeal, short hit flashes, exact charge transitions and audio were not evaluated.",
+        "Only duel seed 1 and four-wizards seed 19, rotation 0, and their first 20 seconds were visually sampled. Four-way endings and the measured duel late timeout were not watched.",
+        "Capture source f1be1b202375e5eead57ae30de21c35597a57a09b0fbcb278caf21701232a8c9 differs from the published batch report source a39d445ba071859a97d2b0273b7c92f921e8631116763e9c6b765dd90649d901. Batch statistics are background screening, not claimed to be exact matched visual-run evidence.",
+        "No numerical fun score or simulated purchase claim. No claim of independent human taste validation.",
+        "Current logs identify spell types rather than unique attack lineage; no exact projectile-to-dodge causal attribution made.",
+        "Capture files are local generated evidence under ignored runs-captures; retain them separately if moving machines."
+      ],
+      "overallVerdict": "No movement variant yet demonstrates the recognizable spellcraft, buildup/payoff, and planted surprise this persona wants. Preference remains unsure; preserve measured movement as a contrasting direction and test stronger spell communication next.",
+      "followUp": {
+        "model": "gpt-6.1-sol",
+        "method": "Direct view_image inspection of four ordered sampled stills; no continuous playback.",
+        "capture": "runs-captures/duel-s1-fixed/capture.json",
+        "metadata": {
+          "experiment": "movement-pacing-v1",
+          "source": "sha256:c818e1626474c535cf8c552ee5a650ae70f70eda3c9a4b65857abc9d6a45f55f",
+          "dt": 0.016666666666666666,
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+        },
+        "batchSource": "sha256:c818e1626474c535cf8c552ee5a650ae70f70eda3c9a4b65857abc9d6a45f55f",
+        "sourceMatchesPublishedReport": true,
+        "evidenceInspected": [
+          {
+            "path": "runs-captures/duel-s1-fixed/frame-00048.png",
+            "requestedTime": 8,
+            "panelTimes": {
+              "baseline": 7.999999999999977,
+              "measured": 7.999999999999977,
+              "burst": 7.999999999999977
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1-fixed/frame-00060.png",
+            "requestedTime": 10,
+            "panelTimes": {
+              "baseline": 9.766666666666731,
+              "measured": 10.000000000000076,
+              "burst": 10.000000000000076
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1-fixed/frame-00084.png",
+            "requestedTime": 14,
+            "panelTimes": {
+              "baseline": 9.766666666666731,
+              "measured": 14.000000000000275,
+              "burst": 11.866666666666836
+            }
+          },
+          {
+            "path": "runs-captures/duel-s1-fixed/frame-00114.png",
+            "requestedTime": 19,
+            "panelTimes": {
+              "baseline": 9.766666666666731,
+              "measured": 19.000000000000203,
+              "burst": 11.866666666666836
+            }
+          }
+        ],
+        "observations": [
+          {
+            "scene": "duel",
+            "seed": 1,
+            "time": "8, 10, 14, 19s",
+            "panels": [
+              "A/baseline",
+              "B/measured",
+              "C/burst"
+            ],
+            "expectations": [
+              "WB-E001",
+              "WB-E002",
+              "WB-E006",
+              "WB-E007"
+            ],
+            "finding": "A and C still clearly hold their red wins at 9.8s and 11.9s. B remains active with a visible blue ground circle at 14s; its 19s state differs from the initial review (blue 90 HP versus 100 initially). I retain the visual assessment: the ring is more recognizable than most small effects, chase/projectile identities remain basic, and no established-ability surprise becomes apparent in these samples. Different HP and positions must not be mistaken for proof of improved spectacle."
+          }
+        ],
+        "preference": "unsure; no change",
+        "limits": [
+          "Initial findings and initial source labels are retained above. The source mismatch limitation applies to that initial review; this follow-up capture matches the current published report.",
+          "Only four duel stills inspected for follow-up. No fixed four-way capture or late measured ending reviewed.",
+          "Numerical fixes and full-match cross-runtime agreement were reported by root, not independently verified by this persona review."
+        ]
+      },
+      "rootCorrections": [
+        {
+          "finding": "The follow-up phrase \u201cblue 90 HP versus 100 initially\u201d conflates initial capture with old headless result. At requested19s the initial capture measured blue HP was56; fixed capture is90. The old headless batch had blue100. This correction changes factual comparison only, not the reviewer judgment.",
+          "evidence": [
+            "runs-captures/duel-s1/capture.json frame114",
+            "runs-captures/duel-s1-fixed/capture.json frame114"
+          ],
+          "initialCaptureHP": {
+            "red": 30,
+            "blue": 56
+          },
+          "fixedCaptureHP": {
+            "red": 30,
+            "blue": 90
+          }
+        }
+      ]
+    },
+    {
+      "schema": "wizard-battles-persona-review-v1",
+      "persona": "Systems-curious spectator: causal understanding and honest evidence",
+      "model": "gpt-6.1-sol",
+      "source": "sha256:c818e1626474c535cf8c552ee5a650ae70f70eda3c9a4b65857abc9d6a45f55f",
+      "authorship": "Initial criticism from independent persona_systems reviewer messages retained in round1-notes.json. Root retained this report and performed the explicitly labeled corrected-evidence follow-up below.",
+      "overallVerdict": "The loop produced a useful evidence-integrity finding, now fixed. Measured duel seed1 remains a non-progress failure. No movement profile is established as more interesting, and individual dodge effectiveness remains unmeasured.",
+      "initialReview": {
+        "evidence": "Pre-fix report/raw logs and six sampled duel-seed1 stills, as reported by the independent reviewer; exact six frame filenames were not retained in its messages.",
+        "observations": [
+          "The old headless measured duel1 timed out with119 releases and82 dashes, only fireball damage, and red20/blue100 final HP. Activity counts did not imply progress.",
+          "The captured measured duel1 at19s had red30/blue56, while the old batch had red40/blue100. The reviewer checked source snapshots and narrowed changed inputs to tooling/viewer files rather than simulation files.",
+          "The source discrepancy prevented attributing browser spectacle to that batch. Root isolated engine-scale numerical differences selecting opposite directions at a tie."
+        ]
+      },
+      "followUp": {
+        "reviewer": "root (gpt-6.1-sol)",
+        "method": "Actual view_image inspection of four corrected stills, plus capture manifests and published report; no continuous video viewing.",
+        "evidenceInspected": [
+          "runs-captures/duel-s1-fixed/frame-00060.png",
+          "runs-captures/duel-s1-fixed/frame-00084.png",
+          "runs-captures/duel-s1-fixed/frame-00114.png",
+          "runs-captures/duel-s1-fixed-late/frame-00000.png",
+          "public/experiments/movement-pacing-v1/report.json",
+          "public/experiments/movement-pacing-v1/validation.json"
+        ],
+        "observations": [
+          {
+            "runId": "duel-s1-r0-measured",
+            "time": "10s",
+            "expectations": [
+              "WB-E004"
+            ],
+            "fact": "B shows red60/blue100, with separation and orange projectile cues. A holds its9.8s red win; C remains active. This agrees with matching capture state and curated damage evidence."
+          },
+          {
+            "runId": "duel-s1-r0-measured",
+            "time": "14s",
+            "expectations": [
+              "WB-E004",
+              "WB-E006"
+            ],
+            "fact": "B shows a conspicuous pale blue ground circle and red40/blue100. The field is easier to distinguish than the small orange projectiles; a still cannot establish successful defense attribution."
+          },
+          {
+            "runId": "duel-s1-r0-measured",
+            "time": "19s and90s",
+            "expectations": [
+              "WB-E004",
+              "WB-E007"
+            ],
+            "fact": "Both sampled B states show red30/blue90, consistent with final report HP and the long damage gap. At90s orange projectiles remain visible, so this is continuing activity without damage progress, not a frozen panel."
+          }
+        ],
+        "verification": "Centered dodge/turn/score ties fixed in c94ede0. Root verified72 full-match Node/Chromium cases in development and production; reported source now matches inspected fixed captures. This verifies selected configurations, not universal cross-engine bit identity."
+      },
+      "preference": {
+        "choice": "unsure; no adoption recommendation",
+        "reason": "Measured exposes a useful failure; fresh validation also finds baseline/burst timeouts. Duration and event counts cannot settle taste.",
+        "ownerPreference": "unknown"
+      },
+      "rankedConcerns": [
+        {
+          "rank": 1,
+          "concern": "Evidence must describe the same source and configuration.",
+          "status": "fixed for delivered packet; retain provenance discipline"
+        },
+        {
+          "rank": 2,
+          "concern": "Long repeated exchanges may stop changing stakes.",
+          "status": "retain as a failure example; investigate mechanisms in a later experiment"
+        },
+        {
+          "rank": 3,
+          "concern": "Unique attack/projectile lineage missing.",
+          "status": "deferred under existing runner scope; do not claim specific successful dodges"
+        }
+      ],
+      "evidenceLimits": [
+        "Sampled stills and logs, not continuous clip viewing.",
+        "Initial reviewer messages are retained excerpts, not a fabricated full original report.",
+        "No owner calibration or broad matchup validation.",
+        "Qualitative interpretation remains uncertain; individual attack causality is unavailable."
+      ]
+    }
+  ]
+}

@@ -47,3 +47,16 @@ npm run check:comparison -- --production
 The comparison browser check verifies headless agreement, resize/enlargement independence, synchronized live ticks, finished holds, feedback persistence/export/import, invalid imports, and expectation decisions. The existing `check:browser` checks the single-battle view.
 
 For a persona round, use `docs/PERSONA_REVIEW.md`. Publish actual reviews and triage in `public/experiments/movement-pacing-v1/reviews.json` so they appear below the viewing panels. Never describe a log review or sampled stills as watching a clip, never fabricate owner preferences, and retain disagreement. A working loop is delivered before the owner chooses any approach.
+
+## Delivered pilot evidence
+
+The committed report contains 48 screening matches; `public/experiments/movement-pacing-v1/validation.json` adds 24 fresh-seed matches. Current media in that directory shares source `sha256:c818e1626474c535cf8c552ee5a650ae70f70eda3c9a4b65857abc9d6a45f55f`:
+
+- [Duel seed1 clip](../public/experiments/movement-pacing-v1/media/duel-s1/clip.mp4), with [frame-state manifest](../public/experiments/movement-pacing-v1/media/duel-s1/capture.json).
+- [Four-way seed19 clip](../public/experiments/movement-pacing-v1/media/four-s19/clip.mp4), with [manifest](../public/experiments/movement-pacing-v1/media/four-s19/capture.json).
+- [Measured duel seed1 at 90s](../public/experiments/movement-pacing-v1/media/duel-s1-late/frame-00000.png), showing continuing projectile activity without HP progress.
+- [Three persona assessments](../public/experiments/movement-pacing-v1/reviews.json) and [triage](../public/experiments/movement-pacing-v1/triage.json), also displayed under the comparison page's evidence disclosure.
+
+Initial review excerpts and the full spectacle review preserve pre-fix source labels; corrected follow-up evidence is clearly distinguished. The systems report retains initial independent reviewer messages plus an explicitly root-authored verification follow-up. `media/reviewed-frames/manifest.json` maps retained inspected images to original workspace paths and hashes. The reviews inspected sampled stills and logs; they did not continuously watch the encoded clips. Clips are provided for human viewing.
+
+The next useful hypothesis is stronger spell commitment/payoff communication, including framing at comparison scale. Measured movement is not adopted: it offers some clearer spacing but can create prolonged non-progress. Fresh validation also finds baseline/burst stalls, so no profile is a general solution. The owner has not selected a favorite or calibrated the judges.

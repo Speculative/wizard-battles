@@ -1,0 +1,30 @@
+{
+  "schema": "wizard-battles-review-notes-v1",
+  "round": "Initial independent reviews before numerical fix",
+  "retention": "These are root-retained excerpts from actual reviewer messages, not reconstructed full reports. Full spectacle report is retained separately. Follow-up reviews use the corrected source.",
+  "preFixBatchSource": "sha256:a39d445ba071859a97d2b0273b7c92f921e8631116763e9c6b765dd90649d901",
+  "preFixCaptureSource": "sha256:f1be1b202375e5eead57ae30de21c35597a57a09b0fbcb278caf21701232a8c9",
+  "messages": [
+    {
+      "reviewer": "persona_readability",
+      "model": "gpt-6.1-sol",
+      "finding": "Inspected 13 ordered duel seed1 stills at0\u201319.83s, not continuous clip. First HP loss in A at3.3s lacked obvious visible anticipation/strike at sampled resolution; tiny ring at4.7s easy to miss against grid. B showed visible separation and blue initiative at10\u201319.8s, unlike A/C red chase into win. Tentative research preference for B; insufficient evidence to crown it."
+    },
+    {
+      "reviewer": "persona_readability",
+      "model": "gpt-6.1-sol",
+      "finding": "Also inspected 9 actual duel seed7 frames at0,2,4,6,8,10,12,14,15.5s. B gave longer exchanges/field visibility at8\u201310s, but still red pursuit into blue attrition. C delayed the same story."
+    },
+    {
+      "reviewer": "persona_systems",
+      "model": "gpt-6.1-sol",
+      "finding": "Found material mismatch: old batch measured duel1 had red40/blue100 at19s, captured measured duel1 had red30/blue56. Source hashes differed; checked source snapshots and found unchanged simulation inputs. Root subsequently isolated numerical tie instability across Node/Chromium, fixed it and reverified complete matches."
+    },
+    {
+      "reviewer": "persona_spectacle",
+      "model": "gpt-6.1-sol",
+      "finding": "Tiny silhouettes/projectiles against dense grid limited reading of buildup and melee impact. In four-way19 ordered stills, B kept specialists alive longer and showed large readable ground ring at12s. None demonstrated established-ability surprise. See retained full report for exact evidence and uncertainties."
+    }
+  ],
+  "preFixBatchDirectory": "runs-experiment/2026-10-17T20-35-48-049Z"
+}

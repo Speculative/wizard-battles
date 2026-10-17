@@ -1,0 +1,138 @@
+{
+  "metadata": {
+    "experiment": "movement-pacing-v1",
+    "source": "sha256:c818e1626474c535cf8c552ee5a650ae70f70eda3c9a4b65857abc9d6a45f55f",
+    "dt": 0.016666666666666666,
+    "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+  },
+  "url": "http://127.0.0.1:5173/compare.html?capture=1&scenario=duel&seed=1",
+  "viewport": {
+    "width": 1440,
+    "height": 1050
+  },
+  "fps": 10,
+  "start": 90,
+  "duration": 0,
+  "frames": [
+    {
+      "frame": 0,
+      "requestedTime": 90,
+      "panels": [
+        {
+          "variant": "baseline",
+          "time": 9.766666666666731,
+          "tick": 586,
+          "finished": true,
+          "contestants": [
+            {
+              "id": "red",
+              "hp": 80,
+              "alive": true,
+              "position": {
+                "x": 101.62008307091867,
+                "y": 33,
+                "z": -57.975366133799206
+              },
+              "velocity": {
+                "x": 24.54236848459721,
+                "y": 0,
+                "z": 57.311825133050796
+              }
+            },
+            {
+              "id": "blue",
+              "hp": -10,
+              "alive": false,
+              "position": {
+                "x": 151.4721247895929,
+                "y": 33,
+                "z": 12.221831562833426
+              },
+              "velocity": {
+                "x": -30.775376438953547,
+                "y": 0,
+                "z": 10.147645544972908
+              }
+            }
+          ]
+        },
+        {
+          "variant": "measured",
+          "time": 89.99999999999618,
+          "tick": 5400,
+          "finished": false,
+          "contestants": [
+            {
+              "id": "red",
+              "hp": 30,
+              "alive": true,
+              "position": {
+                "x": -21.322926666339605,
+                "y": 33,
+                "z": -161.43763841942084
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            },
+            {
+              "id": "blue",
+              "hp": 90,
+              "alive": true,
+              "position": {
+                "x": -368.1012483882172,
+                "y": 33,
+                "z": -330.80236423469086
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            }
+          ]
+        },
+        {
+          "variant": "burst",
+          "time": 11.866666666666836,
+          "tick": 712,
+          "finished": true,
+          "contestants": [
+            {
+              "id": "red",
+              "hp": 70,
+              "alive": true,
+              "position": {
+                "x": -107.55235153079896,
+                "y": 33,
+                "z": 45.049285676313794
+              },
+              "velocity": {
+                "x": 35.83452408901251,
+                "y": 0,
+                "z": -48.674433629662666
+              }
+            },
+            {
+              "id": "blue",
+              "hp": -10,
+              "alive": false,
+              "position": {
+                "x": -133.2107395281082,
+                "y": 33,
+                "z": -42.429638241607236
+              },
+              "velocity": {
+                "x": 48.75980363312482,
+                "y": 0,
+                "z": -14.869612974716944
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

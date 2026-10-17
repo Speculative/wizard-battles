@@ -1,0 +1,122 @@
+{
+  "persona": "Fighting-game spectator focused on pressure, commitment, and readability",
+  "model": "gpt-6.1-sol",
+  "source": "sha256:c818e1626474c535cf8c552ee5a650ae70f70eda3c9a4b65857abc9d6a45f55f",
+  "reviewedAt": "2026-10-17T20:44:49.081197+00:00",
+  "variantMap": {
+    "A": "baseline",
+    "B": "measured",
+    "C": "burst"
+  },
+  "evidenceInspected": [
+    {
+      "path": "/workspace/runs-captures/duel-s1-fixed/frame-00048.png",
+      "requestedTime": 8,
+      "method": "view_image"
+    },
+    {
+      "path": "/workspace/runs-captures/duel-s1-fixed/frame-00060.png",
+      "requestedTime": 10,
+      "method": "view_image"
+    },
+    {
+      "path": "/workspace/runs-captures/duel-s1-fixed/frame-00084.png",
+      "requestedTime": 14,
+      "method": "view_image"
+    },
+    {
+      "path": "/workspace/runs-captures/duel-s1-fixed/frame-00114.png",
+      "requestedTime": 19,
+      "method": "view_image"
+    },
+    {
+      "path": "/workspace/runs-captures/duel-s1-fixed-late/frame-00000.png",
+      "requestedTime": 90,
+      "method": "view_image"
+    },
+    {
+      "path": "/workspace/runs-captures/duel-s1-fixed/capture.json",
+      "scope": "capture metadata and panel states for frames 48,60,84,114"
+    },
+    {
+      "path": "/workspace/runs-captures/duel-s1-fixed-late/capture.json",
+      "scope": "capture metadata and panel states for frame 0"
+    },
+    {
+      "path": "/workspace/public/experiments/movement-pacing-v1/report.json",
+      "scope": "duel seed 1 rotation 0 summaries and curated evidence; rotation 1 summaries and curated evidence also returned; long output partially truncated"
+    }
+  ],
+  "overallVerdict": {
+    "WB-E004": "Not established visually. A/C show decisive outcomes and damage logs support consequential melee pressure, but sampled stills do not explain commitments, hits, or counters. B is worse on sustained consequence: 120-second timeout with a reported 103-second maximum damage gap.",
+    "WB-E005": "Partial positional readability, insufficient pressure readability. Separate red/blue figures make spacing legible in B/C, but tiny fighters, health bars, and projectiles make attack state and initiative difficult to infer. B late activity lacks changing stakes."
+  },
+  "observations": [
+    {
+      "timeSeconds": 8,
+      "visual": "A fighters nearly overlap; B/C have visible separation. A/C blue is at 34 HP, B blue at 100 HP. Color and spacing read more readily than attack state.",
+      "interpretation": "A/C have established meaningful damage; no sampled pose identifies a punishable commitment."
+    },
+    {
+      "timeSeconds": 10,
+      "visual": "A shows red wins at 9.8 seconds. B has red 60/blue 100; C red 80/blue 34. B/C remain separated.",
+      "interpretation": "Outcome text supplies clear consequence for A. B has a readable health disadvantage for red, but spatial separation alone does not prove a richer exchange."
+    },
+    {
+      "timeSeconds": 14,
+      "visual": "A/C show completed red wins. B shows a broad blue floor circle below red, blue above, with red 40/blue 100.",
+      "logSupport": "B report records red projectileSlowField release at 13.383 seconds and blue damage to red at 14.267 seconds.",
+      "interpretation": "The floor circle is the clearest sampled arena cue, but its owner, duration, and tactical impact are not evident from the still."
+    },
+    {
+      "timeSeconds": 19,
+      "visual": "B shows separated fighters and small orange projectiles; red 30/blue 90. A/C remain frozen at their win states.",
+      "interpretation": "B now has damage in both directions, but projectile direction, who has initiative, and whether either fighter is committed remain unclear."
+    },
+    {
+      "timeSeconds": 90,
+      "visual": "B remains in progress with small orange projectiles and the same red 30/blue 90 as at 19 seconds.",
+      "logSupport": "B rotation 0 ends by timeout at 120 seconds, eight damage events, maximum damage gap 103.0167 seconds.",
+      "interpretation": "This reverses my willingness to prefer B for spectator pressure: apparent activity has not converted into changing health stakes. Still-to-still HP equality alone would not prove absence of intervening damage; the report supports the concern."
+    }
+  ],
+  "preference": {
+    "choice": "No adoption recommendation; A/C preferred over B for demonstrated consequence in this seed, with no defensible visual ranking between A and C from these samples.",
+    "researchDirection": "Keep B only as a spacing/telegraph research branch after resolving long non-damaging loops. Its separation is useful but does not outweigh the stalled outcome.",
+    "priorOpinion": "Earlier tentative preference for B is not retained after inspecting the 90-second state and timeout summary.",
+    "ownerPreference": "Unknown",
+    "uncertainty": "High for moment-to-moment readability and commitment; moderate for rejecting B sustained pressure in this particular duel seed. No numeric fun score."
+  },
+  "rankedConcerns": [
+    {
+      "rank": 1,
+      "concern": "B loses consequential pressure after early damage; long timeout with unchanged late health undermines momentum.",
+      "criteria": [
+        "WB-E004",
+        "WB-E005"
+      ]
+    },
+    {
+      "rank": 2,
+      "concern": "Commitment, recovery, impact, and attack ownership are too weak to identify reliably at captured panel scale.",
+      "criteria": [
+        "WB-E004",
+        "WB-E005"
+      ]
+    },
+    {
+      "rank": 3,
+      "concern": "A close overlap obscures who initiates or responds; C separation helps but does not establish readable counterplay.",
+      "criteria": [
+        "WB-E005"
+      ]
+    }
+  ],
+  "evidenceLimits": [
+    "Five sampled stills and selected metadata/logs only; no continuous clip viewing or temporal cadence judgment.",
+    "Single duel seed and displayed rotation; report summaries do not establish general balance or enjoyment.",
+    "No unique cast/projectile causal IDs; no attribution of a dodge or projectile to a particular attack.",
+    "UI clamps defeated HP to zero while metadata records -10; finished A/C panels preserve their terminal time rather than requested sample time.",
+    "No direct owner preference or playtest evidence."
+  ]
+}
