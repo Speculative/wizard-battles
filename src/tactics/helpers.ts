@@ -6,7 +6,6 @@ import type { CastController, PaceHint } from "./tactic";
 import { STATIONARY } from "./tactic";
 import type { SelectionContext } from "../spells/selection";
 import { ARENA } from "../config";
-import { nowSeconds } from "../clock";
 import { ProjectileIncomingDetector } from "../events/projectileIncoming";
 
 export interface Candidate {
@@ -58,7 +57,7 @@ export function selectionContext(
     target,
     distToTarget: surfaceDistance(self, target),
     readyAt: w.getReadyAt ? w.getReadyAt() : new Map(),
-    nowSeconds: nowSeconds(),
+    nowSeconds: self.world.time,
   };
 }
 
@@ -438,8 +437,8 @@ export function pickSafeDirection(
     220
   );
   scored = scoreAwayFromEnemies(scored, self, world, enemyWeight);
-  scored = scoreByWallClearance(scored, wallWeight, 140);
-  scored = scoreByArenaCenter(scored, centerWeight);
+  scored = scoreByWallClearance(scored, wallWeight, 140, world.bounds);
+  scored = scoreByArenaCenter(scored, centerWeight, world.bounds);
   const best = pickBest(scored);
   if (!best) return null;
   const idx = scored.indexOf(best);

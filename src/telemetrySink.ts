@@ -1,11 +1,13 @@
 import { closeSync, mkdirSync, openSync, writeSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { FrameSample, Sink } from "./telemetry";
-import { telemetryTime } from "./telemetry";
 
 interface MatchMeta {
   runId: string;
   seed: number | null;
+  scenario?: string;
+  variant?: string;
+  rotation?: number;
   dt: number;
   maxSeconds: number;
   sampleHz: number;
@@ -33,10 +35,10 @@ export class JsonlSink implements Sink {
     this.meta = meta;
   }
 
-  event(type: string, who: string | null, meta?: Record<string, unknown>): void {
+  event(type: string, who: string | null, meta?: Record<string, unknown>, time = 0): void {
     const rec: Record<string, unknown> = {
       run: this.meta.runId,
-      t: telemetryTime(),
+      t: time,
       type,
       who,
     };
@@ -44,10 +46,10 @@ export class JsonlSink implements Sink {
     writeSync(this.eventsFd, JSON.stringify(rec) + "\n");
   }
 
-  frame(s: FrameSample): void {
+  frame(s: FrameSample, time = 0): void {
     const rec = {
       run: this.meta.runId,
-      t: telemetryTime(),
+      t: time,
       who: s.who,
       x: s.x,
       z: s.z,

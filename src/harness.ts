@@ -1,17 +1,7 @@
-import * as THREE from "three";
 import { rmSync, mkdirSync, existsSync } from "node:fs";
-import { World } from "./world";
-import { BasicWizard } from "./contestants/basicWizard";
-import { redRoster, blueRoster, greenRoster, yellowRoster } from "./rosters";
-import { FireballFactory } from "./spells/fireball";
-import { MeleeFactory } from "./spells/meleeAttack";
-import { ProjectileSlowFieldFactory } from "./spells/projectileSlowField";
-import { BlinkFactory } from "./spells/blink";
-import { IceShardFactory } from "./spells/iceShard";
-import { IceBoltFactory } from "./spells/iceBolt";
-import { Heavy, Spread, Swarm, Gatling } from "./spells/modifiers";
-import { useVirtualClock, advanceVirtualClock, nowSeconds } from "./clock";
-import { setTelemetry, emit, emitFrame } from "./telemetry";
+import { createScenario, SIMULATION_DT, SCENARIO_ID } from "./scenario";
+import type { World } from "./world";
+import type { BasicWizard } from "./contestants/basicWizard";
 import { JsonlSink } from "./telemetrySink";
 import { nearestEnemy, surfaceDistance } from "./tactics/helpers";
 
@@ -20,6 +10,9 @@ interface RunOptions {
   maxSeconds: number;
   sampleHz: number;
   seed?: number;
+  scenario?: string;
+  variant?: string;
+  rotation?: number;
   runId: string;
   runsDir: string;
 }
@@ -33,53 +26,6 @@ interface RunResult {
   runId: string;
 }
 
-function makeWorld(): World {
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera();
-  const world = new World(scene, camera);
-
-  world.addContestant(
-    new BasicWizard({
-      id: "red",
-      color: 0xff2244,
-      start: new THREE.Vector3(-300, 0, -150),
-      roster: redRoster(),
-      spellbook: [MeleeFactory, ProjectileSlowFieldFactory, FireballFactory],
-    })
-  );
-  world.addContestant(
-    new BasicWizard({
-      id: "blue",
-      color: 0x2266ff,
-      start: new THREE.Vector3(300, 0, 150),
-      roster: blueRoster(),
-      spellbook: [FireballFactory, BlinkFactory],
-    })
-  );
-  world.addContestant(
-    new BasicWizard({
-      id: "green",
-      color: 0x22cc55,
-      start: new THREE.Vector3(-300, 0, 200),
-      roster: greenRoster(),
-      spellbook: [IceShardFactory, IceBoltFactory],
-      modifiers: [Spread],
-    })
-  );
-  world.addContestant(
-    new BasicWizard({
-      id: "yellow",
-      color: 0xffdd22,
-      start: new THREE.Vector3(300, 0, -200),
-      roster: yellowRoster(),
-      spellbook: [FireballFactory],
-      modifiers: [Heavy, Spread, Swarm, Gatling],
-    })
-  );
-
-  return world;
-}
-
 function aliveIds(world: World): string[] {
   return world.contestants.filter((c) => c.alive).map((c) => c.id);
 }
@@ -89,7 +35,7 @@ function sampleFrames(world: World): void {
     if (!c.alive) continue;
     const w = c as BasicWizard;
     const enemy = nearestEnemy(c, world);
-    emitFrame({
+    world.emitFrame({
       who: c.id,
       x: c.position.x,
       z: c.position.z,
@@ -108,93 +54,93 @@ function sampleFrames(world: World): void {
 }
 
 export function runMatch(opts: RunOptions): RunResult {
-  if (opts.seed !== undefined) {
-    seedMathRandom(opts.seed);
-  }
-  useVirtualClock(0);
-  const world = makeWorld();
+  if (!Number.isFinite(opts.dt) || opts.dt <= 0) throw new Error("dt must be positive");
+  if (!Number.isFinite(opts.maxSeconds) || opts.maxSeconds <= 0) throw new Error("maxSeconds must be positive");
+  if (!Number.isFinite(opts.sampleHz) || opts.sampleHz < 0) throw new Error("sampleHz must be nonnegative");
+  const world = createScenario({ seed: opts.seed ?? 1, scenario: opts.scenario, variant: opts.variant, rotation: opts.rotation });
 
   const sink = new JsonlSink(opts.runsDir, {
     runId: opts.runId,
-    seed: opts.seed ?? null,
+    seed: world.seed,
+    scenario: opts.scenario ?? SCENARIO_ID,
+    variant: opts.variant ?? "baseline",
+    rotation: opts.rotation ?? 0,
     dt: opts.dt,
     maxSeconds: opts.maxSeconds,
     sampleHz: opts.sampleHz,
     contestants: world.contestants.map((c) => c.id),
     startedAt: new Date().toISOString(),
   });
-  setTelemetry(sink);
+  world.telemetry = sink;
 
-  emit("match_start", null, {
-    runId: opts.runId,
-    seed: opts.seed ?? null,
-    dt: opts.dt,
-    sampleHz: opts.sampleHz,
-    contestants: world.contestants.map((c) => c.id),
-  });
+  try {
+    world.emit("match_start", null, {
+      runId: opts.runId,
+      seed: world.seed,
+      scenario: opts.scenario ?? SCENARIO_ID,
+      variant: opts.variant ?? "baseline",
+      rotation: opts.rotation ?? 0,
+      dt: opts.dt,
+      sampleHz: opts.sampleHz,
+      contestants: world.contestants.map((c) => c.id),
+    });
 
-  const startWall = performance.now();
-  const dt = opts.dt;
-  const maxSteps = Math.ceil(opts.maxSeconds / dt);
-  const sampleEvery =
-    opts.sampleHz > 0 ? Math.max(1, Math.round(1 / (opts.sampleHz * dt))) : 0;
-  let step = 0;
-  let reason: RunResult["reason"] = "timeout";
+    const startWall = performance.now();
+    const dt = opts.dt;
+    const maxSteps = Math.ceil(opts.maxSeconds / dt);
+    const sampleEvery =
+      opts.sampleHz > 0 ? Math.max(1, Math.round(1 / (opts.sampleHz * dt))) : 0;
+    let step = 0;
+    let reason: RunResult["reason"] = "timeout";
 
-  if (sampleEvery > 0) sampleFrames(world);
+    if (sampleEvery > 0) sampleFrames(world);
 
-  for (; step < maxSteps; step++) {
-    world.update(dt);
-    advanceVirtualClock(dt);
-    if (sampleEvery > 0 && (step + 1) % sampleEvery === 0) {
-      sampleFrames(world);
+    for (; step < maxSteps; step++) {
+      world.update(dt);
+      if (sampleEvery > 0 && (step + 1) % sampleEvery === 0) {
+        sampleFrames(world);
+      }
+      const alive = aliveIds(world);
+      if (alive.length <= 1) {
+        reason = alive.length === 1 ? "win" : "draw";
+        break;
+      }
     }
+
+    const wallMs = performance.now() - startWall;
     const alive = aliveIds(world);
-    if (alive.length <= 1) {
-      reason = alive.length === 1 ? "win" : "draw";
-      break;
-    }
+    const winner = alive.length === 1 ? alive[0] : null;
+    const simulatedSeconds = world.time;
+
+    world.emit("match_end", null, {
+      reason,
+      winner,
+      alive,
+      simulatedSeconds,
+      wallMs,
+    });
+
+    sink.finalize({
+      endedAt: new Date().toISOString(),
+      simulatedSeconds,
+      reason,
+      winner,
+      alive,
+    });
+
+    return {
+      winner,
+      alive,
+      simulatedSeconds,
+      wallMs,
+      reason,
+      runId: opts.runId,
+    };
+  } finally {
+    world.telemetry = null;
+    sink.close();
   }
 
-  const wallMs = performance.now() - startWall;
-  const alive = aliveIds(world);
-  const winner = alive.length === 1 ? alive[0] : null;
-  const simulatedSeconds = nowSeconds();
-
-  emit("match_end", null, {
-    reason,
-    winner,
-    alive,
-    simulatedSeconds,
-    wallMs,
-  });
-
-  sink.finalize({
-    endedAt: new Date().toISOString(),
-    simulatedSeconds,
-    reason,
-    winner,
-    alive,
-  });
-  setTelemetry(null);
-  sink.close();
-
-  return {
-    winner,
-    alive,
-    simulatedSeconds,
-    wallMs,
-    reason,
-    runId: opts.runId,
-  };
-}
-
-function seedMathRandom(seed: number): void {
-  let state = (seed | 0) || 1;
-  Math.random = (): number => {
-    state = (state * 1664525 + 1013904223) | 0;
-    return ((state >>> 0) % 1_000_000) / 1_000_000;
-  };
 }
 
 interface CliArgs {
@@ -203,6 +149,9 @@ interface CliArgs {
   maxSeconds: number;
   sampleHz: number;
   seed?: number;
+  scenario?: string;
+  variant?: string;
+  rotation?: number;
   runIdPrefix: string | null;
   runsDir: string;
   keep: boolean;
@@ -212,10 +161,13 @@ interface CliArgs {
 function parseArgs(argv: string[]): CliArgs {
   const out: CliArgs = {
     runs: 1,
-    dt: 1 / 60,
+    dt: SIMULATION_DT,
     maxSeconds: 120,
     sampleHz: 10,
     seed: undefined,
+    scenario: SCENARIO_ID,
+    variant: "baseline",
+    rotation: 0,
     runIdPrefix: null,
     runsDir: "runs",
     keep: false,
@@ -227,6 +179,9 @@ function parseArgs(argv: string[]): CliArgs {
     else if (arg === "--dt") out.dt = Number(argv[++i]);
     else if (arg === "--max") out.maxSeconds = Number(argv[++i]);
     else if (arg === "--sample-hz") out.sampleHz = Number(argv[++i]);
+    else if (arg === "--scenario") out.scenario = argv[++i];
+    else if (arg === "--variant") out.variant = argv[++i];
+    else if (arg === "--rotation") out.rotation = Number(argv[++i]);
     else if (arg === "--seed") out.seed = Number(argv[++i]);
     else if (arg === "--run-id") out.runIdPrefix = String(argv[++i]);
     else if (arg === "--runs-dir") out.runsDir = String(argv[++i]);
@@ -252,12 +207,10 @@ function main(): void {
   }
   mkdirSync(args.runsDir, { recursive: true });
 
-  const originalLog = console.log;
   const wins = new Map<string, number>();
   const totalsByReason = { win: 0, draw: 0, timeout: 0 };
   const startAll = performance.now();
   for (let r = 0; r < args.runs; r++) {
-    if (args.quiet) console.log = (): void => undefined;
     const seed = args.seed !== undefined ? args.seed + r : undefined;
     const runId = defaultRunId(args, r, seed);
     const result = runMatch({
@@ -265,10 +218,12 @@ function main(): void {
       maxSeconds: args.maxSeconds,
       sampleHz: args.sampleHz,
       seed,
+      scenario: args.scenario,
+      variant: args.variant,
+      rotation: args.rotation,
       runId,
       runsDir: args.runsDir,
     });
-    console.log = originalLog;
     totalsByReason[result.reason]++;
     if (result.winner) {
       wins.set(result.winner, (wins.get(result.winner) ?? 0) + 1);

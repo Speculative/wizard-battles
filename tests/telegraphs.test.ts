@@ -1,0 +1,52 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import * as THREE from 'three';
+import { createScenario } from '../src/scenario';
+import { Vector3 } from '../src/math';
+import { BattleView } from '../src/presentation/battleView';
+import { FireballFactory } from '../src/spells/fireball';
+import { Heavy } from '../src/spells/modifiers';
+import { Projectile } from '../src/spells/projectile';
+import { ProjectileSlowField } from '../src/spells/projectileSlowField';
+import { Charging } from '../src/components';
+
+test('AOE marker shows full authoritative radius at target through charge and flight', () => {
+  const world = createScenario({ seed: 3 });
+  const caster = world.contestants[0];
+  const spell = FireballFactory.create(caster, null, new Vector3(1, 0, 0), Heavy) as Projectile;
+  spell.frozen = true;
+  spell.setDetonationPoint(120, -80);
+  caster.addComponent(Charging, { target: null, remaining: 1.8, totalDuration: 2 });
+  world.addSpell(spell);
+  const view = new BattleView(world, new THREE.OrthographicCamera());
+  view.render();
+  const marker = view.group.getObjectByName('telegraph')!;
+  assert.ok(marker.visible);
+  assert.equal(marker.position.x, 120);
+  assert.equal(marker.position.z, -80);
+  assert.equal(marker.scale.x, spell.spec.aoe!.radius);
+  caster.removeComponent(Charging);
+  spell.frozen = false;
+  view.render();
+  assert.ok(marker.visible);
+  assert.equal(marker.scale.x, spell.spec.aoe!.radius);
+  view.dispose();
+});
+
+test('slow field graphics become active only on release and match dome geometry', () => {
+  const world = createScenario();
+  const spell = new ProjectileSlowField(world.contestants[0], new Vector3(20, 0, 30));
+  spell.frozen = true;
+  world.addSpell(spell);
+  const view = new BattleView(world, new THREE.OrthographicCamera());
+  view.render();
+  const field = view.group.getObjectByName('field:red')!;
+  assert.equal(field.visible, false);
+  spell.frozen = false;
+  view.render();
+  assert.equal(field.visible, true);
+  const dome = field.getObjectByName('dome') as THREE.Mesh<THREE.SphereGeometry>;
+  assert.equal(dome.geometry.parameters.radius, spell.radius);
+  assert.equal(dome.scale.y * spell.radius, spell.height);
+  view.dispose();
+});

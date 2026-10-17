@@ -6,14 +6,15 @@ export class GameRenderer {
   readonly camera: THREE.OrthographicCamera;
   readonly renderer: THREE.WebGLRenderer;
   private readonly canvas: HTMLCanvasElement;
+  private readonly onResize = () => { this.resize(); this.render(); };
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, options: { pixelRatio?: number } = {}) {
     this.canvas = canvas;
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xffffff);
 
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+    this.renderer.setPixelRatio(options.pixelRatio ?? window.devicePixelRatio);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.BasicShadowMap;
     this.renderer.toneMapping = THREE.NoToneMapping;
@@ -31,7 +32,7 @@ export class GameRenderer {
 
     this.addLights();
     this.resize();
-    window.addEventListener("resize", () => this.resize());
+    window.addEventListener("resize", this.onResize);
   }
 
   private addLights(): void {
@@ -103,6 +104,11 @@ export class GameRenderer {
     this.camera.top = cy + viewHeight / 2;
     this.camera.bottom = cy - viewHeight / 2;
     this.camera.updateProjectionMatrix();
+  }
+
+  dispose(): void {
+    window.removeEventListener("resize", this.onResize);
+    this.renderer.dispose();
   }
 
   render(): void {

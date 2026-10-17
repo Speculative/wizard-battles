@@ -1,13 +1,14 @@
-import * as THREE from "three";
+import { Vector3 } from "../math";
 import type { World } from "../world";
 import type { ComponentKey } from "../components";
 
 export interface Contestant {
   readonly id: string;
-  readonly mesh: THREE.Object3D;
-  readonly position: THREE.Vector3;
-  readonly velocity: THREE.Vector3;
-  readonly facing: THREE.Vector3;
+  readonly world: World;
+  readonly color: number;
+  readonly position: Vector3;
+  readonly velocity: Vector3;
+  readonly facing: Vector3;
   readonly radius: number;
   hp: number;
   alive: boolean;

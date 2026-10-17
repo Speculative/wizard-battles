@@ -1,4 +1,4 @@
-import type * as THREE from "three";
+import type { Vector3 } from "../math";
 
 export type Change =
   | ForceMovementStateChange
@@ -9,7 +9,7 @@ export type Change =
 export interface ForceMovementStateChange {
   type: "forceMovementState";
   state: "dashing";
-  direction: THREE.Vector3;
+  direction: Vector3;
   priority: HandlerTier;
 }
 

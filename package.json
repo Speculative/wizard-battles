@@ -8,12 +8,16 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "sim": "tsx src/harness.ts",
-    "q": "tsx scripts/duckq.ts"
+    "q": "tsx scripts/duckq.ts",
+    "capture": "tsx scripts/capture.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "check:browser": "tsx scripts/check-browser.ts"
   },
   "devDependencies": {
     "@duckdb/node-api": "^1.5.2-r.1",
     "@types/node": "^25.6.0",
     "@types/three": "^0.184.0",
+    "playwright": "1.64.1",
     "tsx": "^4.21.0",
     "typescript": "~6.0.2",
     "vite": "^8.0.4"

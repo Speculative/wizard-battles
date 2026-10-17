@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { Vector3 } from "../math";
 import type { World } from "../world";
 import type { Contestant } from "../contestants/contestant";
 
@@ -25,9 +25,8 @@ export interface SpellMetadata {
 }
 
 export interface Spell {
-  readonly mesh: THREE.Object3D;
-  readonly position: THREE.Vector3;
-  readonly velocity: THREE.Vector3;
+  readonly position: Vector3;
+  readonly velocity: Vector3;
   readonly caster: Contestant;
   readonly metadata: SpellMetadata;
   dead: boolean;
@@ -44,7 +43,7 @@ export interface SpellFactory {
   create(
     caster: Contestant,
     target: Contestant | null,
-    aim: THREE.Vector3,
+    aim: Vector3,
     modifier?: SpellModifier
   ): Spell;
 }

@@ -1,3 +1,4 @@
+import { deepFreeze } from "./deepFreeze";
 import {
   makeProjectileFactory,
   Projectile,
@@ -38,3 +39,5 @@ export const FireballFactory: ProjectileFactory =
 export const FIREBALL_METADATA = FireballFactory.metadata;
 
 export { Projectile as Fireball };
+
+deepFreeze(FIREBALL_SPEC);

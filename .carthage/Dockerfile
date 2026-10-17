@@ -12,5 +12,20 @@ FROM ghcr.io/speculative/carthage-base:v1
 
 USER root
 
+# Keep browsers in the image, outside the workspace and per-agent cache mounts.
+# The installer version comes from this repository's lockfile, matching npm ci.
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
+COPY package-lock.json /opt/carthage-browser/project-package-lock.json
+COPY .carthage/check-browser.cjs /opt/carthage-browser/check-browser.cjs
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
+    && npm install --prefix /opt/carthage-browser --no-audit --no-fund --ignore-scripts \
+      "playwright@$(node -p "require('/opt/carthage-browser/project-package-lock.json').packages['node_modules/playwright'].version")" \
+    && /opt/carthage-browser/node_modules/.bin/playwright install --with-deps chromium \
+    && chmod -R a+rX /opt/playwright-browsers \
+    && rm -rf /var/lib/apt/lists/*
+
 USER carthage
 WORKDIR /workspace
+
+# Fail the image build if the actual runtime user cannot launch/render.
+RUN node /opt/carthage-browser/check-browser.cjs

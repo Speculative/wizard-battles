@@ -1,12 +1,12 @@
-import * as THREE from "three";
+import { Vector3 } from "../math";
+import { computeAimSolution } from "./aim";
 import type { Contestant } from "./contestant";
 import type { World } from "../world";
 import { FireballFactory } from "../spells/fireball";
 import { Projectile, isProjectileFactory, isProjectileModifier, specToMetadata } from "../spells/projectile";
 import type { Spell, SpellFactory, SpellMetadata, SpellModifier } from "../spells/spell";
-import { getToonGradient, makeOutline } from "../materials";
 import { KinematicBody, type MovementStats } from "../kinematics";
-import { StatusDisplay } from "../statusDisplay";
+import { DEFAULT_MOVEMENT_STATS, type MovementState } from "./movement";
 import { TacticSelector } from "../tactics/selector";
 import type {
   CastController,
@@ -26,14 +26,6 @@ import { InterruptOnLowHPHandler } from "../handlers/interruptOnLowHP";
 import { runPipeline } from "../handlers/pipeline";
 import type { ComponentKey } from "../components";
 import { Channeling, Charging, Dashing, Recovering } from "../components";
-import { nowSeconds } from "../clock";
-import { emit } from "../telemetry";
-
-function gaussian(): number {
-  const u = 1 - Math.random();
-  const v = Math.random();
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-}
 
 function computeEffectiveMetadata(
   factory: SpellFactory,
@@ -50,9 +42,6 @@ const RADIUS = 22;
 const FLOAT_HEIGHT = RADIUS * 1.5;
 const CHARGE_DURATION = 0.45;
 
-const AIM_NOISE_SIGMA_MAX = 0.2;
-const AIM_NOISE_SIGMA_MIN = 0.02;
-const AIM_NOISE_DECAY_SHOTS = 25;
 
 const STAMINA_MAX = 3.0;
 const STAMINA_SPRINT_DRAIN = 1.0;
@@ -69,8 +58,6 @@ const DASH_MIN_STAMINA = 0.6;
 const DASH_COOLDOWN = 1.2;
 const DASH_RECOVERY_DURATION = 0.35;
 
-const TRAIL_SAMPLE_INTERVAL = 0.03;
-const TRAIL_MAX_SAMPLES = 10;
 
 const FACING_TURN_RATE = Math.PI * 2.5;
 const SPRINT_FACING_CONE = (Math.PI * 5) / 12;
@@ -78,72 +65,15 @@ const SPRINT_FACING_CONE = (Math.PI * 5) / 12;
 const STRAFE_SIDE_SCALE = 0.6;
 const STRAFE_BACK_SCALE = 0.4;
 
-type MovementState =
-  | "idle"
-  | "walking"
-  | "running"
-  | "sprinting"
-  | "dashing"
-  | "charging"
-  | "channeling"
-  | "recovering";
-
-const STATE_STATS: Record<MovementState, MovementStats> = {
-  idle: { maxSpeed: 0, acceleration: 0, friction: 500, turnRate: Math.PI * 2 },
-  walking: {
-    maxSpeed: 60,
-    acceleration: 350,
-    friction: 350,
-    turnRate: Math.PI * 1.6,
-  },
-  running: {
-    maxSpeed: 130,
-    acceleration: 450,
-    friction: 300,
-    turnRate: Math.PI * 1.2,
-  },
-  sprinting: {
-    maxSpeed: 220,
-    acceleration: 500,
-    friction: 250,
-    turnRate: Math.PI * 0.7,
-  },
-  dashing: {
-    maxSpeed: 340,
-    acceleration: 2000,
-    friction: 600,
-    turnRate: Math.PI * 0.3,
-  },
-  charging: {
-    maxSpeed: 45,
-    acceleration: 250,
-    friction: 400,
-    turnRate: Math.PI * 1.8,
-  },
-  channeling: {
-    // Fully rooted: caster can rotate to face target but does not translate.
-    // Future "break concentration" interactions will react to damage taken
-    // while in this state (see Channeling component).
-    maxSpeed: 0,
-    acceleration: 0,
-    friction: 1500,
-    turnRate: Math.PI * 1.5,
-  },
-  recovering: {
-    maxSpeed: 15,
-    acceleration: 50,
-    friction: 800,
-    turnRate: Math.PI * 0.6,
-  },
-};
-
 export interface BasicWizardOptions {
   id: string;
+  world: World;
   color: number;
-  start: THREE.Vector3;
+  start: Vector3;
   roster: RosterEntry[];
   spellbook?: SpellFactory[];
   modifiers?: SpellModifier[];
+  movement?: Partial<Record<MovementState, Partial<MovementStats>>>;
 }
 
 class WizardCastController implements CastController {
@@ -179,15 +109,16 @@ class WizardCastController implements CastController {
 
 export class BasicWizard implements Contestant {
   readonly id: string;
-  readonly mesh: THREE.Object3D;
+  readonly color: number;
+  readonly world: World;
   readonly radius = RADIUS;
   hp = 100;
   alive = true;
 
   private readonly body: KinematicBody;
-  readonly facing = new THREE.Vector3(1, 0, 0);
-  private readonly facingPivot: THREE.Group;
-  private readonly wanderDir = new THREE.Vector3();
+  private readonly movement: Record<MovementState, MovementStats>;
+  readonly facing = new Vector3(1, 0, 0);
+  private readonly wanderDir = new Vector3();
   private state: MovementState = "running";
   private stateTimer = 0;
   private stamina = STAMINA_MAX;
@@ -202,7 +133,7 @@ export class BasicWizard implements Contestant {
   private chargeTarget: Contestant | null = null;
   private shotsFired = 0;
   private dashCooldown = 0;
-  private readonly dashDir = new THREE.Vector3();
+  private readonly dashDir = new Vector3();
   private readonly projectileDetector = new ProjectileIncomingDetector();
   private readonly lowHPDetector = new LowHPCrossedDetector(0.4);
   private readonly detectors: EventDetector[] = [
@@ -217,10 +148,8 @@ export class BasicWizard implements Contestant {
   private readonly components = new Map<string, unknown>();
   private readonly castController: WizardCastController;
   private currentMoveIntent: Vec2 = { x: 0, z: 0 };
-  private currentPaceHint: PaceHint = "hold";
   private currentFacingIntent: Vec2 = { x: 0, z: 0 };
-  private readonly moveScratch = new THREE.Vector3();
-  private _cachedWorldForCast: World | null = null;
+  private readonly moveScratch = new Vector3();
 
   getComponent<T>(key: ComponentKey<T>): T | undefined {
     return this.components.get(key.id) as T | undefined;
@@ -231,89 +160,32 @@ export class BasicWizard implements Contestant {
   removeComponent<T>(key: ComponentKey<T>): void {
     this.components.delete(key.id);
   }
-  private debugLogTimer = 0;
   private readonly tacticSelector: TacticSelector;
-  private readonly trail: THREE.Line;
-  private readonly trailPositions: Float32Array;
-  private readonly trailColors: Float32Array;
-  private readonly trailGeo: THREE.BufferGeometry;
-  private trailSampleTimer = 0;
-  private trailCount = 0;
-  private trailSampling = false;
-  private readonly trailBaseColor: THREE.Color;
-  private trailAttached = false;
-  private readonly status = new StatusDisplay();
-  private statusAttached = false;
 
-  get position(): THREE.Vector3 {
+  get position(): Vector3 {
     return this.body.position;
   }
-  get velocity(): THREE.Vector3 {
+  get velocity(): Vector3 {
     return this.body.velocity;
   }
 
   constructor(opts: BasicWizardOptions) {
     this.id = opts.id;
-    this.spellbook = opts.spellbook ?? [FireballFactory];
-    this.modifiers = opts.modifiers ?? [];
-    this.body = new KinematicBody({ ...STATE_STATS.running }, opts.start);
+    this.color = opts.color;
+    this.world = opts.world;
+    this.spellbook = [...(opts.spellbook ?? [FireballFactory])];
+    this.modifiers = [...(opts.modifiers ?? [])];
+    this.movement = Object.fromEntries(Object.entries(DEFAULT_MOVEMENT_STATS).map(([state, stats]) =>
+      [state, { ...stats, ...opts.movement?.[state as MovementState] }]
+    )) as Record<MovementState, MovementStats>;
+    this.body = new KinematicBody({ ...this.movement.running }, opts.start);
     this.body.position.y = FLOAT_HEIGHT;
     this.tacticSelector = new TacticSelector(opts.roster, opts.id);
     this.castController = new WizardCastController(this);
 
-    const sphereGeo = new THREE.SphereGeometry(RADIUS, 24, 24);
-    const bodyMesh = new THREE.Mesh(
-      sphereGeo,
-      new THREE.MeshToonMaterial({
-        color: opts.color,
-        gradientMap: getToonGradient(),
-      })
-    );
-    bodyMesh.castShadow = true;
-    const group = new THREE.Group();
-    group.add(makeOutline(sphereGeo, 1.05));
-    group.add(bodyMesh);
-
-    const facingMarker = new THREE.Mesh(
-      new THREE.ConeGeometry(RADIUS * 0.35, RADIUS * 0.9, 10),
-      new THREE.MeshToonMaterial({
-        color: 0x222222,
-        gradientMap: getToonGradient(),
-      })
-    );
-    facingMarker.rotation.z = -Math.PI / 2;
-    facingMarker.position.set(RADIUS * 0.9, RADIUS * 0.3, 0);
-    const facingPivot = new THREE.Group();
-    facingPivot.add(facingMarker);
-    group.add(facingPivot);
-    this.facingPivot = facingPivot;
-
-    this.mesh = group;
-    this.mesh.position.copy(this.body.position);
-
-    this.trailBaseColor = new THREE.Color(opts.color);
-    this.trailGeo = new THREE.BufferGeometry();
-    this.trailPositions = new Float32Array(TRAIL_MAX_SAMPLES * 3);
-    this.trailColors = new Float32Array(TRAIL_MAX_SAMPLES * 3);
-    this.trailGeo.setAttribute(
-      "position",
-      new THREE.BufferAttribute(this.trailPositions, 3)
-    );
-    this.trailGeo.setAttribute(
-      "color",
-      new THREE.BufferAttribute(this.trailColors, 3)
-    );
-    this.trailGeo.setDrawRange(0, 0);
-    this.trail = new THREE.Line(
-      this.trailGeo,
-      new THREE.LineBasicMaterial({ vertexColors: true, transparent: true })
-    );
-    this.trail.frustumCulled = false;
-
-    const angle = Math.random() * Math.PI * 2;
+    const angle = this.world.random() * Math.PI * 2;
     this.wanderDir.set(Math.cos(angle), 0, Math.sin(angle));
     this.facing.copy(this.wanderDir);
-    this.facingPivot.rotation.y = -Math.atan2(this.facing.z, this.facing.x);
   }
 
   stamina01(): number {
@@ -342,19 +214,7 @@ export class BasicWizard implements Contestant {
   }
 
   update(dt: number, world: World): void {
-    if (!this.trailAttached) {
-      world.scene.add(this.trail);
-      this.trailAttached = true;
-    }
-    if (!this.statusAttached) {
-      world.scene.add(this.status.group);
-      this.statusAttached = true;
-    }
-
     if (!this.alive) {
-      this.mesh.visible = false;
-      this.trail.visible = false;
-      this.status.setVisible(false);
       if (this.chargedSpell) {
         this.chargedSpell.dead = true;
         this.chargedSpell = null;
@@ -363,14 +223,13 @@ export class BasicWizard implements Contestant {
       return;
     }
 
-    this._cachedWorldForCast = world;
     this.dashCooldown = Math.max(0, this.dashCooldown - dt);
 
     this.turnTimer -= dt;
     if (this.turnTimer <= 0) {
-      const angle = Math.random() * Math.PI * 2;
+      const angle = this.world.random() * Math.PI * 2;
       this.wanderDir.set(Math.cos(angle), 0, Math.sin(angle));
-      this.turnTimer = 0.8 + Math.random() * 1.6;
+      this.turnTimer = 0.8 + this.world.random() * 1.6;
     }
 
     this.tacticSelector.updateDormantObservations(this, world);
@@ -402,14 +261,12 @@ export class BasicWizard implements Contestant {
       if (c.type === "forceMovementState" && c.state === "dashing") {
         const policy = activeTactic.dodgePolicy?.(this, world) ?? "always";
         if (policy === "never") {
-          console.log(
-            `${this.id} ${activeTactic.id} policy blocked dodge`
-          );
+          this.world.emit("dash_refused", this.id, { reason: "tactic_policy", tactic: activeTactic.id });
         } else {
           this.tryEnterDash(c.direction);
         }
       } else if (c.type === "observe") {
-        activeTactic.onObserve?.(c.key, c.value);
+        activeTactic.onObserve?.(c.key, c.value, world);
       }
     }
 
@@ -421,7 +278,6 @@ export class BasicWizard implements Contestant {
 
     const output: TacticOutput = activeTactic.update(dt, this, world);
     this.currentMoveIntent = output.moveIntent;
-    this.currentPaceHint = output.paceHint;
     this.currentFacingIntent = output.facingIntent;
 
     this.updateState(dt, output.paceHint);
@@ -456,39 +312,10 @@ export class BasicWizard implements Contestant {
     this.enforceArenaBounds(world);
 
     this.body.position.y = FLOAT_HEIGHT;
-    this.mesh.position.copy(this.body.position);
-
-    this.updateTrail(dt);
 
     activeTactic.maybeCast?.(dt, this, world, this.castController);
     this.updateChargedSpell();
 
-    this.status.update(
-      this.hp / 100,
-      this.stamina / STAMINA_MAX,
-      this.body.position,
-      RADIUS * 1.8,
-      world.camera.quaternion
-    );
-
-    if (this.id === "red") {
-      this.debugLogTimer -= dt;
-      if (this.debugLogTimer <= 0) {
-        this.debugLogTimer = 0.4;
-        const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
-        const nowS = nowSeconds();
-        const cooldowns = this.spellbook
-          .map((f) => {
-            const r = this.readyAt.get(f) ?? 0;
-            const left = Math.max(0, r - nowS);
-            return `${f.metadata.id}=${left.toFixed(1)}`;
-          })
-          .join(" ");
-        console.log(
-          `red state=${this.state} spd=${speed.toFixed(0)} stam=${this.stamina.toFixed(1)} tactic=${activeTactic.id} pace=${this.currentPaceHint} cd[${cooldowns}]`
-        );
-      }
-    }
   }
 
   private hasLivingEnemy(world: World): boolean {
@@ -498,7 +325,7 @@ export class BasicWizard implements Contestant {
     return false;
   }
 
-  private resolveMoveVector(world: World, isDashing: boolean): THREE.Vector3 {
+  private resolveMoveVector(world: World, isDashing: boolean): Vector3 {
     if (isDashing) return this.dashDir;
     let intent = this.currentMoveIntent;
     if (isStationary(intent) && !this.hasLivingEnemy(world)) {
@@ -512,36 +339,36 @@ export class BasicWizard implements Contestant {
     return this.moveScratch;
   }
 
-  private resolveFacingVector(): THREE.Vector3 {
+  private resolveFacingVector(): Vector3 {
     const intent = this.currentFacingIntent;
     if (isStationary(intent)) {
-      return new THREE.Vector3(this.facing.x, 0, this.facing.z);
+      return new Vector3(this.facing.x, 0, this.facing.z);
     }
     const len = Math.hypot(intent.x, intent.z);
     if (len < 1e-4) {
-      return new THREE.Vector3(this.facing.x, 0, this.facing.z);
+      return new Vector3(this.facing.x, 0, this.facing.z);
     }
-    return new THREE.Vector3(intent.x / len, 0, intent.z / len);
+    return new Vector3(intent.x / len, 0, intent.z / len);
   }
 
   private clampToCone(
-    desired: THREE.Vector3,
-    reference: THREE.Vector3,
+    desired: Vector3,
+    reference: Vector3,
     maxAngle: number,
-    fallback: THREE.Vector3
-  ): THREE.Vector3 {
+    fallback: Vector3
+  ): Vector3 {
     const refLen = Math.hypot(reference.x, reference.z);
     if (refLen < 1e-3) return fallback;
     const rx = reference.x / refLen;
     const rz = reference.z / refLen;
     const dLen = Math.hypot(desired.x, desired.z);
-    if (dLen < 1e-3) return new THREE.Vector3(rx, 0, rz);
+    if (dLen < 1e-3) return new Vector3(rx, 0, rz);
     const dx = desired.x / dLen;
     const dz = desired.z / dLen;
     const dot = rx * dx + rz * dz;
     const clamped = Math.max(-1, Math.min(1, dot));
     const angle = Math.acos(clamped);
-    if (angle <= maxAngle) return new THREE.Vector3(dx, 0, dz);
+    if (angle <= maxAngle) return new Vector3(dx, 0, dz);
     const cross = rx * dz - rz * dx;
     let sign: 1 | -1;
     if (Math.abs(cross) < 0.1) {
@@ -556,10 +383,10 @@ export class BasicWizard implements Contestant {
     const rot = maxAngle * sign;
     const cos = Math.cos(rot);
     const sin = Math.sin(rot);
-    return new THREE.Vector3(rx * cos - rz * sin, 0, rx * sin + rz * cos);
+    return new Vector3(rx * cos - rz * sin, 0, rx * sin + rz * cos);
   }
 
-  private strafeScale(moveIntent: THREE.Vector3): number {
+  private strafeScale(moveIntent: Vector3): number {
     const iLen = Math.hypot(moveIntent.x, moveIntent.z);
     if (iLen < 1e-3) return 1;
     const ix = moveIntent.x / iLen;
@@ -571,7 +398,7 @@ export class BasicWizard implements Contestant {
     return STRAFE_SIDE_SCALE + (STRAFE_BACK_SCALE - STRAFE_SIDE_SCALE) * -dot;
   }
 
-  private updateFacing(dt: number, intent: THREE.Vector3): void {
+  private updateFacing(dt: number, intent: Vector3): void {
     const len = Math.hypot(intent.x, intent.z);
     if (len < 1e-3) return;
     const tx = intent.x / len;
@@ -592,72 +419,6 @@ export class BasicWizard implements Contestant {
       const fz = this.facing.x * sin + this.facing.z * cos;
       this.facing.set(fx, 0, fz);
     }
-    this.facingPivot.rotation.y = -Math.atan2(this.facing.z, this.facing.x);
-  }
-
-  private updateTrail(dt: number): void {
-    const sampling = this.state === "sprinting" || this.state === "dashing";
-    if (sampling !== this.trailSampling) {
-      this.trailCount = 0;
-      this.trailSampleTimer = 0;
-      this.trailSampling = sampling;
-      this.rewriteTrailFromFront();
-    }
-    if (sampling) {
-      this.trailSampleTimer -= dt;
-      if (this.trailSampleTimer <= 0) {
-        this.trailSampleTimer = TRAIL_SAMPLE_INTERVAL;
-        this.pushTrailSample();
-      }
-    } else if (this.trailCount > 0) {
-      this.trailSampleTimer -= dt;
-      if (this.trailSampleTimer <= 0) {
-        this.trailSampleTimer = TRAIL_SAMPLE_INTERVAL;
-        this.shiftTrailTail();
-      }
-    }
-    this.trail.visible = this.trailCount > 1;
-  }
-
-  private shiftTrailTail(): void {
-    if (this.trailCount <= 0) return;
-    for (let i = 1; i < this.trailCount; i++) {
-      this.trailPositions[(i - 1) * 3] = this.trailPositions[i * 3];
-      this.trailPositions[(i - 1) * 3 + 1] = this.trailPositions[i * 3 + 1];
-      this.trailPositions[(i - 1) * 3 + 2] = this.trailPositions[i * 3 + 2];
-    }
-    this.trailCount--;
-    this.rewriteTrailFromFront();
-  }
-
-  private pushTrailSample(): void {
-    if (this.trailCount >= TRAIL_MAX_SAMPLES) {
-      for (let i = 1; i < TRAIL_MAX_SAMPLES; i++) {
-        this.trailPositions[(i - 1) * 3] = this.trailPositions[i * 3];
-        this.trailPositions[(i - 1) * 3 + 1] = this.trailPositions[i * 3 + 1];
-        this.trailPositions[(i - 1) * 3 + 2] = this.trailPositions[i * 3 + 2];
-      }
-      this.trailCount = TRAIL_MAX_SAMPLES - 1;
-    }
-    const idx = this.trailCount * 3;
-    this.trailPositions[idx] = this.body.position.x;
-    this.trailPositions[idx + 1] = this.body.position.y;
-    this.trailPositions[idx + 2] = this.body.position.z;
-    this.trailCount++;
-    this.rewriteTrailFromFront();
-  }
-
-  private rewriteTrailFromFront(): void {
-    const n = this.trailCount;
-    for (let i = 0; i < n; i++) {
-      const t = n <= 1 ? 1 : i / (n - 1);
-      this.trailColors[i * 3] = this.trailBaseColor.r * t;
-      this.trailColors[i * 3 + 1] = this.trailBaseColor.g * t;
-      this.trailColors[i * 3 + 2] = this.trailBaseColor.b * t;
-    }
-    this.trailGeo.attributes.position.needsUpdate = true;
-    this.trailGeo.attributes.color.needsUpdate = true;
-    this.trailGeo.setDrawRange(0, n);
   }
 
   private updateState(dt: number, paceHint: PaceHint): void {
@@ -740,7 +501,8 @@ export class BasicWizard implements Contestant {
     if (this.state === next) return;
     const prev = this.state;
     this.state = next;
-    this.body.stats = { ...STATE_STATS[next] };
+    this.world.emit("movement_state", this.id, { from: prev, to: next });
+    this.body.stats = { ...this.movement[next] };
     if (stateDuration > 0) this.stateTimer = stateDuration;
 
     if (prev === "charging") this.removeComponent(Charging);
@@ -779,6 +541,17 @@ export class BasicWizard implements Contestant {
         this.body.position.y + 8,
         this.body.position.z + aim.z * (this.radius + 6)
       );
+      if (this.chargedSpell.spec.aimMode === "groundTarget" && this.chargeTarget) {
+        // A live preview follows the authoritative target until release locks the endpoint.
+        // Zero-noise aiming is pure and consumes no gameplay random values.
+        const preview = computeAimSolution(this.position, this.chargeTarget,
+          this.chargedSpeed, 0, this.shotsFired, this.world.random);
+        const direction = preview.direction.normalize();
+        this.chargedSpell.setDetonationPoint(
+          this.position.x + direction.x * preview.leadDistance,
+          this.position.z + direction.z * preview.leadDistance
+        );
+      }
     }
     if (this.state !== "charging" && this.state !== "channeling") {
       this.releaseCharge();
@@ -793,7 +566,7 @@ export class BasicWizard implements Contestant {
   ): boolean {
     const effective = computeEffectiveMetadata(factory, modifier);
     if (!this.alive) {
-      emit("cast_request", this.id, {
+      this.world.emit("cast_request", this.id, {
         factory: factory.metadata.id,
         modifier: modifier?.id ?? null,
         effectiveSpellId: effective.id,
@@ -810,7 +583,7 @@ export class BasicWizard implements Contestant {
       this.state === "charging" ||
       this.state === "channeling"
     ) {
-      emit("cast_request", this.id, {
+      this.world.emit("cast_request", this.id, {
         factory: factory.metadata.id,
         modifier: modifier?.id ?? null,
         effectiveSpellId: effective.id,
@@ -821,7 +594,7 @@ export class BasicWizard implements Contestant {
       return false;
     }
     if (!this._ccIsReady(factory)) {
-      emit("cast_request", this.id, {
+      this.world.emit("cast_request", this.id, {
         factory: factory.metadata.id,
         modifier: modifier?.id ?? null,
         effectiveSpellId: effective.id,
@@ -833,7 +606,7 @@ export class BasicWizard implements Contestant {
     }
 
     this.chargeTarget = target;
-    const aimVec = new THREE.Vector3(aim.x, 0, aim.z);
+    const aimVec = new Vector3(aim.x, 0, aim.z);
     if (aimVec.lengthSq() < 1e-6) aimVec.set(1, 0, 0);
     const spell = factory.create(this, target, aimVec, modifier) as Spell & {
       frozen: boolean;
@@ -843,11 +616,11 @@ export class BasicWizard implements Contestant {
     this.chargedFactory = factory;
     this.chargedModifier = modifier ?? null;
     this.chargedSpeed = effective.baseSpeed ?? 0;
-    this._cachedWorldForCast?.addSpell(spell);
+    this.world.addSpell(spell);
     const castMode: MovementState =
       effective.castMode === "channel" ? "channeling" : "charging";
     this.setState(castMode, effective.chargeTime || CHARGE_DURATION);
-    emit("cast_request", this.id, {
+    this.world.emit("cast_request", this.id, {
       factory: factory.metadata.id,
       modifier: modifier?.id ?? null,
       effectiveSpellId: effective.id,
@@ -871,6 +644,7 @@ export class BasicWizard implements Contestant {
   }
   _ccCancelCharging(): void {
     if (!this.chargedSpell) return;
+    this.world.emit("cast_cancel", this.id, { spell: this.chargedFactory?.metadata.id ?? null });
     this.chargedSpell.dead = true;
     this.chargedSpell = null;
     this.chargedFactory = null;
@@ -892,7 +666,7 @@ export class BasicWizard implements Contestant {
   }
   _ccIsReady(factory: SpellFactory): boolean {
     const readyAt = this.readyAt.get(factory) ?? 0;
-    return readyAt <= nowSeconds();
+    return readyAt <= this.world.time;
   }
 
   private releaseCharge(): void {
@@ -905,17 +679,14 @@ export class BasicWizard implements Contestant {
 
     if (spell instanceof Projectile && target) {
       const noiseScale = spell.spec.aimNoiseScale ?? 1;
-      const solution = this.computeAimSolution(
-        target,
-        projectileSpeed,
-        noiseScale
+      const solution = computeAimSolution(
+        this.position, target, projectileSpeed, noiseScale, this.shotsFired, this.world.random
       );
       spell.setVelocityFromDirection(solution.direction);
       if (spell.spec.aimMode === "groundTarget") {
         spell.setDetonationPoint(
-          this.body.position.x + solution.leadX,
-          this.body.position.z + solution.leadZ,
-          solution.leadDistance
+          this.body.position.x + solution.direction.clone().normalize().x * solution.leadDistance,
+          this.body.position.z + solution.direction.clone().normalize().z * solution.leadDistance
         );
       }
       this.shotsFired++;
@@ -928,72 +699,13 @@ export class BasicWizard implements Contestant {
     this.chargeTarget = null;
     const effective = computeEffectiveMetadata(factory, modifier ?? undefined);
     const cooldown = effective.cooldown || 1.0;
-    this.readyAt.set(factory, nowSeconds() + cooldown);
-    emit("cast_release", this.id, {
+    this.readyAt.set(factory, this.world.time + cooldown);
+    this.world.emit("cast_release", this.id, {
       factory: factory.metadata.id,
       modifier: modifier?.id ?? null,
       effectiveSpellId: effective.id,
       targetId: target?.id ?? null,
     });
-  }
-
-  private computeAimSolution(
-    target: Contestant,
-    projectileSpeed: number,
-    noiseScale: number
-  ): { direction: THREE.Vector3; leadX: number; leadZ: number; leadDistance: number } {
-    const dx = target.position.x - this.body.position.x;
-    const dz = target.position.z - this.body.position.z;
-    const vx = target.velocity.x;
-    const vz = target.velocity.z;
-    const s = projectileSpeed;
-    const a = vx * vx + vz * vz - s * s;
-    const b = 2 * (dx * vx + dz * vz);
-    const c = dx * dx + dz * dz;
-
-    let leadX = dx;
-    let leadZ = dz;
-    if (Math.abs(a) < 1e-6) {
-      if (Math.abs(b) > 1e-6) {
-        const t = -c / b;
-        if (t > 0) {
-          leadX = dx + vx * t;
-          leadZ = dz + vz * t;
-        }
-      }
-    } else {
-      const disc = b * b - 4 * a * c;
-      if (disc >= 0) {
-        const sq = Math.sqrt(disc);
-        const t1 = (-b - sq) / (2 * a);
-        const t2 = (-b + sq) / (2 * a);
-        let t = Infinity;
-        if (t1 > 0) t = t1;
-        if (t2 > 0 && t2 < t) t = t2;
-        if (Number.isFinite(t)) {
-          leadX = dx + vx * t;
-          leadZ = dz + vz * t;
-        }
-      }
-    }
-
-    const sigma =
-      (AIM_NOISE_SIGMA_MIN +
-        (AIM_NOISE_SIGMA_MAX - AIM_NOISE_SIGMA_MIN) *
-          Math.exp(-this.shotsFired / AIM_NOISE_DECAY_SHOTS)) *
-      noiseScale;
-    const noise = gaussian() * sigma;
-    const cos = Math.cos(noise);
-    const sin = Math.sin(noise);
-    const rx = leadX * cos - leadZ * sin;
-    const rz = leadX * sin + leadZ * cos;
-    const leadDistance = Math.hypot(leadX, leadZ);
-    return {
-      direction: new THREE.Vector3(rx, 0, rz),
-      leadX,
-      leadZ,
-      leadDistance,
-    };
   }
 
   private enforceArenaBounds(world: World): void {
@@ -1018,7 +730,7 @@ export class BasicWizard implements Contestant {
     }
   }
 
-  private tryEnterDash(direction: THREE.Vector3): void {
+  private tryEnterDash(direction: Vector3): void {
     if (
       this.state === "dashing" ||
       this.state === "recovering" ||
@@ -1032,7 +744,7 @@ export class BasicWizard implements Contestant {
     this.dashDir.copy(direction);
     this.body.velocity.x = this.dashDir.x * DASH_IMPULSE_SPEED;
     this.body.velocity.z = this.dashDir.z * DASH_IMPULSE_SPEED;
-    emit("dash", this.id, { dirX: direction.x, dirZ: direction.z });
+    this.world.emit("dash", this.id, { dirX: direction.x, dirZ: direction.z });
     const staminaFrac = Math.min(1, this.stamina / DASH_STAMINA_COST);
     this.stamina = Math.max(
       0,

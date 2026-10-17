@@ -1,3 +1,4 @@
+import { deepFreeze } from "./deepFreeze";
 import type { ProjectileModifier, ProjectileSpec } from "./projectile";
 
 const HEAVY_CHARGE_MUL = 4.5;
@@ -178,3 +179,8 @@ export const Heavy: ProjectileModifier = {
     };
   },
 };
+
+deepFreeze(Spread);
+deepFreeze(Swarm);
+deepFreeze(Gatling);
+deepFreeze(Heavy);

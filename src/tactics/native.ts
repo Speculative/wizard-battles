@@ -42,7 +42,6 @@ import type {
 } from "./tactic";
 import { STATIONARY } from "./tactic";
 import type { Vec2 } from "../steering";
-import { nowMs, nowSeconds } from "../clock";
 
 function directionTo(self: Contestant, enemy: Contestant): {
   x: number;
@@ -101,8 +100,8 @@ function orbitOutput(
   candidates = scoreByRangeMatch(candidates, self, enemy, preferredRange, band, 0.5);
   candidates = scoreByAngularPreference(candidates, enemyPos, tangent, angularWeight);
   candidates = scoreByReachability(candidates, self, 0.25, 300);
-  candidates = scoreByWallClearance(candidates, 1.8, 140);
-  candidates = scoreByArenaCenter(candidates, 0.3);
+  candidates = scoreByWallClearance(candidates, 1.8, 140, world.bounds);
+  candidates = scoreByArenaCenter(candidates, 0.3, world.bounds);
   candidates = scoreAwayFromProjectiles(candidates, self, world, 0.6, 180);
   const best = pickBest(candidates);
   const moveIntent: Vec2 = best ? steerToward(self, best.pos) : STATIONARY;
@@ -118,7 +117,10 @@ function orbitOutput(
 export class Pressure implements Tactic {
   readonly id = "pressure";
   readonly minDwell = 2.5;
-  private readonly dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private readonly dir: 1 | -1;
+  constructor(random: () => number = () => 0.5) {
+    this.dir = random() < 0.5 ? 1 : -1;
+  }
   private static readonly RANGE = 170;
   private static readonly BAND = 50;
 
@@ -142,7 +144,10 @@ export class Pressure implements Tactic {
 export class Kite implements Tactic {
   readonly id = "kite";
   readonly minDwell = 3;
-  private readonly dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private readonly dir: 1 | -1;
+  constructor(random: () => number = () => 0.5) {
+    this.dir = random() < 0.5 ? 1 : -1;
+  }
   private static readonly RANGE = 320;
   private static readonly BAND = 60;
 
@@ -163,7 +168,10 @@ export class Kite implements Tactic {
 export class Orbit implements Tactic {
   readonly id = "orbit";
   readonly minDwell = 3;
-  private readonly dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private readonly dir: 1 | -1;
+  constructor(random: () => number = () => 0.5) {
+    this.dir = random() < 0.5 ? 1 : -1;
+  }
   private static readonly RANGE = 270;
   private static readonly BAND = 70;
 
@@ -181,7 +189,10 @@ export class Orbit implements Tactic {
 export class Ambush implements Tactic {
   readonly id = "ambush";
   readonly minDwell = 3.5;
-  private readonly dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private readonly dir: 1 | -1;
+  constructor(random: () => number = () => 0.5) {
+    this.dir = random() < 0.5 ? 1 : -1;
+  }
   private static readonly RANGE = 340;
   private static readonly BAND = 40;
 
@@ -203,7 +214,10 @@ export class Ambush implements Tactic {
 export class Retreat implements Tactic {
   readonly id = "retreat";
   readonly minDwell = 2;
-  private readonly dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private readonly dir: 1 | -1;
+  constructor(random: () => number = () => 0.5) {
+    this.dir = random() < 0.5 ? 1 : -1;
+  }
   private static readonly RANGE = 360;
   private static readonly BAND = 80;
 
@@ -235,7 +249,10 @@ export class BaitAndSwitch implements Tactic {
   readonly minDwell = 1.5;
   readonly detectors: EventDetector[] = [new OpponentChargingDetector()];
   readonly handlers: Handler[] = [new NoteOpponentChargingHandler()];
-  private flipSign: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private flipSign: 1 | -1;
+  constructor(random: () => number = () => 0.5) {
+    this.flipSign = random() < 0.5 ? 1 : -1;
+  }
   private enemyChargingRemaining = 0;
   private lastObservedAt = 0;
   private flipTimer = 0;
@@ -250,16 +267,16 @@ export class BaitAndSwitch implements Tactic {
     const dist = surfaceDistance(self, enemy);
     const midRange = dist > 200 && dist < 380 ? 1 : 0.4;
     const staminaOk = stamina01(self) > 0.6 ? 1 : 0.5;
-    const staleness = (nowMs() - this.lastObservedAt) / 1000;
+    const staleness = ((self.world.time * 1000) - this.lastObservedAt) / 1000;
     const opportunityBoost =
       staleness < 0.5 && this.enemyChargingRemaining > 0 ? 2.5 : 1;
     return 0.5 * midRange * staminaOk * opportunityBoost;
   }
 
-  onObserve(key: string, value: unknown): void {
+  onObserve(key: string, value: unknown, world: World): void {
     if (key === "opponentChargingRemaining" && typeof value === "number") {
       this.enemyChargingRemaining = value;
-      this.lastObservedAt = nowMs();
+      this.lastObservedAt = world.time * 1000;
     }
   }
 
@@ -317,7 +334,7 @@ export class DuelistCharge implements Tactic {
       16
     );
     candidates = scoreByReachability(candidates, self, 0.8, 400);
-    candidates = scoreByWallClearance(candidates, 1.2, 120);
+    candidates = scoreByWallClearance(candidates, 1.2, 120, world.bounds);
     candidates = scoreAwayFromProjectiles(candidates, self, world, 0.5, 180);
     const best = pickBest(candidates);
     const moveIntent: Vec2 = best
@@ -343,7 +360,10 @@ export class DuelistCharge implements Tactic {
 export class CloseQuarters implements Tactic {
   readonly id = "closequarters";
   readonly minDwell = 1.0;
-  private readonly dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private readonly dir: 1 | -1;
+  constructor(random: () => number = () => 0.5) {
+    this.dir = random() < 0.5 ? 1 : -1;
+  }
   private static readonly RANGE = 35;
   private static readonly BAND = 20;
   private static readonly YIELD_OUT_OF_RANGE = 150;
@@ -447,8 +467,8 @@ export class Sniper implements Tactic {
       120
     );
     candidates = scoreAwayFromEnemiesPublic(candidates, self, world, 0.5, 220);
-    candidates = scoreByWallClearance(candidates, 1.6, 120);
-    candidates = scoreByArenaCenter(candidates, 0.25);
+    candidates = scoreByWallClearance(candidates, 1.6, 120, world.bounds);
+    candidates = scoreByArenaCenter(candidates, 0.25, world.bounds);
     candidates = scoreAwayFromProjectiles(candidates, self, world, 0.6, 180);
     const best = pickBest(candidates);
     const moveIntent: Vec2 = best ? steerToward(self, best.pos) : STATIONARY;
@@ -500,8 +520,8 @@ export class Sniper implements Tactic {
       this.isEligibleModifier(m, self, enemy)
     );
     if (eligible.length === 0) return undefined;
-    if (Math.random() >= Sniper.HEAVY_PROBABILITY) return undefined;
-    return eligible[Math.floor(Math.random() * eligible.length)];
+    if (self.world.random() >= Sniper.HEAVY_PROBABILITY) return undefined;
+    return eligible[Math.floor(self.world.random() * eligible.length)];
   }
 
   private isEligibleModifier(
@@ -523,7 +543,10 @@ export class Sniper implements Tactic {
 export class Turtle implements Tactic {
   readonly id = "turtle";
   readonly minDwell = 4;
-  private readonly dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+  private readonly dir: 1 | -1;
+  constructor(random: () => number = () => 0.5) {
+    this.dir = random() < 0.5 ? 1 : -1;
+  }
   private static readonly RANGE = 340;
   private static readonly BAND = 90;
 
@@ -546,7 +569,7 @@ export class Scrapper implements Tactic {
   readonly minDwell = 1.2;
   private flip: 1 | -1 = 1;
   private flipTimer = 0;
-  private chaoticRange = 160 + Math.random() * 220;
+  private chaoticRange = 270;
   private rangeTimer = 0;
   private static readonly FLIP_INTERVAL = 0.8;
   private static readonly RANGE_REROLL_INTERVAL = 2.5;
@@ -554,7 +577,7 @@ export class Scrapper implements Tactic {
 
   score(self: Contestant, world: World): number {
     if (!nearestEnemy(self, world)) return 0;
-    return 0.35 + Math.random() * 0.3;
+    return 0.35 + self.world.random() * 0.3;
   }
   update(dt: number, self: Contestant, world: World): TacticOutput {
     const enemy = nearestEnemy(self, world);
@@ -566,11 +589,11 @@ export class Scrapper implements Tactic {
     }
     this.rangeTimer -= dt;
     if (this.rangeTimer <= 0) {
-      this.chaoticRange = 160 + Math.random() * 220;
+      this.chaoticRange = 160 + self.world.random() * 220;
       this.rangeTimer = Scrapper.RANGE_REROLL_INTERVAL;
     }
     const paceOverride =
-      surfaceDistance(self, enemy) > 380 && Math.random() < 0.02
+      surfaceDistance(self, enemy) > 380 && self.world.random() < 0.02
         ? "walk"
         : undefined;
     return orbitOutput(
@@ -605,7 +628,7 @@ export class AntiMageZone implements Tactic {
     const sweetRange = dist > 60 && dist < 180 ? 1.4 : 0.3;
     const staminaOk = stamina01(self) > 0.5 ? 1 : 0.5;
     const recentCastPenalty =
-      (nowMs() - this.lastCastAt) / 1000 < 6 ? 0.15 : 1;
+      ((self.world.time * 1000) - this.lastCastAt) / 1000 < 6 ? 0.15 : 1;
     return 0.75 * sweetRange * staminaOk * recentCastPenalty;
   }
 
@@ -633,7 +656,7 @@ export class AntiMageZone implements Tactic {
       return idleOutput();
     }
     const dist = surfaceDistance(self, enemy);
-    const sinceCast = (nowMs() - this.lastCastAt) / 1000;
+    const sinceCast = ((self.world.time * 1000) - this.lastCastAt) / 1000;
     const inRushWindow =
       this.lastCastAt > 0 && sinceCast < AntiMageZone.RUSH_WINDOW_SECONDS;
 
@@ -685,13 +708,13 @@ export class AntiMageZone implements Tactic {
     const factory = this.pickZoneFactory(self, enemy);
     if (!factory) return;
     if (caster.requestCast(factory, enemy, directionTo(self, enemy))) {
-      this.lastCastAt = nowMs();
+      this.lastCastAt = (self.world.time * 1000);
     }
   }
 
   private zoneReady(self: Contestant): boolean {
     const book = spellbook(self);
-    const t = nowSeconds();
+    const t = self.world.time;
     const w = self as Contestant & {
       getReadyAt?: () => Map<SpellFactory, number>;
     };
@@ -738,7 +761,7 @@ export class AvoidIncoming implements Tactic {
   }
 
   private readyMobility(self: Contestant): SpellFactory | null {
-    const t = nowSeconds();
+    const t = self.world.time;
     const w = self as Contestant & {
       getReadyAt?: () => Map<SpellFactory, number>;
     };

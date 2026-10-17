@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { Vector3 } from "../math";
 import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
 import type { GameEvent } from "../events/event";
@@ -43,7 +43,7 @@ export class LateralDodgeHandler
         distance: DODGE_REACH,
         directions,
       }) ?? perp;
-    const direction = new THREE.Vector3(aim.x, 0, aim.z);
+    const direction = new Vector3(aim.x, 0, aim.z);
     return [
       {
         type: "forceMovementState",

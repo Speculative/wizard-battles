@@ -49,7 +49,7 @@ export interface Tactic {
     world: World,
     caster: CastController
   ): void;
-  onObserve?(key: string, value: unknown): void;
+  onObserve?(key: string, value: unknown, world: World): void;
   currentPhaseId?(): string | undefined;
   shouldYield?(self: Contestant, world: World): string | null;
   dodgePolicy?(self: Contestant, world: World): DodgePolicy;

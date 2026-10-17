@@ -1,7 +1,6 @@
 import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
 import type { RosterEntry, Tactic } from "./tactic";
-import { emit } from "../telemetry";
 
 const EVAL_INTERVAL = 1.0;
 const RANDOM_JITTER = 0.35;
@@ -18,12 +17,11 @@ export class TacticSelector {
     if (roster.length === 0) {
       throw new Error("TacticSelector requires at least one roster entry");
     }
-    this.roster = roster;
+    this.roster = roster.map(entry => ({ ...entry }));
     this.label = label;
     this.current = roster[0].tactic;
     this.dwellLeft = this.current.minDwell;
     this.lastPhaseId = this.current.currentPhaseId?.();
-    console.log(`${this.label} -> ${this.current.id} (initial)`);
   }
 
   get currentTactic(): Tactic {
@@ -44,7 +42,7 @@ export class TacticSelector {
           const produced = handler.handle(self, event, world);
           for (const c of produced) {
             if (c.type === "observe") {
-              tactic.onObserve(c.key, c.value);
+              tactic.onObserve(c.key, c.value, world);
             }
           }
           if (handler.terminal) break;
@@ -54,8 +52,7 @@ export class TacticSelector {
   }
 
   forceRescore(self: Contestant, world: World, reason: string): void {
-    console.log(`${this.label} interrupt: ${reason}`);
-    emit("interrupt", this.label, { reason, currentTactic: this.current.id });
+    world.emit("interrupt", this.label, { reason, currentTactic: this.current.id });
     this.rescore(self, world);
   }
 
@@ -68,10 +65,7 @@ export class TacticSelector {
 
     const phaseId = this.current.currentPhaseId?.();
     if (phaseId !== this.lastPhaseId) {
-      console.log(
-        `${this.label} ${this.current.id} phase ${this.lastPhaseId ?? "-"} -> ${phaseId ?? "-"}`
-      );
-      emit("tactic_phase", this.label, {
+      world.emit("tactic_phase", this.label, {
         tactic: this.current.id,
         from: this.lastPhaseId ?? null,
         to: phaseId ?? null,
@@ -86,7 +80,7 @@ export class TacticSelector {
     let bestScore = -Infinity;
     for (const entry of this.roster) {
       const raw = entry.tactic.score(self, world);
-      const jitter = 1 + (Math.random() * 2 - 1) * RANDOM_JITTER;
+      const jitter = 1 + (world.random() * 2 - 1) * RANDOM_JITTER;
       const score = raw * entry.bias * jitter;
       if (score > bestScore) {
         bestScore = score;
@@ -98,8 +92,7 @@ export class TacticSelector {
       this.current = best;
       this.dwellLeft = best.minDwell;
       this.lastPhaseId = best.currentPhaseId?.();
-      console.log(`${this.label} ${prev} -> ${best.id}`);
-      emit("tactic_switch", this.label, {
+        world.emit("tactic_switch", this.label, {
         from: prev,
         to: best.id,
         score: bestScore,

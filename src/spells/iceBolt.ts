@@ -1,10 +1,11 @@
+import { deepFreeze } from "./deepFreeze";
 import { FIREBALL_SPEC } from "./fireball";
 import {
   makeProjectileFactory,
   type ProjectileFactory,
   type ProjectileSpec,
 } from "./projectile";
-import { ICE_PALETTE } from "./particleBurst";
+import { ICE_PALETTE } from "./visualSpec";
 
 export const ICE_BOLT_SPEC: ProjectileSpec = {
   ...FIREBALL_SPEC,
@@ -32,3 +33,5 @@ export const ICE_BOLT_SPEC: ProjectileSpec = {
 
 export const IceBoltFactory: ProjectileFactory =
   makeProjectileFactory(ICE_BOLT_SPEC);
+
+deepFreeze(ICE_BOLT_SPEC);

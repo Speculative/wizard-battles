@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { Vector3 } from "./math";
 
 export interface MovementStats {
   maxSpeed: number;
@@ -8,18 +8,18 @@ export interface MovementStats {
 }
 
 export class KinematicBody {
-  readonly position = new THREE.Vector3();
-  readonly velocity = new THREE.Vector3();
+  readonly position = new Vector3();
+  readonly velocity = new Vector3();
   stats: MovementStats;
-  private readonly intent = new THREE.Vector3();
+  private readonly intent = new Vector3();
   private hasIntent = false;
 
-  constructor(stats: MovementStats, initial?: THREE.Vector3) {
+  constructor(stats: MovementStats, initial?: Vector3) {
     this.stats = stats;
     if (initial) this.position.copy(initial);
   }
 
-  setIntent(dir: THREE.Vector3): void {
+  setIntent(dir: Vector3): void {
     const len = Math.hypot(dir.x, dir.z);
     if (len < 1e-6) {
       this.hasIntent = false;

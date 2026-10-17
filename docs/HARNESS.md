@@ -1,6 +1,6 @@
 # Headless harness & telemetry
 
-The headless harness runs the simulator without a renderer, advancing a virtual clock so a 30-minute simulated match takes ~1 second of wall-clock. Each match emits structured telemetry as JSONL files; DuckDB queries them in place.
+The headless harness runs the simulator without a renderer, advancing each world’s own simulation clock without constructing presentation objects. Browser and batch runs share `createScenario`; see [ARCHITECTURE.md](ARCHITECTURE.md). Each match emits structured telemetry as JSONL files; DuckDB queries them in place.
 
 ## Quick start
 
@@ -25,11 +25,14 @@ npm run q -- "SELECT type, COUNT(*) FROM read_json_auto('runs/m-s1-0/events.json
 | `--dt SECONDS` | 1/60 | simulator step size; smaller = higher fidelity, slower |
 | `--max SECONDS` | 120 | sim-time cap before a match is force-ended as `timeout` |
 | `--sample-hz N` | 10 | per-contestant frame sample rate; `0` disables frames entirely |
-| `--seed N` | (random) | RNG seed; runs `0..N-1` use `seed+0..seed+N-1` |
+| `--seed N` | 1 | Per-world gameplay RNG seed; explicit-seed sweeps use seed + run index |
+| `--scenario ID` | four-wizards | Shared scenario (`four-wizards` or `duel`) |
+| `--variant ID` | baseline | Shared variant (currently `baseline`) |
+| `--rotation RADIANS` | 0 | Rotate starting positions and facing |
 | `--run-id PREFIX` | (auto) | output dir name; for multi-run, `PREFIX-0`, `PREFIX-1`, ... |
 | `--runs-dir PATH` | runs | parent directory for run outputs |
 | `--keep` | false | keep prior contents of `runs-dir` instead of wiping |
-| `--quiet` / `-q` | false | suppress per-tick console.log noise from the simulator |
+| `--quiet` / `-q` | false | accepted for CLI compatibility; simulation diagnostics now use telemetry |
 
 Default `runId` is `m-s<seed>-<index>` when seeded, or `m-t<timestamp>-<index>` otherwise.
 
@@ -45,7 +48,7 @@ runs/
 
 ### meta.json
 
-Captured at match start, finalized at match end. Includes seed, dt, max-seconds, sample-hz, contestants list, ISO timestamps for `startedAt`/`endedAt`, and the result (`reason`, `winner`, `alive`, `simulatedSeconds`).
+Captured at match start, finalized at match end. Includes scenario, variant, rotation, seed, dt, max-seconds, sample-hz, contestants list, ISO timestamps for `startedAt`/`endedAt`, and the result (`reason`, `winner`, `alive`, `simulatedSeconds`).
 
 ### events.jsonl
 
@@ -63,6 +66,11 @@ Each line is a JSON object. Common columns: `run`, `t` (sim seconds), `type`, `w
 | `damage` | attacker | `victim, amount, spell, hpAfter` |
 | `death` | victim | `killer, spell` |
 | `dash` | wizard | `dirX, dirZ` |
+| `movement_state` | wizard | `from, to` |
+| `cast_cancel` | wizard | `spell` |
+| `dash_refused` | wizard | `reason, tactic` |
+| `spell_impact` / `blink` | caster | presentation event; exact fields in [SPELL_STATE.md](SPELL_STATE.md) |
+| `field_enter` / `field_exit` / `field_expire` | caster | field interaction; exact fields in [SPELL_STATE.md](SPELL_STATE.md) |
 
 `cast_request` is verbose — when a tactic wants to cast but is blocked (cooldown, sprinting, etc.), one event is emitted per tick. Filter with `WHERE accepted = true` for "actually cast" or `WHERE meta->>'$.reason' = 'cooldown'` for cooldown-blocked attempts.
 

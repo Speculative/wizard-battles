@@ -1,7 +1,9 @@
-import * as THREE from "three";
+import { deepFreeze } from "./deepFreeze";
+import { Vector3 } from "../math";
 import type { Spell, SpellFactory, SpellMetadata } from "./spell";
 import type { Contestant } from "../contestants/contestant";
 import type { World } from "../world";
+import { Projectile } from "./projectile";
 
 const FIELD_RADIUS = 130;
 const FIELD_HEIGHT = 110;
@@ -18,135 +20,68 @@ export const PROJECTILE_SLOW_FIELD_METADATA: SpellMetadata = {
   tags: ["zone", "slow", "antiprojectile", "defensive"],
 };
 
-interface SlowedEntry {
-  originalSpeed: number;
-}
-
 export class ProjectileSlowField implements Spell {
-  readonly mesh: THREE.Object3D;
-  readonly position: THREE.Vector3;
-  readonly velocity = new THREE.Vector3();
+  readonly position: Vector3;
+  readonly velocity = new Vector3();
   readonly caster: Contestant;
-  readonly metadata = PROJECTILE_SLOW_FIELD_METADATA;
+  readonly metadata = structuredClone(PROJECTILE_SLOW_FIELD_METADATA);
   frozen = false;
   dead = false;
-  private age = 0;
-  private readonly slowed = new Map<Spell, SlowedEntry>();
-  private readonly domeMat: THREE.MeshBasicMaterial;
-  private readonly ringMat: THREE.LineBasicMaterial;
+  age = 0;
+  readonly radius = FIELD_RADIUS;
+  readonly height = FIELD_HEIGHT;
+  readonly duration = DURATION;
+  private readonly slowed = new Set<Projectile>();
 
-  constructor(caster: Contestant, origin: THREE.Vector3) {
+  constructor(caster: Contestant, origin: Vector3) {
     this.caster = caster;
     this.position = origin.clone();
     this.position.y = 0;
 
-    const group = new THREE.Group();
-    const domeGeo = new THREE.SphereGeometry(
-      FIELD_RADIUS,
-      32,
-      16,
-      0,
-      Math.PI * 2,
-      0,
-      Math.PI / 2
-    );
-    domeGeo.scale(1, FIELD_HEIGHT / FIELD_RADIUS, 1);
-    this.domeMat = new THREE.MeshBasicMaterial({
-      color: 0x66aaff,
-      transparent: true,
-      opacity: 0.22,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    });
-    const dome = new THREE.Mesh(domeGeo, this.domeMat);
-    dome.renderOrder = 3;
-    group.add(dome);
-
-    const ringPositions: number[] = [];
-    const ringSegments = 48;
-    for (let i = 0; i <= ringSegments; i++) {
-      const a = (i / ringSegments) * Math.PI * 2;
-      ringPositions.push(
-        Math.cos(a) * FIELD_RADIUS,
-        1,
-        Math.sin(a) * FIELD_RADIUS
-      );
-    }
-    const ringGeo = new THREE.BufferGeometry();
-    ringGeo.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(ringPositions, 3)
-    );
-    this.ringMat = new THREE.LineBasicMaterial({
-      color: 0x88ccff,
-      transparent: true,
-      opacity: 0.7,
-    });
-    const ring = new THREE.LineLoop(ringGeo, this.ringMat);
-    ring.renderOrder = 4;
-    group.add(ring);
-
-    group.position.copy(this.position);
-    this.mesh = group;
   }
 
   update(dt: number, world: World): void {
     if (this.frozen) return;
     this.age += dt;
     if (this.age >= DURATION) {
-      this.restoreAll();
+      this.restoreAll(world);
+      world.emit("field_expire", this.caster.id, { spell: this.metadata.id });
       this.dead = true;
       return;
     }
 
-    const t = this.age / DURATION;
-    const fade = t < 0.1 ? t / 0.1 : t > 0.85 ? 1 - (t - 0.85) / 0.15 : 1;
-    this.domeMat.opacity = 0.22 * fade;
-    this.ringMat.opacity = 0.7 * fade;
-
-    const currentInside = new Set<Spell>();
+    const currentInside = new Set<Projectile>();
     for (const s of world.spells) {
-      if (s === this) continue;
-      if (s.metadata.kind !== "projectile") continue;
-      if (s.metadata.baseSpeed === undefined) continue;
+      if (!(s instanceof Projectile) || s.dead || s.frozen || s.emitterActive) continue;
       const dx = s.position.x - this.position.x;
       const dz = s.position.z - this.position.z;
-      if (dx * dx + dz * dz <= FIELD_RADIUS * FIELD_RADIUS) {
+      if (s.position.y >= 0 &&
+          (dx * dx + dz * dz) / (FIELD_RADIUS * FIELD_RADIUS) +
+          (s.position.y * s.position.y) / (FIELD_HEIGHT * FIELD_HEIGHT) <= 1) {
         currentInside.add(s);
       }
     }
 
     for (const s of currentInside) {
       if (!this.slowed.has(s)) {
-        const speed = Math.hypot(s.velocity.x, s.velocity.z);
-        if (speed < 1e-3) continue;
-        this.slowed.set(s, { originalSpeed: s.metadata.baseSpeed! });
-        const k = (speed * SLOW_SCALE) / speed;
-        s.velocity.x *= k;
-        s.velocity.z *= k;
+        this.slowed.add(s);
+        s.setSpeedScale(this, SLOW_SCALE);
+        world.emit("field_enter", this.caster.id, { spell: this.metadata.id, projectile: s.metadata.id, scale: SLOW_SCALE });
       }
     }
-
-    for (const [s, entry] of this.slowed) {
+    for (const s of this.slowed) {
       if (!currentInside.has(s)) {
-        if (!s.dead) this.restoreSpeed(s, entry);
+        s.setSpeedScale(this, 1);
+        world.emit("field_exit", this.caster.id, { spell: this.metadata.id, projectile: s.metadata.id });
         this.slowed.delete(s);
       }
     }
   }
 
-  private restoreSpeed(s: Spell, entry: SlowedEntry): void {
-    const speed = Math.hypot(s.velocity.x, s.velocity.z);
-    if (speed < 1e-3) return;
-    const k = entry.originalSpeed / speed;
-    s.velocity.x *= k;
-    s.velocity.z *= k;
-  }
-
-  private restoreAll(): void {
-    for (const [s, entry] of this.slowed) {
-      if (!s.dead) this.restoreSpeed(s, entry);
+  private restoreAll(world: World): void {
+    for (const s of this.slowed) {
+      s.setSpeedScale(this, 1);
+      world.emit("field_exit", this.caster.id, { spell: this.metadata.id, projectile: s.metadata.id, reason: "expired" });
     }
     this.slowed.clear();
   }
@@ -158,3 +93,6 @@ export const ProjectileSlowFieldFactory: SpellFactory = {
     return new ProjectileSlowField(caster, caster.position);
   },
 };
+
+deepFreeze(PROJECTILE_SLOW_FIELD_METADATA);
+deepFreeze(ProjectileSlowFieldFactory);

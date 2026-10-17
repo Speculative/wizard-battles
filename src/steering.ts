@@ -1,5 +1,5 @@
-import * as THREE from "three";
-import type { ARENA } from "./config";
+import { Vector3 } from "./math";
+type ArenaBounds = { readonly width: number; readonly depth: number };
 
 export interface Vec2 {
   x: number;
@@ -106,7 +106,7 @@ export function circle(
 
 export function wallRepulsion(
   from: Vec2,
-  bounds: typeof ARENA,
+  bounds: ArenaBounds,
   threshold: number,
   speed = 1
 ): Vec2 {
@@ -125,7 +125,7 @@ export function wallRepulsion(
   return { x: fx, z: fz };
 }
 
-export function toVector3(v: Vec2, out: THREE.Vector3): void {
+export function toVector3(v: Vec2, out: Vector3): void {
   const len = Math.hypot(v.x, v.z);
   if (len < EPS) {
     out.set(0, 0, 0);
@@ -138,7 +138,7 @@ export interface SampleContext {
   pos: Vec2;
   speed: number;
   intent: Vec2;
-  bounds: typeof ARENA;
+  bounds: ArenaBounds;
   wallHorizon: number;
   intentWeight: number;
   wallWeight: number;
@@ -205,7 +205,7 @@ export function sampleBestDirection(
   return { x: bestX, z: bestZ };
 }
 
-function nearestWallDist(pos: Vec2, bounds: typeof ARENA): number {
+function nearestWallDist(pos: Vec2, bounds: ArenaBounds): number {
   const halfW = bounds.width / 2;
   const halfD = bounds.depth / 2;
   return Math.min(
@@ -216,7 +216,7 @@ function nearestWallDist(pos: Vec2, bounds: typeof ARENA): number {
   );
 }
 
-function timeToWall(pos: Vec2, dir: Vec2, bounds: typeof ARENA): number {
+function timeToWall(pos: Vec2, dir: Vec2, bounds: ArenaBounds): number {
   const halfW = bounds.width / 2;
   const halfD = bounds.depth / 2;
   let tMin = Infinity;
