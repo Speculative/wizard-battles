@@ -29,6 +29,11 @@ also found the post-engine-refactor appearance of fireballs and ice shards
 criticism applies to those spell visuals, not damage flashes. The separately approved
 goal is beautiful, coherent, intentional art direction.
 
+**Owner-confirmed carry-forward:** use hit flashes/sparks in future experiments.
+Retain hit-ring code and historical comparisons until a cleanup pass. This
+decision does not adopt the criticized projectile styling or change ordinary
+battle defaults.
+
 **Disposition:** close the ring-versus-flash comparison and carry C-style hit
 reactions forward. Scope suggested follow-up `09n7-p3qk` first to the
 post-engine-refactor appearance of fireballs and ice shards. A whole-scene art
