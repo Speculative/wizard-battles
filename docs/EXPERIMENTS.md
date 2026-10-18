@@ -16,7 +16,9 @@ A timestamped note saves experiment, exact source hash, scenario, seed, rotation
 
 Browser localStorage remains a backup. **Export feedback JSON** makes another agent-readable copy; imports merge histories and distinct notes without replacing newer edits with older ones. Static-only hosting has no workspace API and explicitly reports that saves are browser-only; it needs a backend to provide durable saves. Invalid imports are rejected without changing current feedback.
 
-The expectation queue defaults to unreviewed and hides approved/declined/removed entries. The initial seven are already approved, so use All / history to see them. Free-text wording, targets and notes remain editable; **Save edits** records a new history entry. **Propose expectation** creates an unreviewed entry. Evidence/satisfaction is recorded in persona reports, separately from these owner decisions.
+**What you want from battles** shows all goals by default, with counts for approved goals and proposals needing review. The initial seven are already approved; no repeat approval is needed. These decisions describe what the owner cares about, not whether the current build satisfies it. Use viewing notes for a reaction to a particular fight, and this list for qualities to preserve or improve across experiments.
+
+Edit wording, optional free-text targets and notes, then **Save edits**. **Propose expectation** adds an entry needing review. **Approve** keeps a proposal as a goal; **Decline** rejects it; **Remove** retires a goal; **Reopen** returns it for review. Filters include every decision state. An empty review filter says no decisions are pending and offers **View all goals**, rather than implying there are no expectations. History remains available. Evidence/satisfaction is recorded in persona reports separately from these owner decisions.
 
 ## Reproducible evidence
 

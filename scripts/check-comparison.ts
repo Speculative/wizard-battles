@@ -20,6 +20,14 @@ try {
   page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
   const url = new URL('compare.html?capture=1&scenario=duel&seed=7', server.resolvedUrls!.local[0]);
   await page.goto(url.href); await page.waitForFunction(() => !!window.comparison);
+  await page.evaluate(() => window.comparison.ready());
+  assert.equal(await page.locator('#filter').inputValue(), 'all');
+  assert.equal(await page.locator('.expectation').count(), 7, 'approved starting goals are visible on first visit');
+  assert.match(await page.locator('#expectation-counts').innerText(), /7 approved · 0 need your review/);
+  await page.locator('#filter').selectOption('unreviewed');
+  assert.match(await page.locator('#expectations').innerText(), /Nothing needs your review.*7 approved goals/);
+  await page.getByRole('button', { name: 'View all goals', exact: true }).click();
+  assert.equal(await page.locator('.expectation').count(), 7);
   const states = await page.evaluate(() => window.comparison.seek(12));
   if (!uiOnly) for (const [i, variant] of VARIANTS.entries()) {
     const world = createScenario({ scenario: 'duel', seed: 7, variant: variant.id });
@@ -56,7 +64,8 @@ try {
   await expectation.getByLabel('Target (free text)').fill('No fixed numeric threshold');
   await expectation.getByRole('button', { name: 'Approve', exact: true }).click();
   assert.equal(await page.locator('.expectation').count(), 0, 'approved proposal disappears from queue');
-  await page.locator('#filter').selectOption('all');
+  assert.match(await page.locator('#expectations').innerText(), /Nothing needs your review.*8 approved goals/);
+  await page.getByRole('button', { name: 'View all goals', exact: true }).click();
   const last = page.locator('.expectation').last();
   assert.equal(await last.getByLabel('Expectation', { exact: true }).inputValue(), 'I can follow the opening');
   const downloadPromise = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export feedback JSON' }).click();

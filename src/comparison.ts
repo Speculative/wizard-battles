@@ -30,8 +30,10 @@ app.innerHTML = `
 <div class="cards"><section class="card"><h2>Your viewing notes</h2><p class="muted">What reads best? A note captures this match, all panel identities and the current time.</p>
 <div class="stack"><div class="feedback-row"><select id="preference" aria-label="Preference"><option value="unsure">Unsure</option><option>A</option><option>B</option><option>C</option><option value="no-difference">No meaningful difference</option><option value="none">None works</option></select><textarea id="note" aria-label="Viewing note" placeholder="What caught your attention, or lost it?"></textarea></div><button id="save-note">Save timestamped note</button><p id="save-status" role="status">Checking workspace saves…</p><button id="retry-save">Retry workspace save</button><ol id="notes-list"></ol></div></section>
 <section class="card"><h2>Evidence, after watching</h2><details><summary>Reveal approaches and experiment identity</summary><div id="variants"></div><small id="identity"></small></details><details><summary>Batch results and persona judgments</summary><div id="evidence">No saved report loaded. Run npm run experiment to generate evidence.</div><div id="reviews"></div></details><p class="muted">Descriptive evidence, no fun score. Expectation approval and build satisfaction are separate. Your preferred approach is still undecided.</p></section></div>
-<section class="card" style="margin-top:24px"><h2>Expectations / your editable review queue</h2><p class="muted">The seven starting expectations were approved in discussion. All build satisfaction remains untested here; persona evidence below can disagree. Changes save to the workspace when this server supports it, with a browser backup. Export is also available.</p>
-<div class="controls"><label>Show <select id="filter"><option value="unreviewed">Unreviewed</option><option value="all">All / history</option><option value="approved">Approved</option><option value="removed">Removed</option></select></label><button id="add-expectation">Propose expectation</button><button id="export">Export feedback JSON</button><label>Import JSON <input id="import" type="file" accept="application/json"></label></div><div id="expectations"></div></section><p id="notice" class="notice" role="status"></p>`;
+<section class="card" style="margin-top:24px"><h2>What you want from battles</h2><p>These are goals for future experiments. Approving a goal means “I care about this,” not “the current fights achieve this.” The seven starting goals were already approved in our discussion; you do not need to approve them again.</p>
+<p>Edit a goal and <strong>Save edits</strong> to refine it. For a new proposal, <strong>Approve</strong> keeps it as a goal; <strong>Decline</strong> says it is not something you want. <strong>Remove</strong> retires a goal and <strong>Reopen</strong> asks to review it again. History is kept.</p>
+<p class="muted">Targets are optional and can be plain language. For example: “Separate duels should sometimes collide in four-way battles.” Use viewing notes above for reactions to a specific fight; use this list for qualities you want us to preserve or improve across experiments. Changes use the same workspace save and browser backup as your notes.</p><p id="expectation-counts" role="status"></p>
+<div class="controls"><label>Show <select id="filter"><option value="all">All goals / history</option><option value="unreviewed">Needs your review</option><option value="approved">Approved goals</option><option value="declined">Declined proposals</option><option value="removed">Removed goals</option></select></label><button id="add-expectation">Propose expectation</button><button id="export">Export feedback JSON</button><label>Import JSON <input id="import" type="file" accept="application/json"></label></div><div id="expectations"></div></section><p id="notice" class="notice" role="status"></p>`;
 $('#hypothesis').textContent = EXPERIMENT.hypothesis;
 $('#build').textContent = `${EXPERIMENT.id} · ${source.slice(0, 23)}`;
 $('#build').title = source;
@@ -69,14 +71,29 @@ function renderExpectations() {
   const container = $('#expectations'); container.replaceChildren();
   const filter = $<HTMLSelectElement>('#filter').value;
   const visible = feedback.expectations.filter(e => filter === 'all' || e.decision === filter);
-  if (!visible.length) { const p = document.createElement('p'); p.textContent = 'No expectations in this queue. Choose All / history to edit the approved starting set, or propose another.'; container.append(p); }
+  const approved = feedback.expectations.filter(e => e.decision === 'approved').length;
+  const unreviewed = feedback.expectations.filter(e => e.decision === 'unreviewed').length;
+  $('#expectation-counts').textContent = `${feedback.expectations.length} total · ${approved} approved · ${unreviewed} need your review`;
+  if (!visible.length) {
+    const p = document.createElement('p');
+    p.textContent = filter === 'unreviewed'
+      ? `Nothing needs your review. Your ${approved} approved goals still guide experiments.`
+      : filter === 'all' ? 'No goals yet. Propose an expectation to add one.' : 'No goals match this filter.';
+    container.append(p);
+    if (filter !== 'all') {
+      const button = document.createElement('button'); button.textContent = 'View all goals';
+      button.onclick = () => { $<HTMLSelectElement>('#filter').value = 'all'; renderExpectations(); };
+      container.append(button);
+    }
+  }
   for (const e of visible) {
     const article = document.createElement('article'); article.className = 'expectation';
-    const heading = document.createElement('strong'); heading.textContent = `${e.id} · ${e.decision}`; article.append(heading);
+    const heading = document.createElement('strong'); heading.textContent = `${e.id} · ${{ approved: 'Approved goal', unreviewed: 'Needs your review', declined: 'Declined proposal', removed: 'Removed goal' }[e.decision]}`; article.append(heading);
     const fields: Partial<Record<'text' | 'target' | 'notes', HTMLTextAreaElement>> = {};
     for (const [key, title] of [['text', 'Expectation'], ['target', 'Target (free text)'], ['notes', 'Your notes']] as const) {
       const label = document.createElement('label'); label.textContent = title;
-      const input = document.createElement('textarea'); input.value = e[key]; label.append(input); article.append(label); fields[key] = input;
+      const input = document.createElement('textarea'); input.value = e[key];
+      if (key === 'target') input.placeholder = 'Optional: how would you recognize success? Words, numbers or ranges are all fine.'; label.append(input); article.append(label); fields[key] = input;
     }
     const actions = document.createElement('div'); actions.className = 'actions';
     function save(decision: Decision) {
