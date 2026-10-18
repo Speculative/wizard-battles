@@ -1,6 +1,16 @@
 import type { Expectation } from './expectations';
 
-export interface Note { at: string; experiment: string; source: string; scenario: string; seed: number; rotation: number; time: number; panelTimes: number[]; variants: string[]; preference: string; text: string }
+export interface ViewingContext {
+  mode: 'evidence' | 'full';
+  briefId?: string;
+  focusedVariant: string | null;
+  clips: { variant: string; start: number; end: number }[];
+}
+export interface Note {
+  at: string; experiment: string; source: string; scenario: string; seed: number;
+  rotation: number; time: number; panelTimes: number[]; variants: string[];
+  preference: string; text: string; viewing?: ViewingContext;
+}
 export interface Feedback { schema: 'wizard-battles-feedback-v1'; expectations: Expectation[]; notes: Note[] }
 export function validateFeedback(value: unknown): asserts value is Feedback {
   const data = value as Feedback;
@@ -12,7 +22,13 @@ export function validateFeedback(value: unknown): asserts value is Feedback {
     ids.add(e.id);
     for (const h of e.history) if (!h || !(['at', 'text', 'target', 'notes'] as const).every(k => typeof h[k] === 'string') || !decisions.includes(h.decision)) throw new Error('Invalid expectation history');
   }
-  for (const n of data.notes) if (!n || !(['at', 'experiment', 'source', 'scenario', 'preference', 'text'] as const).every(k => typeof n[k] === 'string') || ![n.seed, n.rotation, n.time].every(Number.isFinite) || !Array.isArray(n.variants) || !n.variants.every(v => typeof v === 'string') || !Array.isArray(n.panelTimes) || !n.panelTimes.every(Number.isFinite)) throw new Error('Invalid viewing note');
+  for (const n of data.notes) {
+    if (!n || !(['at', 'experiment', 'source', 'scenario', 'preference', 'text'] as const).every(k => typeof n[k] === 'string') || ![n.seed, n.rotation, n.time].every(Number.isFinite) || !Array.isArray(n.variants) || !n.variants.every(v => typeof v === 'string') || !Array.isArray(n.panelTimes) || !n.panelTimes.every(Number.isFinite)) throw new Error('Invalid viewing note');
+    if (n.viewing !== undefined) {
+      const v = n.viewing;
+      if (!v || !['full', 'evidence'].includes(v.mode) || (v.briefId !== undefined && typeof v.briefId !== 'string') || (v.focusedVariant !== null && typeof v.focusedVariant !== 'string') || !Array.isArray(v.clips) || !v.clips.every(c => c && typeof c.variant === 'string' && Number.isFinite(c.start) && Number.isFinite(c.end) && c.start >= 0 && c.end > c.start && c.end <= 120)) throw new Error('Invalid viewing context');
+    }
+  }
 }
 
 // Union notes and histories so separate browsers cannot erase each other's work.

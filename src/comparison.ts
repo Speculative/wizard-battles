@@ -3,6 +3,7 @@ import { GameRenderer } from './renderer';
 import { buildArena } from './arena';
 import { BattleView } from './presentation/battleView';
 import { createScenario, SIMULATION_DT } from './scenario';
+import { COMPARISON_BRIEFS, comparisonBrief, type EvidenceClip } from './comparisonEvidence';
 import { EXPERIMENT, VARIANTS } from './experiment';
 import { initialExpectations, type Decision } from './expectations';
 
@@ -13,28 +14,27 @@ const params = new URLSearchParams(location.search);
 const source = typeof __BUILD_SOURCE__ === 'undefined' ? 'development' : __BUILD_SOURCE__;
 const app = $('#app');
 app.innerHTML = `
-<header><div><div class="eyebrow">Wizard Battles / Experiment room</div><h1>Pressure, commitment, escape</h1><p id="hypothesis"></p></div><div id="build" class="muted"></div></header>
-<p>Compare three movement styles in the same starting match. A is the original; B slows travel and stops to charge; C adds faster escapes and stops to recover.</p>
+<header><div><div class="eyebrow">Wizard Battles / Experiment room</div><h1>Pressure, commitment, escape</h1></div><div id="build" class="muted"></div></header>
 <div id="presets" class="controls" aria-label="Recommended matches"></div>
 <div class="example-heading"><h2 id="example-title"></h2><p id="example-description"></p><p id="active-match" class="muted" role="status"></p></div>
-<div class="controls" aria-label="Viewing range"><button id="full-fight" aria-pressed="true">Full fight</button><button id="exchange" aria-pressed="false">Short interaction · 8–14s</button><button id="late" aria-pressed="false" hidden>Late comparison · 84–90s</button><label><input id="loop" type="checkbox" checked> Loop short interactions</label></div>
+<div class="controls" aria-label="Comparison mode"><button id="show-evidence" aria-pressed="true">Selected evidence</button><button id="full-fight" aria-pressed="false">Full fights / context</button></div>
+<p id="evidence-help">Play one clip, then the other. Their clocks are independent; choosing a clip pauses the other.</p>
 <details><summary>Custom match / display options</summary><div class="controls"><label>Scene <select id="scenario"><option value="duel">Duel · red / blue</option><option value="four-wizards">Four wizards</option></select></label>
 <label>Seed <input id="seed" type="number" min="0" max="4294967295" step="1" value="1"></label>
 <label>Layout <select id="rotation"><option value="0">Original</option><option value="1.5707963267948966">Quarter turn</option></select></label>
-<label><input id="blind" type="checkbox"> Hide variant names</label><small>Custom changes apply when you select a value or leave the seed field.</small></div></details>
-<div class="controls"><button id="play" class="primary">Play</button><button id="restart">Restart</button><button id="step">+1 second</button>
+<small>Custom changes apply when you select a value or leave the seed field.</small></div></details>
+<div id="full-controls" class="controls"><button id="play" class="primary">Play</button><button id="restart">Restart</button><button id="step">+1 second</button>
 <label>Speed <select id="speed"><option value="0.5">½×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
 <label>Time <input id="time" type="range" min="0" max="120" step="0.5" value="0"></label><output id="clock">0.0s / 120s</output></div>
 <div id="panels" class="panels"></div>
-<p class="muted">Each panel starts with the same fighters and seed. Only movement settings differ. Outcomes can diverge. Enlarge a panel to follow its spells; finished fights hold their final state.</p>
-<div class="cards"><section class="card"><h2>Your viewing notes</h2><p class="muted">What reads best? A note captures this match, all panel identities and the current time.</p>
+<p class="muted">Full fights are available for context. Evidence excerpts are deliberately chosen, not a representative sample or a ranking score. Names and designer commentary stay visible so you can assess the proposal.</p>
+<div class="cards"><section class="card"><h2>Your viewing notes</h2><p class="muted">What reads best? A note captures this match, each panel’s time, the selected excerpts and which one you were watching.</p>
 <div class="stack"><div class="feedback-row"><select id="preference" aria-label="Preference"><option value="unsure">Unsure</option><option>A</option><option>B</option><option>C</option><option value="no-difference">No meaningful difference</option><option value="none">None works</option></select><textarea id="note" aria-label="Viewing note" placeholder="What caught your attention, or lost it?"></textarea></div><button id="save-note">Save timestamped note</button><p id="save-status" role="status">Checking workspace saves…</p><button id="retry-save">Retry workspace save</button><ol id="notes-list"></ol></div></section>
-<section class="card"><h2>Evidence, after watching</h2><details><summary>Reveal approaches and experiment identity</summary><div id="variants"></div><small id="identity"></small></details><details><summary>Batch results and persona judgments</summary><div id="evidence">No saved report loaded. Run npm run experiment to generate evidence.</div><div id="reviews"></div></details><p class="muted">Descriptive evidence, no fun score. Expectation approval and build satisfaction are separate. Your preferred approach is still undecided.</p></section></div>
+<section class="card"><h2>Evidence, after watching</h2><details><summary>Reveal approaches and experiment identity</summary><div id="variants"></div><small id="identity"></small></details><details><summary>Batch results and persona judgments</summary><div id="evidence">No saved report loaded. Run npm run experiment to generate evidence.</div><div id="reviews"></div></details><p class="muted">Descriptive evidence, no fun score. Expectation approval and build satisfaction are separate. Your recorded viewing preference favors C; the agent reviews retain their original uncertainty.</p></section></div>
 <section class="card" style="margin-top:24px"><h2>What you want from battles</h2><p>These are goals for future experiments. Approving a goal means “I care about this,” not “the current fights achieve this.” The seven starting goals were already approved in our discussion; you do not need to approve them again.</p>
 <p>Edit a goal and <strong>Save edits</strong> to refine it. For a new proposal, <strong>Approve</strong> keeps it as a goal; <strong>Decline</strong> says it is not something you want. <strong>Remove</strong> retires a goal and <strong>Reopen</strong> asks to review it again. History is kept.</p>
 <p class="muted">Targets are optional and can be plain language. For example: “Separate duels should sometimes collide in four-way battles.” Use viewing notes above for reactions to a specific fight; use this list for qualities you want us to preserve or improve across experiments. Changes use the same workspace save and browser backup as your notes.</p><p id="expectation-counts" role="status"></p>
 <div class="controls"><label>Show <select id="filter"><option value="all">All goals / history</option><option value="unreviewed">Needs your review</option><option value="approved">Approved goals</option><option value="declined">Declined proposals</option><option value="removed">Removed goals</option></select></label><button id="add-expectation">Propose expectation</button><button id="export">Export feedback JSON</button><label>Import JSON <input id="import" type="file" accept="application/json"></label></div><div id="expectations"></div></section><p id="notice" class="notice" role="status"></p>`;
-$('#hypothesis').textContent = EXPERIMENT.hypothesis;
 $('#build').textContent = `${EXPERIMENT.id} · ${source.slice(0, 23)}`;
 $('#build').title = source;
 $('#identity').textContent = `${EXPERIMENT.id}; fixed dt ${SIMULATION_DT}; source ${source}`;
@@ -65,7 +65,14 @@ function persist() {
 $('#retry-save').onclick = persist;
 function renderNotes() {
   $('#notes-list').replaceChildren();
-  for (const n of feedback.notes) { const li = document.createElement('li'); li.textContent = `${n.scenario}, seed ${n.seed}, ${n.time.toFixed(1)}s · ${n.preference}: ${n.text}`; $('#notes-list').append(li); }
+  for (const n of feedback.notes) {
+    const li = document.createElement('li');
+    const context = n.viewing?.mode === 'evidence'
+      ? `evidence ${n.viewing.briefId} · ${n.viewing.clips.map(c => `${c.variant} at ${(n.panelTimes[n.variants.indexOf(c.variant)] ?? 0).toFixed(1)}s`).join(' / ')} · focused ${n.viewing.focusedVariant ?? 'none'}`
+      : `${n.time.toFixed(1)}s`;
+    li.textContent = `${n.scenario}, seed ${n.seed}, ${context} · ${n.preference}: ${n.text}`;
+    $('#notes-list').append(li);
+  }
 }
 function renderExpectations() {
   const container = $('#expectations'); container.replaceChildren();
@@ -132,96 +139,141 @@ validateExample();
 $<HTMLInputElement>('#seed').value = String(seed); $<HTMLSelectElement>('#scenario').value = scenario; $<HTMLSelectElement>('#rotation').value = String(rotation);
 let elapsedTicks = 0;
 let paused = true;
-let rangeStart = 0;
-let rangeEnd: number = EXPERIMENT.maxSeconds;
+let mode: 'evidence' | 'full' = 'full';
+let focusedVariant: string | null = null;
 let accumulator = 0;
 let last: number | null = null;
 const panels = VARIANTS.map((variant, index) => {
   const element = document.createElement('section'); element.className = 'panel';
-  element.innerHTML = `<div class="panel-head"><strong></strong><button aria-label="Enlarge panel ${String.fromCharCode(65 + index)}">Enlarge</button></div><canvas aria-label="Battle panel ${String.fromCharCode(65 + index)}"></canvas><footer></footer>`;
+  element.innerHTML = `<div class="panel-head"><strong></strong><button aria-label="Enlarge panel ${String.fromCharCode(65 + index)}">Enlarge</button></div><div class="clip-caption"><h3></h3><p class="watch-for"></p><details><summary>Why this moment?</summary><p class="clip-reason"></p></details></div><div class="clip-controls"><button class="clip-play" aria-label="Play excerpt ${String.fromCharCode(65 + index)}">Play excerpt</button><button class="clip-replay" aria-label="Replay excerpt ${String.fromCharCode(65 + index)}">Replay</button><label>Clip time <input class="clip-time" aria-label="Excerpt time ${String.fromCharCode(65 + index)}" type="range" step="0.016666666666666666"></label><label><input class="clip-loop" aria-label="Loop excerpt ${String.fromCharCode(65 + index)}" type="checkbox"> Loop</label><button class="clip-full" aria-label="Full fight ${String.fromCharCode(65 + index)}">Full fight</button><output class="clip-clock"></output></div><canvas aria-label="Battle panel ${String.fromCharCode(65 + index)}"></canvas><footer></footer>`;
   $('#panels').append(element);
   const canvas = element.querySelector('canvas')!;
   const gfx = new GameRenderer(canvas, { pixelRatio: 1, shadowMapSize: 512 }); gfx.scene.add(buildArena());
   const world = createScenario({ seed, scenario, rotation, variant: variant.id });
   const view = new BattleView(world, gfx.camera, { visualSeed: seed ^ 0x5f3759df }); gfx.scene.add(view.group);
-  const panel = { variant, element, gfx, world, view, finished: false };
+  const panel = { variant, element, gfx, world, view, finished: false, clip: undefined as EvidenceClip | undefined, cursor: 0, playing: false, accumulator: 0 };
+  element.querySelector<HTMLButtonElement>('.clip-play')!.onclick = () => playExcerpt(panel);
+  element.querySelector<HTMLButtonElement>('.clip-replay')!.onclick = () => { if (panel.clip) seekPanel(panel, panel.clip.start); playExcerpt(panel, true); };
+  element.querySelector<HTMLInputElement>('.clip-time')!.oninput = event => { for (const other of panels) other.playing = false; seekPanel(panel, Number((event.target as HTMLInputElement).value)); focusedVariant = variant.id; render(); };
+  element.querySelector<HTMLButtonElement>('.clip-full')!.onclick = () => { showFullFights(); element.querySelector<HTMLButtonElement>('.panel-head button')!.click(); };
   element.querySelector('button')!.onclick = () => {
     const open = !element.classList.contains('selected'); document.querySelectorAll('.panel').forEach(e => e.classList.remove('selected'));
     element.classList.toggle('selected', open); $('#panels').classList.toggle('enlarged', open); element.querySelector('button')!.textContent = open ? 'Restore' : 'Enlarge';
-    document.querySelectorAll('.panel:not(.selected) button').forEach(e => e.textContent = 'Enlarge'); window.dispatchEvent(new Event('resize')); render();
+    document.querySelectorAll('.panel:not(.selected) .panel-head button').forEach(e => e.textContent = 'Enlarge'); window.dispatchEvent(new Event('resize')); render();
   };
   return panel;
 });
 function render() {
-  const blind = $<HTMLInputElement>('#blind').checked;
+  $('#full-controls').hidden = mode === 'evidence';
+  $('#evidence-help').hidden = mode !== 'evidence';
+  $('#panels').classList.toggle('evidence-mode', mode === 'evidence');
+  $('#show-evidence').setAttribute('aria-pressed', String(mode === 'evidence'));
+  $('#full-fight').setAttribute('aria-pressed', String(mode === 'full'));
   panels.forEach((p, i) => {
+    p.element.hidden = mode === 'evidence' && !p.clip;
     p.view.render(); if (p.element.getBoundingClientRect().height) p.gfx.render();
-    p.element.querySelector('strong')!.textContent = blind ? String.fromCharCode(65 + i) : `${String.fromCharCode(65 + i)} · ${p.variant.name}`;
+    p.element.classList.toggle('playing', p.playing);
+    p.element.querySelector('strong')!.textContent = `${String.fromCharCode(65 + i)} · ${p.variant.name}`;
+    p.element.querySelector<HTMLElement>('.clip-caption')!.hidden = mode !== 'evidence';
+    p.element.querySelector<HTMLElement>('.clip-controls')!.hidden = mode !== 'evidence';
+    if (p.clip) {
+      p.element.querySelector('.clip-play')!.textContent = p.playing ? 'Pause excerpt' : 'Play excerpt';
+      p.element.querySelector('.clip-clock')!.textContent = `${(p.cursor * SIMULATION_DT).toFixed(2)}s · excerpt ${p.clip.start}–${p.clip.end}s`;
+      const scrubber = p.element.querySelector<HTMLInputElement>('.clip-time')!;
+      scrubber.min = String(p.clip.start); scrubber.max = String(p.clip.end); scrubber.value = String(p.cursor * SIMULATION_DT);
+    }
     const alive = p.world.contestants.filter(c => c.alive);
     const result = p.finished ? alive.length <= 1 ? `${alive[0]?.id ?? 'Nobody'} wins` : 'Time limit' : 'In progress';
     p.element.querySelector('footer')!.textContent = `${p.world.time.toFixed(1)}s · ${result}\n${p.world.contestants.map(c => `${c.id} ${Math.max(0, c.hp).toFixed(0)} HP`).join(' / ')}`;
   });
   const time = elapsedTicks * SIMULATION_DT;
-  $('#clock').textContent = `${time.toFixed(1)}s · ${rangeStart}–${rangeEnd}s`;
-  $<HTMLInputElement>('#time').min = String(rangeStart);
-  $<HTMLInputElement>('#time').max = String(rangeEnd);
+  $('#clock').textContent = `${time.toFixed(1)}s / ${EXPERIMENT.maxSeconds}s`;
+  $<HTMLInputElement>('#time').min = '0';
+  $<HTMLInputElement>('#time').max = String(EXPERIMENT.maxSeconds);
   $<HTMLInputElement>('#time').value = String(time);
   $('#play').textContent = paused ? 'Play' : 'Pause';
 }
 function advance(count: number) {
   if (!Number.isSafeInteger(count) || count < 0) throw new Error('Invalid step count');
-  const steps = Math.min(count, Math.round(rangeEnd / SIMULATION_DT) - elapsedTicks);
+  const steps = Math.min(count, Math.round(EXPERIMENT.maxSeconds / SIMULATION_DT) - elapsedTicks);
   for (let tick = 0; tick < steps; tick++) {
-    for (const p of panels) if (!p.finished) {
-      p.world.update(SIMULATION_DT); p.view.recordTick();
-      p.finished = p.world.contestants.filter(c => c.alive).length <= 1 || p.world.tick >= Math.round(EXPERIMENT.maxSeconds / SIMULATION_DT);
-    }
+    for (const p of panels) advanceWorld(p, 1);
     elapsedTicks++;
   }
-  if (panels.every(p => p.finished) || elapsedTicks * SIMULATION_DT >= rangeEnd) paused = true;
+  if (panels.every(p => p.finished) || elapsedTicks * SIMULATION_DT >= EXPERIMENT.maxSeconds) paused = true;
+}
+type Panel = typeof panels[number];
+function advanceWorld(p: Panel, count: number) {
+  for (let tick = 0; tick < count && !p.finished; tick++) {
+    p.world.update(SIMULATION_DT); p.view.recordTick();
+    p.finished = p.world.contestants.filter(c => c.alive).length <= 1 || p.world.tick >= Math.round(EXPERIMENT.maxSeconds / SIMULATION_DT);
+  }
+}
+function resetPanel(p: Panel) {
+  p.playing = false; p.accumulator = 0; p.cursor = 0;
+  p.view.dispose(); p.world = createScenario({ seed, scenario, rotation, variant: p.variant.id });
+  p.view = new BattleView(p.world, p.gfx.camera, { visualSeed: seed ^ 0x5f3759df }); p.gfx.scene.add(p.view.group); p.finished = false;
 }
 function reset() {
   elapsedTicks = 0; accumulator = 0; last = null;
+  for (const p of panels) resetPanel(p);
+}
+function seekPanel(p: Panel, seconds: number) {
+  resetPanel(p); p.cursor = Math.round(seconds / SIMULATION_DT); advanceWorld(p, p.cursor);
+}
+function clearEnlargement() {
+  $('#panels').classList.remove('enlarged');
+  for (const p of panels) { p.element.classList.remove('selected'); p.element.querySelector('.panel-head button')!.textContent = 'Enlarge'; }
+}
+function showFullFights() {
+  mode = 'full'; paused = true; focusedVariant = null; clearEnlargement(); reset(); render();
+}
+function showEvidence() {
+  const brief = comparisonBrief(scenario, seed, rotation);
+  if (!brief) return;
+  mode = 'evidence'; paused = true; focusedVariant = null; clearEnlargement(); reset();
   for (const p of panels) {
-    p.view.dispose(); p.world = createScenario({ seed, scenario, rotation, variant: p.variant.id });
-    p.view = new BattleView(p.world, p.gfx.camera, { visualSeed: seed ^ 0x5f3759df }); p.gfx.scene.add(p.view.group); p.finished = false;
+    p.clip = brief.clips.find(clip => clip.variant === p.variant.id);
+    if (!p.clip) continue;
+    p.element.querySelector('h3')!.textContent = p.clip.title;
+    p.element.querySelector('.watch-for')!.textContent = p.clip.watchFor;
+    p.element.querySelector('.clip-reason')!.textContent = p.clip.why;
+    seekPanel(p, p.clip.start);
   }
+  render();
+}
+function playExcerpt(p: Panel, replay = false) {
+  if (mode !== 'evidence' || !p.clip) return;
+  const play = replay || !p.playing;
+  for (const other of panels) other.playing = false;
+  if (p.cursor >= Math.round(p.clip.end / SIMULATION_DT)) seekPanel(p, p.clip.start);
+  p.playing = play; focusedVariant = p.variant.id; last = null; render();
 }
 function seek(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0 || seconds > EXPERIMENT.maxSeconds) throw new Error('Time must be within the experiment');
-  paused = true; reset(); advance(Math.round(seconds / SIMULATION_DT)); render(); return states();
+  mode = 'full'; paused = true; focusedVariant = null; clearEnlargement(); reset(); advance(Math.round(seconds / SIMULATION_DT)); render(); return states();
 }
 function states() { return panels.map(p => ({ variant: p.variant.id, time: p.world.time, tick: p.world.tick, finished: p.finished, contestants: p.world.contestants.map(c => ({ id: c.id, hp: c.hp, alive: c.alive, position: { ...c.position }, velocity: { ...c.velocity } })) })); }
-$('#blind').onchange = render;
-$('#play').onclick = () => { if (elapsedTicks * SIMULATION_DT >= rangeEnd) seek(rangeStart); paused = !paused; last = null; render(); };
-$('#restart').onclick = () => { seek(rangeStart); render(); };
+$('#play').onclick = () => { if (panels.every(p => p.finished) || elapsedTicks * SIMULATION_DT >= EXPERIMENT.maxSeconds) seek(0); paused = !paused; last = null; render(); };
+$('#restart').onclick = () => { seek(0); render(); };
 $('#step').onclick = () => { paused = true; advance(60); render(); };
 $('#time').oninput = () => seek(Number($<HTMLInputElement>('#time').value));
-const presets = [
-  { id: 'ordinary-duel', title: '1 · Start here: duel', scenario: 'duel', seed: 7, description: 'Follow red and blue. Compare when each fighter closes in, stops, or escapes. Which is easiest to follow?' },
-  { id: 'stalled-duel', title: '2 · When movement stalls', scenario: 'duel', seed: 1, description: 'Does more movement make a better fight? Compare the short interaction with the late window, then watch the full fight for context.' },
-  { id: 'four-way', title: '3 · Four-way battle', scenario: 'four-wizards', seed: 19, description: 'With four fighters, can you tell who is attacking whom? Compare how easy each panel is to follow.' },
-];
+const presets = COMPARISON_BRIEFS;
 function updateExample() {
-  const preset = presets.find(p => p.seed === seed && p.scenario === scenario && rotation === 0);
+  const preset = comparisonBrief(scenario, seed, rotation);
   $('#example-title').textContent = preset?.title ?? 'Custom match';
   $('#example-description').textContent = preset?.description ?? 'The selected setup is active in all three panels.';
   $('#active-match').textContent = `${scenario === 'duel' ? 'Red / blue duel' : 'Four wizards'} · seed ${seed} · ${rotation === 0 ? 'original layout' : 'quarter-turn layout'}`;
-  $('#exchange').textContent = seed === 7 && scenario === 'duel' ? 'Short interaction · 2–6s' : 'Short interaction · 8–14s';
-  $('#late').hidden = preset?.id !== 'stalled-duel';
+  $<HTMLButtonElement>('#show-evidence').disabled = !preset;
   for (const button of document.querySelectorAll<HTMLButtonElement>('#presets button')) button.setAttribute('aria-pressed', String(button.dataset.preset === preset?.id));
   $<HTMLInputElement>('#seed').value = String(seed); $<HTMLSelectElement>('#scenario').value = scenario; $<HTMLSelectElement>('#rotation').value = String(rotation);
-}
-function setRange(start: number, end: number, play = true) {
-  rangeStart = start; rangeEnd = end; seek(start); paused = !play; last = null;
-  for (const [id, active] of [['full-fight', start === 0], ['exchange', start > 0 && start !== 84], ['late', start === 84]] as const) $(`#${id}`).setAttribute('aria-pressed', String(active));
-  render();
 }
 function loadExample(next: { seed: number; scenario: string; rotation: number }) {
   const old = { seed, scenario, rotation };
   try {
     ({ seed, scenario, rotation } = next); validateExample();
-    setRange(0, EXPERIMENT.maxSeconds, false); updateExample();
+    updateExample();
+    if (comparisonBrief(scenario, seed, rotation)) showEvidence(); else showFullFights();
     const url = new URL(location.href); url.searchParams.set('seed', String(seed)); url.searchParams.set('scenario', scenario); url.searchParams.set('rotation', String(rotation)); url.searchParams.delete('time'); history.replaceState(null, '', url);
   } catch (error) { ({ seed, scenario, rotation } = old); updateExample(); notify((error as Error).message); }
 }
@@ -230,20 +282,21 @@ for (const preset of presets) {
   button.onclick = () => loadExample({ seed: preset.seed, scenario: preset.scenario, rotation: 0 }); $('#presets').append(button);
 }
 for (const id of ['seed', 'scenario', 'rotation']) $(`#${id}`).onchange = () => loadExample({ seed: Number($<HTMLInputElement>('#seed').value), scenario: $<HTMLSelectElement>('#scenario').value, rotation: Number($<HTMLSelectElement>('#rotation').value) });
-$('#full-fight').onclick = () => setRange(0, EXPERIMENT.maxSeconds);
-$('#exchange').onclick = () => seed === 7 && scenario === 'duel' ? setRange(2, 6) : setRange(8, 14);
-$('#late').onclick = () => setRange(84, 90);
+$('#full-fight').onclick = showFullFights;
+$('#show-evidence').onclick = showEvidence;
 updateExample();
+if (params.get('capture') !== '1' && !params.has('time')) { if (comparisonBrief(scenario, seed, rotation)) showEvidence(); }
 $('#save-note').onclick = () => {
-  feedback.notes.push({ at: new Date().toISOString(), experiment: EXPERIMENT.id, source, scenario, seed, rotation, time: elapsedTicks * SIMULATION_DT, panelTimes: panels.map(p => p.world.time), variants: VARIANTS.map(v => v.id), preference: $<HTMLSelectElement>('#preference').value, text: $<HTMLTextAreaElement>('#note').value });
+  feedback.notes.push({ at: new Date().toISOString(), experiment: EXPERIMENT.id, source, scenario, seed, rotation, time: mode === 'evidence' ? (panels.find(p => p.variant.id === focusedVariant)?.world.time ?? 0) : elapsedTicks * SIMULATION_DT, viewing: { mode, ...(mode === 'evidence' ? { briefId: comparisonBrief(scenario, seed, rotation)!.id } : {}), focusedVariant, clips: mode === 'evidence' ? panels.filter(p => p.clip).map(p => ({ variant: p.variant.id, start: p.clip!.start, end: p.clip!.end })) : [] }, panelTimes: panels.map(p => p.world.time), variants: VARIANTS.map(v => v.id), preference: $<HTMLSelectElement>('#preference').value, text: $<HTMLTextAreaElement>('#note').value });
   $<HTMLTextAreaElement>('#note').value = ''; persist(); renderNotes();
 };
 const comparison = {
   metadata: { experiment: EXPERIMENT.id, source, dt: SIMULATION_DT, browser: navigator.userAgent },
   seek, states, loadExample,
+  viewing() { return { mode, focusedVariant, panels: panels.map(p => ({ variant: p.variant.id, playing: p.playing, cursor: p.cursor * SIMULATION_DT, clip: p.clip })) }; },
   ready: () => feedbackReady,
-  step(count = 1) { paused = true; advance(count); render(); return states(); },
-  pause() { paused = true; render(); }, play() { paused = false; last = null; render(); },
+  step(count = 1) { if (mode === 'evidence') showFullFights(); paused = true; advance(count); render(); return states(); },
+  pause() { paused = true; for (const p of panels) p.playing = false; render(); }, play() { if (mode === 'evidence') showFullFights(); paused = false; last = null; render(); },
   feedback() { return structuredClone(feedback); },
 };
 declare global { const __BUILD_SOURCE__: string; interface Window { comparison: typeof comparison } }
@@ -265,11 +318,24 @@ void feedbackReady.then(() => { if (migrateBrowser) persist(); });
 if (params.has('time')) seek(Number(params.get('time')));
 function tick(now: number) {
   if (last === null) last = now;
-  if (!paused) {
-    accumulator += Math.max(0, Math.min(.1, (now - last) / 1000)) * Number($<HTMLSelectElement>('#speed').value);
+  const dt = Math.max(0, Math.min(.1, (now - last) / 1000)) * Number($<HTMLSelectElement>('#speed').value);
+  if (mode === 'evidence') {
+    const advancing = panels.some(p => p.playing);
+    for (const p of panels) if (p.playing && p.clip) {
+      p.accumulator += dt;
+      const count = Math.floor((p.accumulator + 1e-10) / SIMULATION_DT);
+      const steps = Math.min(count, Math.round(p.clip.end / SIMULATION_DT) - p.cursor);
+      if (steps) { advanceWorld(p, steps); p.cursor += steps; p.accumulator -= steps * SIMULATION_DT; }
+      if (p.cursor >= Math.round(p.clip.end / SIMULATION_DT)) {
+        if (p.element.querySelector<HTMLInputElement>('.clip-loop')!.checked) { seekPanel(p, p.clip.start); p.playing = true; }
+        else p.playing = false;
+      }
+    }
+    if (advancing) render();
+  } else if (!paused) {
+    accumulator += dt;
     const count = Math.floor((accumulator + 1e-10) / SIMULATION_DT);
     if (count) { advance(count); accumulator -= count * SIMULATION_DT; render(); }
-    if (paused && rangeStart > 0 && $<HTMLInputElement>('#loop').checked) { seek(rangeStart); paused = false; last = now; }
   }
   last = now; requestAnimationFrame(tick);
 }

@@ -5,6 +5,7 @@ import { mkdirSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createScenario, SIMULATION_DT } from '../src/scenario';
+import { COMPARISON_BRIEFS } from '../src/comparisonEvidence';
 import { VARIANTS, EXPERIMENT } from '../src/experiment';
 const uiOnly = process.argv.includes('--ui-only');
 const feedbackDirectory = mkdtempSync(join(tmpdir(), 'wizard-feedback-check-'));
@@ -79,33 +80,76 @@ try {
   await page.evaluate(() => window.comparison.seek(120));
   const ends = await page.evaluate(() => window.comparison.states()); assert.ok(ends.every(s => s.finished));
   await page.evaluate(() => window.comparison.step(60)); assert.deepEqual(await page.evaluate(() => window.comparison.states()), ends);
-  // Presets apply a complete setup immediately, including resetting time.
-  await page.getByRole('button', { name: '3 · Four-way battle', exact: true }).click();
-  assert.match(await page.locator('#active-match').innerText(), /Four wizards · seed 19/);
-  assert.equal((await page.evaluate(() => window.comparison.states()))[0].tick, 0);
-  await page.evaluate(() => window.comparison.play()); await page.waitForFunction(() => window.comparison.states()[0].tick > 0); await page.evaluate(() => window.comparison.pause());
-  const live = await page.evaluate(() => window.comparison.states()); assert.equal(new Set(live.map(s => s.tick)).size, 1);
+  // Every brief loads only its selected evidence at independent starting times.
+  for (const brief of COMPARISON_BRIEFS) {
+    await page.getByRole('button', { name: brief.title, exact: true }).click();
+    assert.equal(await page.locator('.panel:visible').count(), 2);
+    assert.equal(await page.locator('#full-controls').isVisible(), false);
+    const view = await page.evaluate(() => window.comparison.viewing());
+    assert.equal(view.mode, 'evidence');
+    assert.ok(view.panels.every(p => !p.playing));
+    for (const clip of brief.clips) {
+      const index = VARIANTS.findIndex(v => v.id === clip.variant);
+      assert.equal(view.panels[index].cursor, clip.start);
+      const panel = page.locator('.panel').nth(index);
+      assert.match(await panel.locator('.watch-for').innerText(), /./);
+      assert.equal(await panel.locator('.clip-time').getAttribute('max'), String(clip.end));
+      const before = await page.evaluate(() => window.comparison.states());
+      await panel.locator('.clip-time').evaluate((el, seconds) => { (el as HTMLInputElement).value = String(seconds); el.dispatchEvent(new Event('input')); }, (clip.start + clip.end) / 2);
+      const after = await page.evaluate(() => window.comparison.states());
+      for (let i = 0; i < before.length; i++) if (i !== index) assert.deepEqual(after[i], before[i], 'scrubbing never moves another clip');
+      const world = createScenario({ scenario: brief.scenario, seed: brief.seed, variant: clip.variant });
+      while (world.tick < Math.round(((clip.start + clip.end) / 2) / SIMULATION_DT) && world.contestants.filter(c => c.alive).length > 1) world.update(SIMULATION_DT);
+      assert.equal(after[index].tick, world.tick);
+      for (const [j, c] of world.contestants.entries()) assert.ok(Math.abs(after[index].contestants[j].hp - c.hp) < 1e-7, 'excerpt reconstructs its exact fight state');
+    }
+    await page.locator('#panels').screenshot({ path: `${output}/evidence-${brief.id}.png` });
+  }
   await page.getByRole('button', { name: '2 · When movement stalls', exact: true }).click();
-  await page.getByRole('button', { name: 'Short interaction · 8–14s', exact: true }).click();
+  await page.getByRole('button', { name: 'Play excerpt B', exact: true }).click();
+  await page.waitForFunction(() => window.comparison.states()[1].time > 40.1);
+  assert.equal((await page.evaluate(() => window.comparison.states()))[2].tick, 480);
+  await page.getByRole('button', { name: 'Play excerpt C', exact: true }).click();
+  const held = (await page.evaluate(() => window.comparison.states()))[1];
+  await page.waitForFunction(() => window.comparison.states()[2].time > 8.1);
+  assert.deepEqual((await page.evaluate(() => window.comparison.states()))[1], held, 'switching clips pauses the previous one');
+  assert.equal((await page.evaluate(() => window.comparison.viewing())).panels.filter(p => p.playing).length, 1);
   await page.evaluate(() => window.comparison.pause());
-  assert.ok((await page.evaluate(() => window.comparison.states()))[0].tick >= 480);
-  assert.equal(await page.locator('#time').getAttribute('min'), '8');
-  assert.equal(await page.locator('#time').getAttribute('max'), '14');
-  await page.locator('#loop').uncheck();
-  await page.evaluate(() => window.comparison.step(600));
-  assert.equal((await page.evaluate(() => window.comparison.states()))[1].tick, 840);
-  await page.locator('#loop').check();
-  await page.evaluate(() => { window.comparison.seek(13.9); window.comparison.play(); });
-  await page.waitForFunction(() => window.comparison.states()[1].time < 9);
+  await page.getByRole('button', { name: 'Replay excerpt B', exact: true }).click();
   await page.evaluate(() => window.comparison.pause());
-  await page.getByRole('button', { name: 'Restart', exact: true }).click();
-  assert.equal((await page.evaluate(() => window.comparison.states()))[0].tick, 480);
-  await page.getByRole('button', { name: 'Late comparison · 84–90s', exact: true }).click();
+  assert.ok((await page.evaluate(() => window.comparison.states()))[1].time < 40.5);
+  const b = page.locator('.panel').nth(1);
+  await b.locator('.clip-time').evaluate(el => { (el as HTMLInputElement).value = '45.9'; el.dispatchEvent(new Event('input')); });
+  await page.getByRole('button', { name: 'Play excerpt B', exact: true }).click();
+  await page.waitForFunction(() => !window.comparison.viewing().panels[1].playing);
+  assert.equal((await page.evaluate(() => window.comparison.states()))[1].tick, 2760, 'excerpt stops at its own endpoint');
+  await b.locator('.clip-loop').check();
+  await b.locator('.clip-time').evaluate(el => { (el as HTMLInputElement).value = '45.9'; el.dispatchEvent(new Event('input')); });
+  await page.getByRole('button', { name: 'Play excerpt B', exact: true }).click();
+  await page.waitForFunction(() => window.comparison.states()[1].time < 41);
   await page.evaluate(() => window.comparison.pause());
-  assert.ok((await page.evaluate(() => window.comparison.states()))[1].tick >= 5040);
-  await page.getByRole('button', { name: 'Full fight', exact: true }).click();
-  await page.getByRole('button', { name: 'Restart', exact: true }).click();
-  assert.equal((await page.evaluate(() => window.comparison.states()))[0].tick, 0);
+  await page.getByLabel('Viewing note').fill('B stall versus C payoff');
+  await page.getByRole('button', { name: 'Save timestamped note' }).click();
+  await page.waitForFunction(() => document.querySelector('#save-status')!.textContent!.startsWith('Saved to runs-feedback/'));
+  const evidenceNote = await page.evaluate(() => window.comparison.feedback().notes.at(-1)!);
+  assert.equal(evidenceNote.viewing?.mode, 'evidence');
+  assert.equal(evidenceNote.viewing?.focusedVariant, 'measured');
+  assert.deepEqual(evidenceNote.viewing?.clips.map(c => [c.start, c.end]), [[40, 46], [8, 12]]);
+  assert.notEqual(evidenceNote.panelTimes[1], evidenceNote.panelTimes[2]);
+  await page.reload(); await page.waitForFunction(() => !!window.comparison); await page.evaluate(() => window.comparison.ready());
+  assert.deepEqual(await page.evaluate(() => window.comparison.feedback().notes.at(-1)), evidenceNote);
+  await page.getByRole('button', { name: 'Selected evidence', exact: true }).click();
+  await page.getByRole('button', { name: 'Full fight C', exact: true }).click();
+  assert.equal((await page.evaluate(() => window.comparison.viewing())).mode, 'full');
+  assert.equal(await page.locator('.panel.selected strong').innerText(), 'C · Bursts and resets');
+  await page.getByRole('button', { name: 'Enlarge panel C', exact: true }).click();
+  await page.evaluate(() => window.comparison.play());
+  await page.waitForFunction(() => window.comparison.states()[0].tick > 0);
+  await page.evaluate(() => window.comparison.pause());
+  const live = await page.evaluate(() => window.comparison.states()); assert.equal(new Set(live.map(s => s.tick)).size, 1);
+  await page.evaluate(() => window.comparison.loadExample({ scenario: 'duel', seed: 211, rotation: 0 }));
+  assert.equal((await page.evaluate(() => window.comparison.viewing())).mode, 'full', 'custom setups never invent generic evidence windows');
+  assert.equal(await page.locator('#show-evidence').isDisabled(), true);
   // A failed workspace save must not claim durability.
   await page.route('**/api/feedback', route => route.fulfill({ status: 503, body: '{}' }));
   await page.getByLabel('Viewing note').fill('Offline note');
@@ -138,7 +182,7 @@ try {
   }
   if (!uiOnly) console.log('Complete-match browser/headless agreement verified for 72 matched cases, including fresh seeds.');
   assert.deepEqual(errors, []);
-  console.log(`Comparison checks passed (${production ? 'production' : 'development'}; Chromium ${browser.version()}): presets, short-window bounds/loop/restart, fresh-browser workspace recovery, save failure/retry, resize/enlarge, feedback export/import, queue decisions, invalid import, end hold, shared live scheduler.`);
+  console.log(`Comparison checks passed (${production ? 'production' : 'development'}; Chromium ${browser.version()}): curated independent excerpts, exclusive playback, per-clip seek/loop/replay, evidence note context, fresh-browser workspace recovery, save failure/retry, resize/enlarge, feedback export/import, queue decisions, invalid import, end hold, shared live scheduler.`);
 } finally {
   await browser.close();
   rmSync(feedbackDirectory, { recursive: true, force: true });
