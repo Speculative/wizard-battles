@@ -25,7 +25,7 @@ function visuals(view: BattleView) {
       geometry: object.geometry.type,
       parameters: (object.geometry as THREE.SphereGeometry).parameters,
       materials: materials.map(material => ({ type: material.type, opacity: material.opacity,
-        color: (material as THREE.MeshBasicMaterial).color?.getHex() })) }));
+        color: (material as THREE.MeshBasicMaterial).color?.getHex() })) }, (key, value) => key === 'uuid' ? undefined : value));
   });
   return result.sort();
 }
@@ -170,4 +170,28 @@ test('revised emitted shots replace their parent release pulse', () => {
   assert.ok(!view.group.children.some(c => c.name.startsWith('cue:cast_release:')));
   assert.ok(view.group.children.some(c => c.name.startsWith('cue:projectile_emit:')));
   view.dispose();
+});
+
+import { ART_STYLES } from '../src/presentation/artDirection';
+test('five art directions preserve combat, reconstruct and release resources', () => {
+  const worlds = Array.from({ length: 6 }, () => createScenario({ scenario: 'four-wizards', seed: 1, variant: 'burst' }));
+  const camera = new THREE.OrthographicCamera();
+  const views = worlds.map((world, i) => new BattleView(world, camera, { spellReadability: 'reaction', artDirection: ART_STYLES[i-1]?.id, trails: false }));
+  for (let tick = 0; tick < 600; tick++) {
+    worlds.forEach(world => world.update(SIMULATION_DT)); views.forEach(view => view.recordTick());
+    if (tick % 7 === 0) views.forEach(view => view.render());
+    if (tick % 60 === 0) worlds.slice(1).forEach(world => assert.deepEqual(state(world), state(worlds[0])));
+  }
+  const rng = worlds[0].random(); worlds.slice(1).forEach(world => assert.equal(world.random(), rng));
+  for (const [i, view] of views.entries()) {
+    view.render(); const before = visuals(view); view.render(); assert.deepEqual(visuals(view), before);
+    const restored = new BattleView(worlds[i], camera, { spellReadability: 'reaction', artDirection: ART_STYLES[i-1]?.id, trails: false });
+    // Trail sampling has its own cadence check above; reconstruct held shapes and cues.
+    restored.render(); assert.deepEqual(visuals(restored), before);
+    const geometries = new Set<THREE.BufferGeometry>(), disposed = new Set<THREE.BufferGeometry>();
+    view.group.traverse(node => { if (node instanceof THREE.Mesh || node instanceof THREE.LineSegments) geometries.add(node.geometry); });
+    for (const geo of geometries) geo.addEventListener('dispose', () => disposed.add(geo));
+    view.dispose(); restored.dispose(); assert.equal(disposed.size, geometries.size);
+    assert.equal(view.group.parent, null);
+  }
 });

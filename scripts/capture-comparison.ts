@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 const args = process.argv.slice(2);
 const flags = new Map<string, string>();
 for (let i = 0; i < args.length; i += 2) {
-  if (!['--experiment', '--scenario', '--seed', '--rotation', '--time', '--duration', '--fps', '--out'].includes(args[i]) || !args[i + 1]) throw new Error(`Unknown/incomplete option ${args[i]}`);
+  if (!['--experiment', '--scenario', '--seed', '--rotation', '--time', '--duration', '--fps', '--out', '--variant'].includes(args[i]) || !args[i + 1]) throw new Error(`Unknown/incomplete option ${args[i]}`);
   flags.set(args[i].slice(2), args[i + 1]);
 }
 const numeric = (key: string, fallback: number) => Number(flags.get(key) ?? fallback);
@@ -23,6 +23,12 @@ try {
   for (const key of ['experiment', 'scenario', 'seed', 'rotation']) if (flags.has(key)) url.searchParams.set(key, flags.get(key)!);
   await page.goto(url.href); await page.waitForFunction(() => !!window.comparison);
   await page.evaluate(time => window.comparison.seek(time), start);
+  const variant = flags.get('variant');
+  if (variant) {
+    const index = (await page.evaluate(() => window.comparison.metadata.alternatives)).findIndex(v => v.id === variant);
+    if (index < 0) throw new Error(`Unknown capture variant: ${variant}`);
+    await page.locator('.panel').nth(index).locator('.panel-head button').click();
+  }
   const states = [];
   const count = duration === 0 ? 1 : Math.round(duration * fps);
   for (let i = 0; i < count; i++) {
@@ -32,7 +38,7 @@ try {
   }
   const metadata = await page.evaluate(() => window.comparison.metadata);
   if (errors.length) throw new Error(errors.join('\n'));
-  writeFileSync(`${output}/capture.json`, JSON.stringify({ metadata, url: url.href, viewport: { width: 1440, height: 1050 }, fps, start, duration, frames: states }, null, 2));
+  writeFileSync(`${output}/capture.json`, JSON.stringify({ metadata, url: url.href, viewport: { width: 1440, height: 1050 }, focusedVariant: variant ?? null, fps, start, duration, frames: states }, null, 2));
   if (duration > 0) {
     const encoded = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', String(fps), '-i', `${output}/frame-%05d.png`, '-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', `${output}/clip.mp4`], { encoding: 'utf8' });
     if (encoded.status !== 0) throw new Error(`ffmpeg failed: ${encoded.stderr || encoded.error}`);

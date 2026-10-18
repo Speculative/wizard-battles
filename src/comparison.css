@@ -79,3 +79,10 @@ input[type=file] { max-width: 100%; min-width: 0; }
 .review-progress { display: block; font-size: 12px; margin-top: 4px; }
 .comment-save { font-size: 13px; }
 #feedback-tools { margin-top: 20px; }
+.art-directions { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin: 20px 0; }
+.art-directions article { background: #1b1e27; border: 1px solid #343846; border-radius: 10px; padding: 16px; }
+.art-directions h3 { margin: 0; font-size: 18px; }
+.art-directions p { font-size: 13px; }
+.panels.art-panels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.panels.art-panels.enlarged { grid-template-columns: 1fr; }
+@media(max-width: 900px) { .panels.art-panels { grid-template-columns: 1fr; } }

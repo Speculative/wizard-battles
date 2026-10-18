@@ -1,4 +1,5 @@
 import './comparison.css';
+import { Color, PCFSoftShadowMap, SpotLight } from 'three';
 import { GameRenderer } from './renderer';
 import { buildArena } from './arena';
 import { BattleView } from './presentation/battleView';
@@ -7,6 +8,8 @@ import { COMPARISON_BRIEFS as MOVEMENT_BRIEFS, type EvidenceClip } from './compa
 import { EXPERIMENT as MOVEMENT_EXPERIMENT, VARIANTS as MOVEMENT_VARIANTS } from './experiment';
 import { SPELL_EXPERIMENT, SPELL_VARIANTS, SPELL_BRIEFS } from './spellReadabilityExperiment';
 import { REVISION_EXPERIMENT, REVISION_VARIANTS, REVISION_BRIEFS } from './spellReadabilityRevision';
+import { ART_EXPERIMENT, ART_VARIANTS, ART_BRIEFS } from './artDirectionExperiment';
+import { artStyle, buildArtArena, ART_STYLES, type ArtDirection } from './presentation/artDirection';
 import { initialExpectations, type Decision } from './expectations';
 
 import { evidenceReference, evidenceKey, notesForEvidence } from './evidenceFeedback';
@@ -14,11 +17,12 @@ import { validateFeedback, mergeFeedback, type Feedback, type EvidenceReference 
 
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 const params = new URLSearchParams(location.search);
+const artExperiment = params.get('experiment') === ART_EXPERIMENT.id;
 const revisionExperiment = params.get('experiment') === REVISION_EXPERIMENT.id;
-const spellExperiment = revisionExperiment || params.get('experiment') === SPELL_EXPERIMENT.id;
-const EXPERIMENT = revisionExperiment ? REVISION_EXPERIMENT : spellExperiment ? SPELL_EXPERIMENT : MOVEMENT_EXPERIMENT;
-const VARIANTS = revisionExperiment ? REVISION_VARIANTS : spellExperiment ? SPELL_VARIANTS : MOVEMENT_VARIANTS.map(v => ({ ...v, scenarioVariant: v.id, spellReadability: false }));
-const COMPARISON_BRIEFS = revisionExperiment ? REVISION_BRIEFS : spellExperiment ? SPELL_BRIEFS : MOVEMENT_BRIEFS;
+const spellExperiment = artExperiment || revisionExperiment || params.get('experiment') === SPELL_EXPERIMENT.id;
+const EXPERIMENT = artExperiment ? ART_EXPERIMENT : revisionExperiment ? REVISION_EXPERIMENT : spellExperiment ? SPELL_EXPERIMENT : MOVEMENT_EXPERIMENT;
+const VARIANTS = (artExperiment ? ART_VARIANTS : revisionExperiment ? REVISION_VARIANTS : spellExperiment ? SPELL_VARIANTS : MOVEMENT_VARIANTS.map(v => ({ ...v, scenarioVariant: v.id, spellReadability: false }))).map(v => ({ ...v, artDirection: 'artDirection' in v ? v.artDirection as ArtDirection : undefined }));
+const COMPARISON_BRIEFS = artExperiment ? ART_BRIEFS : revisionExperiment ? REVISION_BRIEFS : spellExperiment ? SPELL_BRIEFS : MOVEMENT_BRIEFS;
 function comparisonBrief(scene: string, matchSeed: number, layout: number) {
   return layout === 0 ? COMPARISON_BRIEFS.find(b => b.scenario === scene && b.seed === matchSeed) : undefined;
 }
@@ -28,6 +32,7 @@ app.innerHTML = `
 <header><div><div class="eyebrow">Wizard Battles / Experiment room</div><h1>${EXPERIMENT.title}</h1></div><div id="build" class="muted"></div></header>
 <nav class="controls" role="tablist" aria-label="Experiment room"><button id="comparison-tab" role="tab" aria-selected="true" aria-controls="comparison-page">Comparison</button><button id="goals-tab" role="tab" aria-selected="false" aria-controls="goals-page" tabindex="-1">Goals</button></nav>
 <div id="comparison-page" role="tabpanel" aria-labelledby="comparison-tab">
+${artExperiment ? '<p><strong>My starting proposal: A / Porcelain Lab</strong> for a welcoming, physical training room. B / Photon Chamber is the strongest literal simulator. You can reject all five.</p><p>Five directions · Select a match below, then play each direction independently. <a href="?experiment=spell-readability-v2">Earlier hit-feedback comparison and comments</a>. Save per-clip reactions below each card; general notes can nominate a direction or say none works. Saving retains feedback; it does not start another agent run.</p><div id="art-directions" class="art-directions"></div>' : ''}
 ${revisionExperiment ? '<p>Round 2 · A is the previous B; B and C are new alternatives. Play them one at a time. <a href="?experiment=spell-readability-v1">Previous round and comments</a>. After your feedback, the next decision is to adopt one approach, keep the previous cues, or park this direction.</p>' : ''}
 <div id="presets" class="controls" aria-label="Recommended matches"></div>
 <div class="example-heading"><h2 id="example-title"></h2><p id="example-description"></p><p id="active-match" class="muted" role="status"></p></div>
@@ -44,13 +49,32 @@ ${revisionExperiment ? '<p>Round 2 · A is the previous B; B and C are new alter
 <p class="muted">Full fights are available for context. Evidence excerpts are deliberately chosen, not a representative sample or a ranking score. Names and designer commentary stay visible so you can assess the proposal.</p>
 <div class="cards"><section class="card"><h2>General comparison notes</h2><p class="muted">For an overall comparison or a full fight. Use the comment form on an evidence card to record your response to that specific piece.</p>
 <div class="stack"><div class="feedback-row"><select id="preference" aria-label="Preference"><option value="unsure">Unsure</option><option>A</option><option>B</option><option>C</option><option value="no-difference">No meaningful difference</option><option value="none">None works</option></select><textarea id="note" aria-label="Viewing note" placeholder="What caught your attention, or lost it?"></textarea></div><button id="save-note">Save timestamped note</button><ol id="notes-list"></ol></div></section>
-<section class="card"><h2>Evidence, after watching</h2><details><summary>Reveal approaches and experiment identity</summary><div id="variants"></div><small id="identity"></small></details><details><summary>Batch results and persona judgments</summary><div id="evidence">No saved report loaded. Run npm run experiment to generate evidence.</div><div id="reviews"></div></details><p class="muted">Descriptive evidence, no fun score. Expectation approval and build satisfaction are separate. ${spellExperiment ? 'All alternatives use your preferred C movement. Whether the new spell cues help is the open question.' : 'Your recorded viewing preference favors C; the agent reviews retain their original uncertainty.'}</p></section></div>
+<section class="card"><h2>Evidence, after watching</h2><details><summary>Reveal approaches and experiment identity</summary><div id="variants"></div><small id="identity"></small></details><details><summary>Batch results and persona judgments</summary><div id="evidence">No saved report loaded. Run npm run experiment to generate evidence.</div><div id="reviews"></div></details><p class="muted">Descriptive evidence, no fun score. Expectation approval and build satisfaction are separate. ${artExperiment ? 'All five directions use identical burst gameplay and the chosen fighter flash / impact sparks. Choose a visual world, or reject the candidates.' : spellExperiment ? 'All alternatives use your preferred C movement. Whether the new spell cues help is the open question.' : 'Your recorded viewing preference favors C; the agent reviews retain their original uncertainty.'}</p></section></div>
 </div><section id="goals-page" role="tabpanel" aria-labelledby="goals-tab" hidden class="card"><h2>What you want from battles</h2><p>These are goals for future experiments. Approving a goal means “I care about this,” not “the current fights achieve this.” The seven starting goals were already approved in our discussion; you do not need to approve them again.</p>
 <p>Edit a goal and <strong>Save edits</strong> to refine it. For a new proposal, <strong>Approve</strong> keeps it as a goal; <strong>Decline</strong> says it is not something you want. <strong>Remove</strong> retires a goal and <strong>Reopen</strong> asks to review it again. History is kept.</p>
 <p class="muted">Targets are optional and can be plain language. For example: “Separate duels should sometimes collide in four-way battles.” Use comments and viewing notes on the Comparison tab for reactions to specific fights; use this list for qualities you want us to preserve or improve across experiments. Changes use the same workspace save and browser backup as your notes.</p><p id="expectation-counts" role="status"></p>
 <div class="controls"><label>Show <select id="filter"><option value="all">All goals / history</option><option value="unreviewed">Needs your review</option><option value="approved">Approved goals</option><option value="declined">Declined proposals</option><option value="removed">Removed goals</option></select></label><button id="add-expectation">Propose expectation</button></div><div id="expectations"></div></section><details id="feedback-tools"><summary>Feedback saves and backups</summary><p id="save-status" role="status">Checking workspace saves…</p><div class="controls"><button id="retry-save">Retry workspace save</button><button id="export">Export feedback JSON</button><label>Import JSON <input id="import" type="file" accept="application/json"></label></div></details><p id="notice" class="notice" role="status"></p>`;
 $('#panels').classList.toggle('two-panels', VARIANTS.length === 2);
-if (VARIANTS.length === 2) $('#preference option:nth-child(4)').remove();
+const preference = $<HTMLSelectElement>('#preference');
+for (const option of Array.from(preference.options)) if (['A', 'B', 'C'].includes(option.value)) option.remove();
+for (const [i, variant] of VARIANTS.entries()) {
+  const option = new Option(`${String.fromCharCode(65+i)} · ${variant.name}`, String.fromCharCode(65+i));
+  preference.add(option, preference.options[preference.options.length-2]);
+}
+if (artExperiment) {
+  $('#panels').classList.add('art-panels');
+  $('#evidence').textContent = 'Presentation experiment: combat is held identical. No balance or pacing score is inferred. Source investigation, captures and validation are retained in the art-direction-v1 packet.';
+  $('#evidence-help').textContent = 'Play one direction at a time. Use Enlarge for a closer look; every clip has its own clock, replay and comment form.';
+  for (const [i, style] of ART_STYLES.entries()) {
+    const article = document.createElement('article');
+    const title = document.createElement('h3'); title.textContent = `${String.fromCharCode(65+i)} · ${style.name}`;
+    const vision = document.createElement('p'); vision.textContent = style.vision;
+    const fit = document.createElement('p'); fit.className = 'muted'; fit.textContent = style.fit;
+    const button = document.createElement('button'); button.textContent = `View ${style.name}`;
+    button.onclick = () => { const panel = panels[i]; panel.element.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    article.append(title, vision, fit, button); $('#art-directions').append(article);
+  }
+}
 $('#build').textContent = `${EXPERIMENT.id} · ${source.slice(0, 23)}`;
 $('#build').title = source;
 $('#identity').textContent = `${EXPERIMENT.id}; fixed dt ${SIMULATION_DT}; source ${source}`;
@@ -171,9 +195,15 @@ const panels = VARIANTS.map((variant, index) => {
   element.innerHTML = `<div class="panel-head"><strong></strong><button aria-label="Enlarge panel ${String.fromCharCode(65 + index)}">Enlarge</button></div><div class="clip-caption"><h3></h3><p class="review-status" role="status"></p><p class="watch-for"></p><details><summary>Why this moment?</summary><p class="clip-reason"></p></details></div><div class="clip-controls"><button class="clip-play" aria-label="Play excerpt ${String.fromCharCode(65 + index)}">Play excerpt</button><button class="clip-replay" aria-label="Replay excerpt ${String.fromCharCode(65 + index)}">Replay</button><label>Clip time <input class="clip-time" aria-label="Excerpt time ${String.fromCharCode(65 + index)}" type="range" step="0.016666666666666666"></label><label><input class="clip-loop" aria-label="Loop excerpt ${String.fromCharCode(65 + index)}" type="checkbox"> Loop</label><button class="clip-full" aria-label="Full fight ${String.fromCharCode(65 + index)}">Full fight</button><output class="clip-clock"></output></div><canvas aria-label="Battle panel ${String.fromCharCode(65 + index)}"></canvas><footer></footer><section class="evidence-comment"><h3>Your comment on this evidence</h3><label>Comment<textarea class="comment-text" aria-label="Comment on evidence ${String.fromCharCode(65 + index)}" placeholder="What works here, what doesn't, or what are you unsure about?"></textarea></label><button class="save-comment" aria-label="Save evidence comment ${String.fromCharCode(65 + index)}">Save comment</button><p class="comment-save" role="status"></p><ol class="evidence-notes"></ol></section>`;
   $('#panels').append(element);
   const canvas = element.querySelector('canvas')!;
-  const gfx = new GameRenderer(canvas, { pixelRatio: 1, shadowMapSize: 512 }); gfx.scene.add(buildArena());
+  const gfx = new GameRenderer(canvas, { pixelRatio: 1, shadowMapSize: artExperiment ? 1024 : 512 }); const style = artStyle(variant.artDirection);
+  gfx.scene.add(style ? buildArtArena(style) : buildArena());
+  if (style) {
+    gfx.scene.background = new Color(style.background);
+    gfx.renderer.shadowMap.type = PCFSoftShadowMap;
+    gfx.scene.traverse(node => { if (node instanceof SpotLight) { node.shadow.normalBias = 1.5; node.shadow.bias = -0.0001; } });
+  }
   const world = createScenario({ seed, scenario, rotation, variant: variant.scenarioVariant });
-  const view = new BattleView(world, gfx.camera, { visualSeed: seed ^ 0x5f3759df, spellReadability: variant.spellReadability }); gfx.scene.add(view.group);
+  const view = new BattleView(world, gfx.camera, { visualSeed: seed ^ 0x5f3759df, spellReadability: variant.spellReadability, artDirection: variant.artDirection }); gfx.scene.add(view.group);
   const panel = { variant, element, gfx, world, view, finished: false, clip: undefined as EvidenceClip | undefined, cursor: 0, playing: false, accumulator: 0 };
   element.querySelector<HTMLButtonElement>('.save-comment')!.onclick = () => saveEvidenceComment(panel);
   element.querySelector<HTMLTextAreaElement>('.comment-text')!.oninput = event => { const reference = panelReference(panel); if (reference) commentDrafts.set(evidenceKey(reference), (event.target as HTMLTextAreaElement).value); };
@@ -238,7 +268,7 @@ function advanceWorld(p: Panel, count: number) {
 function resetPanel(p: Panel) {
   p.playing = false; p.accumulator = 0; p.cursor = 0;
   p.view.dispose(); p.world = createScenario({ seed, scenario, rotation, variant: p.variant.scenarioVariant });
-  p.view = new BattleView(p.world, p.gfx.camera, { visualSeed: seed ^ 0x5f3759df, spellReadability: p.variant.spellReadability }); p.gfx.scene.add(p.view.group); p.finished = false;
+  p.view = new BattleView(p.world, p.gfx.camera, { visualSeed: seed ^ 0x5f3759df, spellReadability: p.variant.spellReadability, artDirection: p.variant.artDirection }); p.gfx.scene.add(p.view.group); p.finished = false;
 }
 function reset() {
   elapsedTicks = 0; accumulator = 0; last = null;
@@ -383,7 +413,7 @@ $('#save-note').onclick = () => {
   $<HTMLTextAreaElement>('#note').value = ''; persist(); renderNotes();
 };
 const comparison = {
-  metadata: { experiment: EXPERIMENT.id, source, alternatives: VARIANTS.map(v => ({ id: v.id, scenarioVariant: v.scenarioVariant, spellReadability: v.spellReadability })), dt: SIMULATION_DT, browser: navigator.userAgent },
+  metadata: { experiment: EXPERIMENT.id, source, alternatives: VARIANTS.map(v => ({ id: v.id, scenarioVariant: v.scenarioVariant, spellReadability: v.spellReadability, artDirection: v.artDirection })), dt: SIMULATION_DT, browser: navigator.userAgent },
   seek, states, loadExample,
   viewing() { return { mode, focusedVariant, panels: panels.map(p => ({ variant: p.variant.id, playing: p.playing, cursor: p.cursor * SIMULATION_DT, clip: p.clip })) }; },
   ready: () => feedbackReady,
