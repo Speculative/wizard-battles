@@ -6,7 +6,9 @@ export class GameRenderer {
   readonly camera: THREE.OrthographicCamera;
   readonly renderer: THREE.WebGLRenderer;
   private readonly canvas: HTMLCanvasElement;
-  private readonly onResize = () => { this.resize(); this.render(); };
+  private readonly resizeObserver: ResizeObserver;
+  private width = 0;
+  private height = 0;
 
   constructor(canvas: HTMLCanvasElement, options: { pixelRatio?: number; shadowMapSize?: number } = {}) {
     this.canvas = canvas;
@@ -32,7 +34,10 @@ export class GameRenderer {
 
     this.addLights(options.shadowMapSize ?? 2048);
     this.resize();
-    window.addEventListener("resize", this.onResize);
+    // Grid columns, aspect ratios and hidden panels can change without a
+    // window resize, including while playback is paused.
+    this.resizeObserver = new ResizeObserver(() => this.render());
+    this.resizeObserver.observe(canvas);
   }
 
   private addLights(shadowMapSize: number): void {
@@ -62,10 +67,13 @@ export class GameRenderer {
     this.scene.add(spot.target);
   }
 
-  private resize(): void {
+  private resize(): boolean {
     const rect = this.canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return false;
     const w = Math.max(1, Math.floor(rect.width));
     const h = Math.max(1, Math.floor(rect.height));
+    if (w === this.width && h === this.height) return true;
+    this.width = w; this.height = h;
     this.renderer.setSize(w, h, false);
 
     const aspect = w / h;
@@ -104,14 +112,18 @@ export class GameRenderer {
     this.camera.top = cy + viewHeight / 2;
     this.camera.bottom = cy - viewHeight / 2;
     this.camera.updateProjectionMatrix();
+    return true;
   }
 
   dispose(): void {
-    window.removeEventListener("resize", this.onResize);
+    this.resizeObserver.disconnect();
     this.renderer.dispose();
   }
 
   render(): void {
+    // Synchronize before drawing too: a layout change can precede the next
+    // observer callback. Hidden canvases retain their last usable size.
+    if (!this.resize()) return;
     this.renderer.render(this.scene, this.camera);
   }
 }

@@ -19,8 +19,23 @@ try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1050 }, deviceScaleFactor: 1 });
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
+  async function assertCanvasSizing(target = page) {
+    // Let layout/ResizeObserver settle without a synthetic window resize.
+    await target.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+    const sizes = await target.locator('.panel:visible canvas').evaluateAll(canvases => canvases.map(element => {
+      const canvas = element as HTMLCanvasElement;
+      const rect = canvas.getBoundingClientRect();
+      return { width: canvas.width, height: canvas.height, expectedWidth: Math.floor(rect.width), expectedHeight: Math.floor(rect.height) };
+    }));
+    assert.ok(sizes.length);
+    for (const size of sizes) {
+      assert.equal(size.width, size.expectedWidth, `drawing buffer width must match CSS: ${JSON.stringify(size)}`);
+      assert.equal(size.height, size.expectedHeight, `drawing buffer height must match CSS: ${JSON.stringify(size)}`);
+    }
+  }
   const url = new URL('compare.html?capture=1&scenario=duel&seed=7', server.resolvedUrls!.local[0]);
   await page.goto(url.href); await page.waitForFunction(() => !!window.comparison);
+  await assertCanvasSizing();
   await page.evaluate(() => window.comparison.ready());
   assert.equal(await page.locator('#filter').inputValue(), 'all');
   assert.equal(await page.locator('.expectation').count(), 7, 'approved starting goals are visible on first visit');
@@ -52,8 +67,10 @@ try {
   assert.equal(feedback.notes.at(-1)!.time, 12); assert.equal(feedback.notes.at(-1)!.preference, 'B'); assert.deepEqual(feedback.notes.at(-1)!.variants, VARIANTS.map(v => v.id));
   // A fresh browser must recover notes without any localStorage.
   const fresh = await browser.newPage();
-  await fresh.goto(url.href); await fresh.waitForFunction(() => !!window.comparison);
+  const freshUrl = new URL(url); freshUrl.searchParams.delete('capture');
+  await fresh.goto(freshUrl.href); await fresh.waitForFunction(() => !!window.comparison);
   await fresh.evaluate(() => window.comparison.ready());
+  await assertCanvasSizing(fresh);
   assert.deepEqual(await fresh.evaluate(() => window.comparison.feedback()), feedback);
   await fresh.close();
   await page.reload(); await page.waitForFunction(() => !!window.comparison);
@@ -84,6 +101,7 @@ try {
   for (const brief of COMPARISON_BRIEFS) {
     await page.getByRole('button', { name: brief.title, exact: true }).click();
     assert.equal(await page.locator('.panel:visible').count(), 2);
+    await assertCanvasSizing();
     assert.equal(await page.locator('#full-controls').isVisible(), false);
     const view = await page.evaluate(() => window.comparison.viewing());
     assert.equal(view.mode, 'evidence');
@@ -103,8 +121,22 @@ try {
       assert.equal(after[index].tick, world.tick);
       for (const [j, c] of world.contestants.entries()) assert.ok(Math.abs(after[index].contestants[j].hp - c.hp) < 1e-7, 'excerpt reconstructs its exact fight state');
     }
+    const stateBeforeLayout = await page.evaluate(() => window.comparison.states());
+    await page.locator('.panel:visible .panel-head button').first().click();
+    await assertCanvasSizing();
+    await page.locator('.panel:visible .panel-head button').first().click();
+    await assertCanvasSizing();
+    await page.locator('#app').evaluate(el => { el.style.maxWidth = '1000px'; });
+    await assertCanvasSizing();
+    await page.locator('#app').evaluate(el => { el.style.maxWidth = ''; });
+    await assertCanvasSizing();
+    assert.deepEqual(await page.evaluate(() => window.comparison.states()), stateBeforeLayout, 'layout-only resizes leave every replay unchanged');
     await page.locator('#panels').screenshot({ path: `${output}/evidence-${brief.id}.png` });
   }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await assertCanvasSizing();
+  await page.setViewportSize({ width: 1200, height: 900 });
+  await assertCanvasSizing();
   await page.getByRole('button', { name: '2 · When movement stalls', exact: true }).click();
   await page.getByRole('button', { name: 'Play excerpt B', exact: true }).click();
   await page.waitForFunction(() => window.comparison.states()[1].time > 40.1);
@@ -141,6 +173,7 @@ try {
   await page.getByRole('button', { name: 'Selected evidence', exact: true }).click();
   await page.getByRole('button', { name: 'Full fight C', exact: true }).click();
   assert.equal((await page.evaluate(() => window.comparison.viewing())).mode, 'full');
+  await assertCanvasSizing();
   assert.equal(await page.locator('.panel.selected strong').innerText(), 'C · Bursts and resets');
   await page.getByRole('button', { name: 'Enlarge panel C', exact: true }).click();
   await page.evaluate(() => window.comparison.play());

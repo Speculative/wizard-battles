@@ -159,7 +159,7 @@ const panels = VARIANTS.map((variant, index) => {
   element.querySelector('button')!.onclick = () => {
     const open = !element.classList.contains('selected'); document.querySelectorAll('.panel').forEach(e => e.classList.remove('selected'));
     element.classList.toggle('selected', open); $('#panels').classList.toggle('enlarged', open); element.querySelector('button')!.textContent = open ? 'Restore' : 'Enlarge';
-    document.querySelectorAll('.panel:not(.selected) .panel-head button').forEach(e => e.textContent = 'Enlarge'); window.dispatchEvent(new Event('resize')); render();
+    document.querySelectorAll('.panel:not(.selected) .panel-head button').forEach(e => e.textContent = 'Enlarge'); render();
   };
   return panel;
 });

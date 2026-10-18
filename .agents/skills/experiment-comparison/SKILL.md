@@ -95,6 +95,8 @@ list of seeds and asking them to find the comparison. Verify:
 - Each cue corresponds to visible content, with enough context to understand it.
 - Switching, pausing, scrubbing and replaying clips do not move another clip.
 - Full-fight context is accessible, and labels/time ranges remain unambiguous.
+- Rendered geometry stays proportional when switching panel counts, enlarging,
+  restoring or revealing paused clips; inspect the drawing as well as controls.
 - A note saves durably and recovers with its evidence context intact.
 - Captions, logs, reports and rendered evidence identify the correct source.
 
