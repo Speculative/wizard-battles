@@ -44,3 +44,8 @@ th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #343846; 
 #notes-list { padding-left: 18px; font-size: 13px; }
 #build { font-size: 11px; max-width: 330px; text-align: right; overflow-wrap: anywhere; }
 @media(max-width: 900px) { main { padding: 16px; } .panels, .cards { grid-template-columns: 1fr; } .panel canvas { aspect-ratio: 1.8; } header { display: block; } #build { text-align: left; } .feedback-row { grid-template-columns: 1fr; } }
+button[aria-pressed=true] { background: #c6bdff; color: #191425; border-color: #c6bdff; }
+.example-heading { border-left: 3px solid #c6bdff; padding: 8px 18px; margin: 8px 0; }
+.example-heading h2, .example-heading p { margin: 6px 0; }
+#save-status { font-size: 13px; overflow-wrap: anywhere; color: #cfccf7; }
+[hidden] { display: none !important; }

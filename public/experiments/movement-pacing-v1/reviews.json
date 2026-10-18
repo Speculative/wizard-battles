@@ -126,6 +126,11 @@
       "overallVerdictByExpectation": {
         "WB-E004": "Not established visually. A/C show decisive outcomes and damage logs support consequential melee pressure, but sampled stills do not explain commitments, hits, or counters. B is worse on sustained consequence: 120-second timeout with a reported 103-second maximum damage gap.",
         "WB-E005": "Partial positional readability, insufficient pressure readability. Separate red/blue figures make spacing legible in B/C, but tiny fighters, health bars, and projectiles make attack state and initiative difficult to infer. B late activity lacks changing stakes."
+      },
+      "displaySummary": {
+        "title": "Can I follow the fight?",
+        "text": "In duel seed 1, A and C land hits and reach an outcome. B keeps moving but goes about 103 seconds without damage and hits the time limit. B’s spacing is easier to see in some frames, but that does not make this fight better. The reviewer could not choose between A and C from still images.",
+        "provenance": "Plain-language restatement of the retained review; no new evaluation."
       }
     },
     {
@@ -574,7 +579,7 @@
         {
           "scene": "duel",
           "seed": 1,
-          "time": "0\u20138s",
+          "time": "0–8s",
           "panels": [
             "A/baseline",
             "B/measured",
@@ -590,7 +595,7 @@
         {
           "scene": "duel",
           "seed": 1,
-          "time": "8\u201319.83s",
+          "time": "8–19.83s",
           "panels": [
             "A/baseline",
             "B/measured",
@@ -606,7 +611,7 @@
         {
           "scene": "four-wizards",
           "seed": 19,
-          "time": "2\u20138s",
+          "time": "2–8s",
           "panels": [
             "A/baseline",
             "B/measured",
@@ -622,7 +627,7 @@
         {
           "scene": "four-wizards",
           "seed": 19,
-          "time": "12\u201319.5s",
+          "time": "12–19.5s",
           "panels": [
             "A/baseline",
             "B/measured",
@@ -680,7 +685,7 @@
       "preference": {
         "choice": "unsure",
         "tentativeDirection": "Keep B/measured as a contrasting research direction; no variant approved.",
-        "reason": "B preserves more specialists in the inspected four-way opening and exposes a readable ground cue. A/C communicate a clearer dominant pursuer but too little spellcraft payoff. Movement alone has not resolved this persona\u2019s core concern.",
+        "reason": "B preserves more specialists in the inspected four-way opening and exposes a readable ground cue. A/C communicate a clearer dominant pursuer but too little spellcraft payoff. Movement alone has not resolved this persona’s core concern.",
         "confidence": "low",
         "ownerPreference": "unknown"
       },
@@ -688,13 +693,13 @@
         {
           "rank": 1,
           "concern": "Anticipation and payoff are hard to read at three-panel scale.",
-          "evidence": "Duel s1 A at 3\u20135s: HP drops without a distinct readable hit in the sampled stills.",
+          "evidence": "Duel s1 A at 3–5s: HP drops without a distinct readable hit in the sampled stills.",
           "suggestion": "Next presentation experiment should give one consequential spell a clear buildup, release and impact silhouette, evaluated enlarged and side by side."
         },
         {
           "rank": 2,
           "concern": "Tactical identities need more than color and repeated pursuit.",
-          "evidence": "Four-wizards s19 A 8\u201319.5s: red advances through opponents with similar close-range answers.",
+          "evidence": "Four-wizards s19 A 8–19.5s: red advances through opponents with similar close-range answers.",
           "suggestion": "Test a recognizable defensive answer or counterplay property, rather than only changing speed."
         },
         {
@@ -798,7 +803,7 @@
       },
       "rootCorrections": [
         {
-          "finding": "The follow-up phrase \u201cblue 90 HP versus 100 initially\u201d conflates initial capture with old headless result. At requested19s the initial capture measured blue HP was56; fixed capture is90. The old headless batch had blue100. This correction changes factual comparison only, not the reviewer judgment.",
+          "finding": "The follow-up phrase “blue 90 HP versus 100 initially” conflates initial capture with old headless result. At requested19s the initial capture measured blue HP was56; fixed capture is90. The old headless batch had blue100. This correction changes factual comparison only, not the reviewer judgment.",
           "evidence": [
             "runs-captures/duel-s1/capture.json frame114",
             "runs-captures/duel-s1-fixed/capture.json frame114"
@@ -812,7 +817,12 @@
             "blue": 90
           }
         }
-      ]
+      ],
+      "displaySummary": {
+        "title": "Does the magic feel exciting?",
+        "text": "None of the three convinced this reviewer yet. It is hard to see spells building up, understand the response, and enjoy the payoff. Changing movement alone has not solved that. Try clearer spell buildup and impact next.",
+        "provenance": "Plain-language restatement of the retained review; no new evaluation."
+      }
     },
     {
       "schema": "wizard-battles-persona-review-v1",
@@ -897,7 +907,12 @@
         "Initial reviewer messages are retained excerpts, not a fabricated full original report.",
         "No owner calibration or broad matchup validation.",
         "Qualitative interpretation remains uncertain; individual attack causality is unavailable."
-      ]
+      ],
+      "displaySummary": {
+        "title": "Can we trust the comparison?",
+        "text": "The review found a browser/simulation mismatch, which was fixed and checked again. B stalls in duel seed 1; A and C also stall in some other seeds. The results do not establish a winner. We still cannot tell how much each individual dodge helped.",
+        "provenance": "Plain-language restatement of the retained review; no new evaluation."
+      }
     }
   ]
 }

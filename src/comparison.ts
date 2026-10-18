@@ -4,7 +4,9 @@ import { buildArena } from './arena';
 import { BattleView } from './presentation/battleView';
 import { createScenario, SIMULATION_DT } from './scenario';
 import { EXPERIMENT, VARIANTS } from './experiment';
-import { initialExpectations, type Expectation, type Decision } from './expectations';
+import { initialExpectations, type Decision } from './expectations';
+
+import { validateFeedback, mergeFeedback, type Feedback } from './feedback';
 
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 const params = new URLSearchParams(location.search);
@@ -12,19 +14,23 @@ const source = typeof __BUILD_SOURCE__ === 'undefined' ? 'development' : __BUILD
 const app = $('#app');
 app.innerHTML = `
 <header><div><div class="eyebrow">Wizard Battles / Experiment room</div><h1>Pressure, commitment, escape</h1><p id="hypothesis"></p></div><div id="build" class="muted"></div></header>
-<div class="controls"><label>Scene <select id="scenario"><option value="duel">Duel · red / blue</option><option value="four-wizards">Four wizards</option></select></label>
+<p>Compare three movement styles in the same starting match. A is the original; B slows travel and stops to charge; C adds faster escapes and stops to recover.</p>
+<div id="presets" class="controls" aria-label="Recommended matches"></div>
+<div class="example-heading"><h2 id="example-title"></h2><p id="example-description"></p><p id="active-match" class="muted" role="status"></p></div>
+<div class="controls" aria-label="Viewing range"><button id="full-fight" aria-pressed="true">Full fight</button><button id="exchange" aria-pressed="false">Short interaction · 8–14s</button><button id="late" aria-pressed="false" hidden>Late comparison · 84–90s</button><label><input id="loop" type="checkbox" checked> Loop short interactions</label></div>
+<details><summary>Custom match / display options</summary><div class="controls"><label>Scene <select id="scenario"><option value="duel">Duel · red / blue</option><option value="four-wizards">Four wizards</option></select></label>
 <label>Seed <input id="seed" type="number" min="0" max="4294967295" step="1" value="1"></label>
 <label>Layout <select id="rotation"><option value="0">Original</option><option value="1.5707963267948966">Quarter turn</option></select></label>
-<button id="load">Load example</button><label><input id="blind" type="checkbox" checked> Hide variant names</label></div>
+<label><input id="blind" type="checkbox"> Hide variant names</label><small>Custom changes apply when you select a value or leave the seed field.</small></div></details>
 <div class="controls"><button id="play" class="primary">Play</button><button id="restart">Restart</button><button id="step">+1 second</button>
 <label>Speed <select id="speed"><option value="0.5">½×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
 <label>Time <input id="time" type="range" min="0" max="120" step="0.5" value="0"></label><output id="clock">0.0s / 120s</output></div>
 <div id="panels" class="panels"></div>
-<p class="muted">Matched starts, independent outcomes. Finished fights hold while others continue. Try seeds 1, 7, 19 and 42, including both scenes and layouts. Watch the buildup and reset, not just impacts.</p>
-<div class="cards"><section class="card"><h2>Your viewing notes</h2><p class="muted">What reads best? A note captures this example, all panel identities and the current time.</p>
-<div class="stack"><div class="feedback-row"><select id="preference" aria-label="Preference"><option value="unsure">Unsure</option><option>A</option><option>B</option><option>C</option><option value="no-difference">No meaningful difference</option><option value="none">None works</option></select><textarea id="note" aria-label="Viewing note" placeholder="What caught your attention, or lost it?"></textarea></div><button id="save-note">Save timestamped note</button><ol id="notes-list"></ol></div></section>
+<p class="muted">Each panel starts with the same fighters and seed. Only movement settings differ. Outcomes can diverge. Enlarge a panel to follow its spells; finished fights hold their final state.</p>
+<div class="cards"><section class="card"><h2>Your viewing notes</h2><p class="muted">What reads best? A note captures this match, all panel identities and the current time.</p>
+<div class="stack"><div class="feedback-row"><select id="preference" aria-label="Preference"><option value="unsure">Unsure</option><option>A</option><option>B</option><option>C</option><option value="no-difference">No meaningful difference</option><option value="none">None works</option></select><textarea id="note" aria-label="Viewing note" placeholder="What caught your attention, or lost it?"></textarea></div><button id="save-note">Save timestamped note</button><p id="save-status" role="status">Checking workspace saves…</p><button id="retry-save">Retry workspace save</button><ol id="notes-list"></ol></div></section>
 <section class="card"><h2>Evidence, after watching</h2><details><summary>Reveal approaches and experiment identity</summary><div id="variants"></div><small id="identity"></small></details><details><summary>Batch results and persona judgments</summary><div id="evidence">No saved report loaded. Run npm run experiment to generate evidence.</div><div id="reviews"></div></details><p class="muted">Descriptive evidence, no fun score. Expectation approval and build satisfaction are separate. Your preferred approach is still undecided.</p></section></div>
-<section class="card" style="margin-top:24px"><h2>Expectations / your editable review queue</h2><p class="muted">The seven starting expectations were approved in discussion. All build satisfaction remains untested here; persona evidence below can disagree. Changes save locally. Export to share with an agent or move browsers.</p>
+<section class="card" style="margin-top:24px"><h2>Expectations / your editable review queue</h2><p class="muted">The seven starting expectations were approved in discussion. All build satisfaction remains untested here; persona evidence below can disagree. Changes save to the workspace when this server supports it, with a browser backup. Export is also available.</p>
 <div class="controls"><label>Show <select id="filter"><option value="unreviewed">Unreviewed</option><option value="all">All / history</option><option value="approved">Approved</option><option value="removed">Removed</option></select></label><button id="add-expectation">Propose expectation</button><button id="export">Export feedback JSON</button><label>Import JSON <input id="import" type="file" accept="application/json"></label></div><div id="expectations"></div></section><p id="notice" class="notice" role="status"></p>`;
 $('#hypothesis').textContent = EXPERIMENT.hypothesis;
 $('#build').textContent = `${EXPERIMENT.id} · ${source.slice(0, 23)}`;
@@ -32,25 +38,29 @@ $('#build').title = source;
 $('#identity').textContent = `${EXPERIMENT.id}; fixed dt ${SIMULATION_DT}; source ${source}`;
 for (const v of VARIANTS) { const p = document.createElement('p'); p.textContent = `${v.name}: ${v.description}`; $('#variants').append(p); }
 
-interface Note { at: string; experiment: string; source: string; scenario: string; seed: number; rotation: number; time: number; panelTimes: number[]; variants: string[]; preference: string; text: string }
-interface Feedback { schema: 'wizard-battles-feedback-v1'; expectations: Expectation[]; notes: Note[] }
 const storageKey = `wizard-battles:${EXPERIMENT.id}:feedback-v1`;
-function validateFeedback(value: unknown): asserts value is Feedback {
-  const data = value as Feedback;
-  if (!data || data.schema !== 'wizard-battles-feedback-v1' || !Array.isArray(data.expectations) || !Array.isArray(data.notes)) throw new Error('Unrecognized feedback format');
-  const ids = new Set<string>();
-  const decisions = ['unreviewed', 'approved', 'declined', 'removed'];
-  for (const e of data.expectations) {
-    if (!e || !(['id', 'text', 'target', 'notes', 'provenance'] as const).every(k => typeof e[k] === 'string') || !decisions.includes(e.decision) || !Array.isArray(e.history) || ids.has(e.id)) throw new Error('Invalid or duplicate expectation');
-    ids.add(e.id);
-    for (const h of e.history) if (!h || !(['at', 'text', 'target', 'notes'] as const).every(k => typeof h[k] === 'string') || !decisions.includes(h.decision)) throw new Error('Invalid expectation history');
-  }
-  for (const n of data.notes) if (!n || !(['at', 'experiment', 'source', 'scenario', 'preference', 'text'] as const).every(k => typeof n[k] === 'string') || ![n.seed, n.rotation, n.time].every(Number.isFinite) || !Array.isArray(n.variants) || !n.variants.every(v => typeof v === 'string') || !Array.isArray(n.panelTimes) || !n.panelTimes.every(Number.isFinite)) throw new Error('Invalid viewing note');
-}
 let feedback: Feedback = { schema: 'wizard-battles-feedback-v1', expectations: initialExpectations(), notes: [] };
 try { const saved = localStorage.getItem(storageKey); if (saved) { const data: unknown = JSON.parse(saved); validateFeedback(data); feedback = data; } } catch { notify('Saved feedback could not be read. Export any recoverable data before replacing it.'); }
 function notify(message: string) { $('#notice').textContent = message; }
-function persist() { try { localStorage.setItem(storageKey, JSON.stringify(feedback)); notify('Saved in this browser. Export JSON to share or back up.'); } catch { notify('Browser storage unavailable. Export JSON to keep your changes.'); } }
+function saveBrowser() {
+  try { localStorage.setItem(storageKey, JSON.stringify(feedback)); return true; } catch { return false; }
+}
+let saveQueue = Promise.resolve();
+let saveRevision = 0;
+function persist() {
+  const revision = ++saveRevision;
+  const browserSaved = saveBrowser();
+  $('#save-status').textContent = 'Saving to workspace…';
+  saveQueue = saveQueue.then(async () => {
+    await feedbackReady;
+    const response = await fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(feedback) });
+    if (!response.ok) throw new Error('Workspace save unavailable');
+    const saved = await response.json();
+    if (revision !== saveRevision) return;
+    $('#save-status').textContent = `Saved to ${saved.file} at ${new Date(saved.savedAt).toLocaleTimeString()}. Browser backup ${browserSaved ? 'saved' : 'unavailable'}.`;
+  }).catch(() => { $('#save-status').textContent = browserSaved ? 'Workspace save failed. This change is only in this browser. Retry or export JSON to keep a separate copy.' : 'Save failed in both workspace and browser. Export JSON now to keep this change.'; });
+}
+$('#retry-save').onclick = persist;
 function renderNotes() {
   $('#notes-list').replaceChildren();
   for (const n of feedback.notes) { const li = document.createElement('li'); li.textContent = `${n.scenario}, seed ${n.seed}, ${n.time.toFixed(1)}s · ${n.preference}: ${n.text}`; $('#notes-list').append(li); }
@@ -90,18 +100,12 @@ $('#export').onclick = () => {
 $('#import').onchange = async () => {
   try { const file = $<HTMLInputElement>('#import').files?.[0]; if (!file) return;
     const data: unknown = JSON.parse(await file.text()); validateFeedback(data);
-    // Merge by ID, retaining local notes and distinct history records.
-    for (const incoming of data.expectations) {
-      const local = feedback.expectations.find(e => e.id === incoming.id);
-      if (!local) feedback.expectations.push(incoming);
-      else { const history = [...local.history, ...incoming.history].filter((h, i, all) => all.findIndex(other => JSON.stringify(other) === JSON.stringify(h)) === i).sort((a, b) => a.at.localeCompare(b.at)); Object.assign(local, incoming, { history }); }
-    }
-    for (const n of data.notes) if (!feedback.notes.some(other => JSON.stringify(other) === JSON.stringify(n))) feedback.notes.push(n);
+    feedback = mergeFeedback(feedback, data);
     persist(); renderExpectations(); renderNotes();
   } catch (error) { notify(`Import failed: ${(error as Error).message}`); }
 };
 
-let seed = Number(params.get('seed') ?? 1);
+let seed = Number(params.get('seed') ?? 7);
 let scenario = params.get('scenario') ?? 'duel';
 let rotation = Number(params.get('rotation') ?? 0);
 function validateExample() {
@@ -110,7 +114,9 @@ function validateExample() {
 validateExample();
 $<HTMLInputElement>('#seed').value = String(seed); $<HTMLSelectElement>('#scenario').value = scenario; $<HTMLSelectElement>('#rotation').value = String(rotation);
 let elapsedTicks = 0;
-let paused = params.get('capture') === '1';
+let paused = true;
+let rangeStart = 0;
+let rangeEnd: number = EXPERIMENT.maxSeconds;
 let accumulator = 0;
 let last: number | null = null;
 const panels = VARIANTS.map((variant, index) => {
@@ -139,13 +145,15 @@ function render() {
     p.element.querySelector('footer')!.textContent = `${p.world.time.toFixed(1)}s · ${result}\n${p.world.contestants.map(c => `${c.id} ${Math.max(0, c.hp).toFixed(0)} HP`).join(' / ')}`;
   });
   const time = elapsedTicks * SIMULATION_DT;
-  $('#clock').textContent = `${time.toFixed(1)}s / ${EXPERIMENT.maxSeconds}s`;
+  $('#clock').textContent = `${time.toFixed(1)}s · ${rangeStart}–${rangeEnd}s`;
+  $<HTMLInputElement>('#time').min = String(rangeStart);
+  $<HTMLInputElement>('#time').max = String(rangeEnd);
   $<HTMLInputElement>('#time').value = String(time);
   $('#play').textContent = paused ? 'Play' : 'Pause';
 }
 function advance(count: number) {
   if (!Number.isSafeInteger(count) || count < 0) throw new Error('Invalid step count');
-  const steps = Math.min(count, Math.round(EXPERIMENT.maxSeconds / SIMULATION_DT) - elapsedTicks);
+  const steps = Math.min(count, Math.round(rangeEnd / SIMULATION_DT) - elapsedTicks);
   for (let tick = 0; tick < steps; tick++) {
     for (const p of panels) if (!p.finished) {
       p.world.update(SIMULATION_DT); p.view.recordTick();
@@ -153,7 +161,7 @@ function advance(count: number) {
     }
     elapsedTicks++;
   }
-  if (panels.every(p => p.finished) || elapsedTicks * SIMULATION_DT >= EXPERIMENT.maxSeconds) paused = true;
+  if (panels.every(p => p.finished) || elapsedTicks * SIMULATION_DT >= rangeEnd) paused = true;
 }
 function reset() {
   elapsedTicks = 0; accumulator = 0; last = null;
@@ -168,25 +176,55 @@ function seek(seconds: number) {
 }
 function states() { return panels.map(p => ({ variant: p.variant.id, time: p.world.time, tick: p.world.tick, finished: p.finished, contestants: p.world.contestants.map(c => ({ id: c.id, hp: c.hp, alive: c.alive, position: { ...c.position }, velocity: { ...c.velocity } })) })); }
 $('#blind').onchange = render;
-$('#play').onclick = () => { paused = !paused; last = null; render(); };
-$('#restart').onclick = () => { reset(); render(); };
+$('#play').onclick = () => { if (elapsedTicks * SIMULATION_DT >= rangeEnd) seek(rangeStart); paused = !paused; last = null; render(); };
+$('#restart').onclick = () => { seek(rangeStart); render(); };
 $('#step').onclick = () => { paused = true; advance(60); render(); };
 $('#time').oninput = () => seek(Number($<HTMLInputElement>('#time').value));
-$('#load').onclick = () => {
+const presets = [
+  { id: 'ordinary-duel', title: '1 · Start here: duel', scenario: 'duel', seed: 7, description: 'Follow red and blue. Compare when each fighter closes in, stops, or escapes. Which is easiest to follow?' },
+  { id: 'stalled-duel', title: '2 · When movement stalls', scenario: 'duel', seed: 1, description: 'Does more movement make a better fight? Compare the short interaction with the late window, then watch the full fight for context.' },
+  { id: 'four-way', title: '3 · Four-way battle', scenario: 'four-wizards', seed: 19, description: 'With four fighters, can you tell who is attacking whom? Compare how easy each panel is to follow.' },
+];
+function updateExample() {
+  const preset = presets.find(p => p.seed === seed && p.scenario === scenario && rotation === 0);
+  $('#example-title').textContent = preset?.title ?? 'Custom match';
+  $('#example-description').textContent = preset?.description ?? 'The selected setup is active in all three panels.';
+  $('#active-match').textContent = `${scenario === 'duel' ? 'Red / blue duel' : 'Four wizards'} · seed ${seed} · ${rotation === 0 ? 'original layout' : 'quarter-turn layout'}`;
+  $('#exchange').textContent = seed === 7 && scenario === 'duel' ? 'Short interaction · 2–6s' : 'Short interaction · 8–14s';
+  $('#late').hidden = preset?.id !== 'stalled-duel';
+  for (const button of document.querySelectorAll<HTMLButtonElement>('#presets button')) button.setAttribute('aria-pressed', String(button.dataset.preset === preset?.id));
+  $<HTMLInputElement>('#seed').value = String(seed); $<HTMLSelectElement>('#scenario').value = scenario; $<HTMLSelectElement>('#rotation').value = String(rotation);
+}
+function setRange(start: number, end: number, play = true) {
+  rangeStart = start; rangeEnd = end; seek(start); paused = !play; last = null;
+  for (const [id, active] of [['full-fight', start === 0], ['exchange', start > 0 && start !== 84], ['late', start === 84]] as const) $(`#${id}`).setAttribute('aria-pressed', String(active));
+  render();
+}
+function loadExample(next: { seed: number; scenario: string; rotation: number }) {
   const old = { seed, scenario, rotation };
   try {
-    seed = Number($<HTMLInputElement>('#seed').value); scenario = $<HTMLSelectElement>('#scenario').value; rotation = Number($<HTMLSelectElement>('#rotation').value); validateExample();
-    paused = true; reset(); render();
-    const url = new URL(location.href); url.searchParams.set('seed', String(seed)); url.searchParams.set('scenario', scenario); url.searchParams.set('rotation', String(rotation)); history.replaceState(null, '', url); notify('Loaded matched example. Press Play to watch.');
-  } catch (error) { ({ seed, scenario, rotation } = old); notify((error as Error).message); }
-};
+    ({ seed, scenario, rotation } = next); validateExample();
+    setRange(0, EXPERIMENT.maxSeconds, false); updateExample();
+    const url = new URL(location.href); url.searchParams.set('seed', String(seed)); url.searchParams.set('scenario', scenario); url.searchParams.set('rotation', String(rotation)); url.searchParams.delete('time'); history.replaceState(null, '', url);
+  } catch (error) { ({ seed, scenario, rotation } = old); updateExample(); notify((error as Error).message); }
+}
+for (const preset of presets) {
+  const button = document.createElement('button'); button.textContent = preset.title; button.dataset.preset = preset.id;
+  button.onclick = () => loadExample({ seed: preset.seed, scenario: preset.scenario, rotation: 0 }); $('#presets').append(button);
+}
+for (const id of ['seed', 'scenario', 'rotation']) $(`#${id}`).onchange = () => loadExample({ seed: Number($<HTMLInputElement>('#seed').value), scenario: $<HTMLSelectElement>('#scenario').value, rotation: Number($<HTMLSelectElement>('#rotation').value) });
+$('#full-fight').onclick = () => setRange(0, EXPERIMENT.maxSeconds);
+$('#exchange').onclick = () => seed === 7 && scenario === 'duel' ? setRange(2, 6) : setRange(8, 14);
+$('#late').onclick = () => setRange(84, 90);
+updateExample();
 $('#save-note').onclick = () => {
   feedback.notes.push({ at: new Date().toISOString(), experiment: EXPERIMENT.id, source, scenario, seed, rotation, time: elapsedTicks * SIMULATION_DT, panelTimes: panels.map(p => p.world.time), variants: VARIANTS.map(v => v.id), preference: $<HTMLSelectElement>('#preference').value, text: $<HTMLTextAreaElement>('#note').value });
   $<HTMLTextAreaElement>('#note').value = ''; persist(); renderNotes();
 };
 const comparison = {
   metadata: { experiment: EXPERIMENT.id, source, dt: SIMULATION_DT, browser: navigator.userAgent },
-  seek, states,
+  seek, states, loadExample,
+  ready: () => feedbackReady,
   step(count = 1) { paused = true; advance(count); render(); return states(); },
   pause() { paused = true; render(); }, play() { paused = false; last = null; render(); },
   feedback() { return structuredClone(feedback); },
@@ -194,6 +232,19 @@ const comparison = {
 declare global { const __BUILD_SOURCE__: string; interface Window { comparison: typeof comparison } }
 window.comparison = comparison;
 renderExpectations(); renderNotes(); render();
+let migrateBrowser = false;
+const feedbackReady = (async () => {
+  try {
+    const response = await fetch('/api/feedback');
+    if (!response.ok) throw new Error('Workspace unavailable');
+    const saved = await response.json(); validateFeedback(saved.feedback);
+    feedback = mergeFeedback(feedback, saved.feedback);
+    migrateBrowser = JSON.stringify(feedback) !== JSON.stringify(saved.feedback) && (feedback.notes.length > 0 || feedback.expectations.some(e => e.history.length > (initialExpectations().find(i => i.id === e.id)?.history.length ?? 0)));
+    saveBrowser(); renderNotes(); renderExpectations();
+    $('#save-status').textContent = `Workspace connected · ${saved.location}. Existing browser notes will also be saved here.`;
+  } catch { $('#save-status').textContent = 'Workspace storage unavailable. Notes remain in this browser; export JSON for a separate copy.'; }
+})();
+void feedbackReady.then(() => { if (migrateBrowser) persist(); });
 if (params.has('time')) seek(Number(params.get('time')));
 function tick(now: number) {
   if (last === null) last = now;
@@ -201,6 +252,7 @@ function tick(now: number) {
     accumulator += Math.max(0, Math.min(.1, (now - last) / 1000)) * Number($<HTMLSelectElement>('#speed').value);
     const count = Math.floor((accumulator + 1e-10) / SIMULATION_DT);
     if (count) { advance(count); accumulator -= count * SIMULATION_DT; render(); }
+    if (paused && rangeStart > 0 && $<HTMLInputElement>('#loop').checked) { seek(rangeStart); paused = false; last = now; }
   }
   last = now; requestAnimationFrame(tick);
 }
@@ -224,9 +276,10 @@ void fetch('./experiments/movement-pacing-v1/reviews.json').then(async response 
   if (!response.ok) return;
   const reviews = await response.json();
   for (const review of reviews.reviews) {
-    const details = document.createElement('details'); const summary = document.createElement('summary'); summary.textContent = review.persona;
+    const plain = review.displaySummary;
+    const details = document.createElement('details'); const summary = document.createElement('summary'); summary.textContent = plain?.title ?? review.persona;
     details.append(summary);
-    const verdict = document.createElement('p'); verdict.textContent = review.overallVerdict ?? review.preference?.reason ?? 'See retained report for observations and uncertainty.'; details.append(verdict);
+    const verdict = document.createElement('p'); verdict.textContent = plain?.text ?? review.overallVerdict; details.append(verdict);
     const limits = document.createElement('p'); limits.className = 'muted'; limits.textContent = 'Agent perspective; sampled frames and logs, not owner feedback. Original reports retain their evidence source identities.'; details.append(limits);
     const raw = document.createElement('details'); const rawTitle = document.createElement('summary'); rawTitle.textContent = 'Full traceable report';
     const pre = document.createElement('pre'); pre.textContent = JSON.stringify(review, null, 2); raw.append(rawTitle, pre); details.append(raw); $('#reviews').append(details);
