@@ -51,6 +51,12 @@ try {
   assert.equal(note.evidence!.id,ART_BRIEFS[0].clips[4].id); assert.equal(note.experiment,'art-direction-v1');
   const fresh = await browser.newPage(); await fresh.goto(url); await fresh.waitForFunction(() => !!window.comparison); await fresh.evaluate(() => window.comparison.ready());
   assert.match(await fresh.locator('.review-status').nth(4).innerText(),/Commented/); await fresh.close();
+  // A direction link must reveal its target even when another card is enlarged.
+  await page.getByRole('button',{name:'Enlarge panel A',exact:true}).click();
+  await page.getByRole('button',{name:'View Obsidian Foundry',exact:true}).click();
+  assert.equal(await page.locator('.panel:visible').count(),1);
+  assert.match(await page.locator('.panel:visible .panel-head strong').innerText(),/Obsidian Foundry/);
+  await page.getByRole('button',{name:'Enlarge panel E',exact:true}).click();
   // Exercise geometry projection on enlarged, restored, narrow and paused canvases.
   for (const width of [1440,780]) {
     await page.setViewportSize({width,height:1050});

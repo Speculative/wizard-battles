@@ -71,7 +71,11 @@ if (artExperiment) {
     const vision = document.createElement('p'); vision.textContent = style.vision;
     const fit = document.createElement('p'); fit.className = 'muted'; fit.textContent = style.fit;
     const button = document.createElement('button'); button.textContent = `View ${style.name}`;
-    button.onclick = () => { const panel = panels[i]; panel.element.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    button.onclick = () => {
+      const panel = panels[i];
+      if ($('#panels').classList.contains('enlarged') && !panel.element.classList.contains('selected')) panel.element.querySelector<HTMLButtonElement>('.panel-head button')!.click();
+      panel.element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
     article.append(title, vision, fit, button); $('#art-directions').append(article);
   }
 }
