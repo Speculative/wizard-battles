@@ -11,10 +11,11 @@ import { seededRandom } from '../random';
 import { StatusDisplay } from '../statusDisplay';
 import { createTelegraph } from './telegraph';
 import { glow, ring, disposeObject } from './primitives';
+import { preparationPointer, semanticCue } from './spellCues';
 
 interface View { group: THREE.Group; update(): void; dispose(): void }
 interface TrailSample { t: number; x: number; y: number; z: number }
-export interface VisualOptions { effects?: boolean; trails?: boolean; visualSeed?: number }
+export interface VisualOptions { effects?: boolean; trails?: boolean; visualSeed?: number; spellReadability?: boolean }
 const EFFECT_LIFETIME = 0.65;
 const TRAIL_HISTORY = 0.2;
 
@@ -34,7 +35,7 @@ export class BattleView {
     this.world = world;
     this.camera = camera;
     this.options = { effects: options.effects ?? true, trails: options.trails ?? true,
-      visualSeed: options.visualSeed ?? (world.seed ^ 0x5f3759df) };
+      visualSeed: options.visualSeed ?? (world.seed ^ 0x5f3759df), spellReadability: options.spellReadability ?? false };
   }
 
   /** Call once after each simulation tick, even when no frame is rendered. */
@@ -69,8 +70,14 @@ export class BattleView {
     }
     if (this.options.effects) for (const event of this.world.events) {
       if (this.world.time - event.t > EFFECT_LIFETIME) continue;
-      if (event.type !== 'spell_impact' && event.type !== 'blink') continue;
-      if (!this.effects.has(event.seq)) this.effects.set(event.seq, this.makeEffect(event));
+      const cue = this.options.spellReadability && ['damage', 'cast_release', 'projectile_emit'].includes(event.type);
+      if (event.type !== 'spell_impact' && event.type !== 'blink' && !cue) continue;
+      if (!this.effects.has(event.seq)) {
+        if (cue) {
+          const effect = semanticCue(event);
+          this.effects.set(event.seq, this.view(effect.group, () => effect.update(this.world.time - event.t)));
+        } else this.effects.set(event.seq, this.makeEffect(event));
+      }
     }
     for (const [seq, effect] of this.effects) {
       const event = this.world.events.find(event => event.seq === seq);
@@ -107,8 +114,13 @@ export class BattleView {
     const figure = new THREE.Group();
     figure.add(body, hat, brim, nose);
     const charge = ring(c.radius * 1.4, c.color);
+    const timer = ring(c.radius * 1.65, 0xffffff);
+    timer.name = 'preparation-progress';
+    const track = ring(c.radius * 1.7, 0x172333, 0.9);
+    track.geometry.dispose();
+    track.geometry = new THREE.RingGeometry(c.radius * 1.49, c.radius * 1.7, 48);
     const status = new StatusDisplay();
-    group.add(figure, charge, status.group);
+    group.add(figure, charge, track, timer, status.group);
     return this.view(group, () => {
       group.visible = c.alive;
       figure.position.set(c.position.x, c.position.y + Math.sin(this.world.time * 3 + c.color) * 2, c.position.z);
@@ -116,10 +128,15 @@ export class BattleView {
       const charging = c.getComponent(Charging) ?? c.getComponent(Channeling);
       charge.visible = !!charging;
       charge.position.set(c.position.x, 0.5, c.position.z);
+      timer.visible = this.options.spellReadability && this.options.effects && !!charging;
+      timer.position.set(c.position.x, 0.7, c.position.z);
+      track.visible = timer.visible;
+      track.position.set(c.position.x, 0.6, c.position.z);
       if (charging) {
-        const progress = 1 - charging.remaining / Math.max(0.001, charging.totalDuration);
+        const progress = Math.max(0, Math.min(1, 1 - charging.remaining / Math.max(0.001, charging.totalDuration)));
         charge.scale.setScalar(0.7 + progress * 0.3);
         (charge.material as THREE.MeshBasicMaterial).opacity = 0.3 + progress * 0.6;
+        timer.geometry.setDrawRange(0, Math.floor(progress * 48) * 6);
       }
       const stamina = 'stamina01' in c ? (c as Contestant & { stamina01(): number }).stamina01() : 1;
       status.update(c.hp / 100, stamina, new THREE.Vector3(c.position.x, c.position.y, c.position.z), c.radius * 3.1, this.camera.quaternion);
@@ -156,12 +173,18 @@ export class BattleView {
       trail.push(node); group.add(node);
     }
     const telegraph = s.spec.telegraph ? createTelegraph(s.spec.telegraph) : null;
+    const pointer = preparationPointer(s.caster.color);
+    group.add(pointer);
     group.add(head);
     if (telegraph) { telegraph.mesh.name = "telegraph"; group.add(telegraph.mesh); }
     return this.view(group, () => {
       head.visible = !s.emitterActive;
       head.position.set(s.position.x, s.position.y, s.position.z);
       head.rotation.y = -Math.atan2(s.velocity.z, s.velocity.x);
+      pointer.visible = this.options.spellReadability && this.options.effects && (s.frozen || s.emitterActive);
+      pointer.position.set(s.caster.position.x, 0.8, s.caster.position.z);
+      const direction = s.emitterActive ? s.emitterBaseDir : s.position.clone().sub(s.caster.position);
+      pointer.rotation.y = -Math.atan2(direction.z, direction.x);
       if (telegraph) {
         const groundTarget = s.spec.telegraph?.kind === 'ground-circle';
         telegraph.mesh.visible = groundTarget ? !!s.detonateAt : s.frozen || s.emitterActive;
@@ -234,11 +257,14 @@ export class BattleView {
     const geometry = new THREE.RingGeometry(s.caster.radius, s.reach + s.caster.radius, 28, 1, -s.coneHalfAngle, s.coneHalfAngle * 2);
     geometry.rotateX(-Math.PI / 2);
     const arc = new THREE.Mesh(geometry, glow(0xb9e5ff, 0.5));
+    const pointer = preparationPointer(s.caster.color);
+    group.add(pointer);
     group.add(arc);
     return this.view(group, () => {
       group.position.set(s.caster.position.x, s.caster.position.y * 0.6, s.caster.position.z);
       group.rotation.y = -Math.atan2(s.aim.z, s.aim.x);
       arc.visible = !s.frozen && s.age < s.swingDuration;
+      pointer.visible = this.options.spellReadability && this.options.effects && s.frozen;
       (arc.material as THREE.MeshBasicMaterial).opacity = 0.65 * Math.sin(Math.PI * s.age / s.swingDuration);
     });
   }

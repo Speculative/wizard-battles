@@ -82,3 +82,21 @@ The committed report contains 48 screening matches; `public/experiments/movement
 Initial review excerpts and the full spectacle review preserve pre-fix source labels; corrected follow-up evidence is clearly distinguished. The systems report retains initial independent reviewer messages plus an explicitly root-authored verification follow-up. `media/reviewed-frames/manifest.json` maps retained inspected images to original workspace paths and hashes. The reviews inspected sampled stills and logs; they did not continuously watch the encoded clips. Clips are provided for human viewing.
 
 The next useful hypothesis is stronger spell commitment/payoff communication, including framing at comparison scale. Measured movement is not adopted: it offers some clearer spacing but can create prolonged non-progress. Fresh validation also finds baseline/burst stalls, so no profile is a general solution. The owner’s first exported viewing note (2026-10-18) strongly prefers C/burst, especially in duels and for intersecting fights in the four-way scene, and dislikes B/measured’s strafing duels. This is owner feedback on the viewed examples, rather than a general calibration of the persona judges.
+
+## Spell readability prototype
+
+`compare.html?experiment=spell-readability-v1` selects the presentation-only
+experiment. Both panels construct the exact `burst` scenario; A retains current
+spell visuals and B enables preparation progress/direction, release pulses and
+confirmed-damage markers. It does not change the default movement experiment or
+the ordinary battle page. Event metadata includes release/hit positions so
+reconstructed markers stay at the event location. Explosions retain their old
+particles and do not imply damage. The directional pointer describes current
+preparation, not a guaranteed future projectile path.
+
+This prototype has no curated excerpts yet. Evidence selection, source-matched
+batch/captures, independent persona review and owner-path self-review remain
+required before presenting a recommendation. `SPELL_BRIEFS` in
+`src/spellReadabilityExperiment.ts` is the selection location. Comparison capture
+accepts `--experiment spell-readability-v1`; existing captures default to the
+movement experiment.

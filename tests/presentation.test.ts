@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { createScenario, SIMULATION_DT } from '../src/scenario';
 import { BattleView } from '../src/presentation/battleView';
 import { World } from '../src/world';
+import { semanticCue } from '../src/presentation/spellCues';
 
 function state(world: World) {
   return { tick: world.tick, time: world.time, events: world.events,
@@ -75,4 +76,49 @@ test('particles reconstruct from event time and seed, then expire and dispose', 
   assert.equal(disposed, true);
   view.dispose(); restored.dispose();
   assert.equal(scene.children.length, 0);
+});
+
+test('spell cues preserve complete C fights and reconstruct after seeking', () => {
+  const camera = new THREE.OrthographicCamera();
+  for (const scenario of ['duel', 'four-wizards']) for (const seed of [1, 19, 101]) {
+    const worlds = [false, true].map(() => createScenario({ seed, scenario, variant: 'burst' }));
+    const views = worlds.map((world, i) => new BattleView(world, camera, { spellReadability: !!i }));
+    for (let tick = 0; tick < 7200; tick++) {
+      for (let i = 0; i < 2; i++) { worlds[i].update(SIMULATION_DT); views[i].recordTick(); }
+      if (tick % 13 === 0) views.forEach(view => view.render());
+      if (tick % 60 === 0) assert.deepEqual(state(worlds[0]), state(worlds[1]));
+      if (worlds[0].contestants.filter(c => c.alive).length <= 1) break;
+    }
+    assert.deepEqual(state(worlds[0]), state(worlds[1]));
+    assert.equal(worlds[0].random(), worlds[1].random());
+    views.forEach(view => view.render());
+    const restored = new BattleView(worlds[1], camera, { spellReadability: true });
+    // Trail history is supplied by per-tick sampling, unlike event-based cues.
+    const cueVisuals = (view: BattleView) => view.group.children.filter(c => c.name.startsWith('cue:')).map(c => {
+      c.updateMatrixWorld(true);
+      return { name: c.name, visible: c.visible, matrix: c.matrixWorld.toArray() };
+    });
+    restored.render();
+    assert.deepEqual(cueVisuals(views[1]), cueVisuals(restored));
+    views.forEach(view => view.dispose()); restored.dispose();
+  }
+});
+
+test('damage markers require damage and remain at the recorded hit location', () => {
+  const world = new World();
+  world.emit('damage', 'red', { victim: 'blue', amount: 22, position: { x: 10, y: 0, z: 30 } });
+  const cue = semanticCue(world.events[0]);
+  cue.update(0.1);
+  assert.ok(cue.group.children.some(c => c.name === 'confirmed-hit'));
+  assert.deepEqual(cue.group.position.toArray(), [10, 2, 30]);
+  cue.update(0.4);
+  assert.equal(cue.group.visible, false);
+  const view = new BattleView(world, new THREE.OrthographicCamera(), { spellReadability: true });
+  view.render();
+  assert.ok(view.group.children.some(c => c.name.startsWith('cue:damage:')));
+  world.events.length = 0;
+  world.emit('spell_impact', 'red', { position: { x: 0, y: 0, z: 0 } });
+  view.render();
+  assert.ok(!view.group.children.some(c => c.name.startsWith('cue:damage:')));
+  view.dispose();
 });

@@ -3,8 +3,9 @@ import { GameRenderer } from './renderer';
 import { buildArena } from './arena';
 import { BattleView } from './presentation/battleView';
 import { createScenario, SIMULATION_DT } from './scenario';
-import { COMPARISON_BRIEFS, comparisonBrief, type EvidenceClip } from './comparisonEvidence';
-import { EXPERIMENT, VARIANTS } from './experiment';
+import { COMPARISON_BRIEFS as MOVEMENT_BRIEFS, type EvidenceClip } from './comparisonEvidence';
+import { EXPERIMENT as MOVEMENT_EXPERIMENT, VARIANTS as MOVEMENT_VARIANTS } from './experiment';
+import { SPELL_EXPERIMENT, SPELL_VARIANTS, SPELL_BRIEFS } from './spellReadabilityExperiment';
 import { initialExpectations, type Decision } from './expectations';
 
 import { evidenceReference, evidenceKey, notesForEvidence } from './evidenceFeedback';
@@ -12,10 +13,17 @@ import { validateFeedback, mergeFeedback, type Feedback, type EvidenceReference 
 
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 const params = new URLSearchParams(location.search);
+const spellExperiment = params.get('experiment') === SPELL_EXPERIMENT.id;
+const EXPERIMENT = spellExperiment ? SPELL_EXPERIMENT : MOVEMENT_EXPERIMENT;
+const VARIANTS = spellExperiment ? SPELL_VARIANTS : MOVEMENT_VARIANTS.map(v => ({ ...v, scenarioVariant: v.id, spellReadability: false }));
+const COMPARISON_BRIEFS = spellExperiment ? SPELL_BRIEFS : MOVEMENT_BRIEFS;
+function comparisonBrief(scene: string, matchSeed: number, layout: number) {
+  return layout === 0 ? COMPARISON_BRIEFS.find(b => b.scenario === scene && b.seed === matchSeed) : undefined;
+}
 const source = typeof __BUILD_SOURCE__ === 'undefined' ? 'development' : __BUILD_SOURCE__;
 const app = $('#app');
 app.innerHTML = `
-<header><div><div class="eyebrow">Wizard Battles / Experiment room</div><h1>Pressure, commitment, escape</h1></div><div id="build" class="muted"></div></header>
+<header><div><div class="eyebrow">Wizard Battles / Experiment room</div><h1>${EXPERIMENT.title}</h1></div><div id="build" class="muted"></div></header>
 <nav class="controls" role="tablist" aria-label="Experiment room"><button id="comparison-tab" role="tab" aria-selected="true" aria-controls="comparison-page">Comparison</button><button id="goals-tab" role="tab" aria-selected="false" aria-controls="goals-page" tabindex="-1">Goals</button></nav>
 <div id="comparison-page" role="tabpanel" aria-labelledby="comparison-tab">
 <div id="presets" class="controls" aria-label="Recommended matches"></div>
@@ -33,11 +41,13 @@ app.innerHTML = `
 <p class="muted">Full fights are available for context. Evidence excerpts are deliberately chosen, not a representative sample or a ranking score. Names and designer commentary stay visible so you can assess the proposal.</p>
 <div class="cards"><section class="card"><h2>General comparison notes</h2><p class="muted">For an overall comparison or a full fight. Use the comment form on an evidence card to record your response to that specific piece.</p>
 <div class="stack"><div class="feedback-row"><select id="preference" aria-label="Preference"><option value="unsure">Unsure</option><option>A</option><option>B</option><option>C</option><option value="no-difference">No meaningful difference</option><option value="none">None works</option></select><textarea id="note" aria-label="Viewing note" placeholder="What caught your attention, or lost it?"></textarea></div><button id="save-note">Save timestamped note</button><ol id="notes-list"></ol></div></section>
-<section class="card"><h2>Evidence, after watching</h2><details><summary>Reveal approaches and experiment identity</summary><div id="variants"></div><small id="identity"></small></details><details><summary>Batch results and persona judgments</summary><div id="evidence">No saved report loaded. Run npm run experiment to generate evidence.</div><div id="reviews"></div></details><p class="muted">Descriptive evidence, no fun score. Expectation approval and build satisfaction are separate. Your recorded viewing preference favors C; the agent reviews retain their original uncertainty.</p></section></div>
+<section class="card"><h2>Evidence, after watching</h2><details><summary>Reveal approaches and experiment identity</summary><div id="variants"></div><small id="identity"></small></details><details><summary>Batch results and persona judgments</summary><div id="evidence">No saved report loaded. Run npm run experiment to generate evidence.</div><div id="reviews"></div></details><p class="muted">Descriptive evidence, no fun score. Expectation approval and build satisfaction are separate. ${spellExperiment ? 'Both panels use your preferred C movement. Whether the new spell cues help is the open question.' : 'Your recorded viewing preference favors C; the agent reviews retain their original uncertainty.'}</p></section></div>
 </div><section id="goals-page" role="tabpanel" aria-labelledby="goals-tab" hidden class="card"><h2>What you want from battles</h2><p>These are goals for future experiments. Approving a goal means “I care about this,” not “the current fights achieve this.” The seven starting goals were already approved in our discussion; you do not need to approve them again.</p>
 <p>Edit a goal and <strong>Save edits</strong> to refine it. For a new proposal, <strong>Approve</strong> keeps it as a goal; <strong>Decline</strong> says it is not something you want. <strong>Remove</strong> retires a goal and <strong>Reopen</strong> asks to review it again. History is kept.</p>
 <p class="muted">Targets are optional and can be plain language. For example: “Separate duels should sometimes collide in four-way battles.” Use comments and viewing notes on the Comparison tab for reactions to specific fights; use this list for qualities you want us to preserve or improve across experiments. Changes use the same workspace save and browser backup as your notes.</p><p id="expectation-counts" role="status"></p>
 <div class="controls"><label>Show <select id="filter"><option value="all">All goals / history</option><option value="unreviewed">Needs your review</option><option value="approved">Approved goals</option><option value="declined">Declined proposals</option><option value="removed">Removed goals</option></select></label><button id="add-expectation">Propose expectation</button></div><div id="expectations"></div></section><details id="feedback-tools"><summary>Feedback saves and backups</summary><p id="save-status" role="status">Checking workspace saves…</p><div class="controls"><button id="retry-save">Retry workspace save</button><button id="export">Export feedback JSON</button><label>Import JSON <input id="import" type="file" accept="application/json"></label></div></details><p id="notice" class="notice" role="status"></p>`;
+$('#panels').classList.toggle('two-panels', VARIANTS.length === 2);
+if (spellExperiment) $('#preference option:nth-child(4)').remove();
 $('#build').textContent = `${EXPERIMENT.id} · ${source.slice(0, 23)}`;
 $('#build').title = source;
 $('#identity').textContent = `${EXPERIMENT.id}; fixed dt ${SIMULATION_DT}; source ${source}`;
@@ -159,8 +169,8 @@ const panels = VARIANTS.map((variant, index) => {
   $('#panels').append(element);
   const canvas = element.querySelector('canvas')!;
   const gfx = new GameRenderer(canvas, { pixelRatio: 1, shadowMapSize: 512 }); gfx.scene.add(buildArena());
-  const world = createScenario({ seed, scenario, rotation, variant: variant.id });
-  const view = new BattleView(world, gfx.camera, { visualSeed: seed ^ 0x5f3759df }); gfx.scene.add(view.group);
+  const world = createScenario({ seed, scenario, rotation, variant: variant.scenarioVariant });
+  const view = new BattleView(world, gfx.camera, { visualSeed: seed ^ 0x5f3759df, spellReadability: variant.spellReadability }); gfx.scene.add(view.group);
   const panel = { variant, element, gfx, world, view, finished: false, clip: undefined as EvidenceClip | undefined, cursor: 0, playing: false, accumulator: 0 };
   element.querySelector<HTMLButtonElement>('.save-comment')!.onclick = () => saveEvidenceComment(panel);
   element.querySelector<HTMLTextAreaElement>('.comment-text')!.oninput = event => { const reference = panelReference(panel); if (reference) commentDrafts.set(evidenceKey(reference), (event.target as HTMLTextAreaElement).value); };
@@ -224,8 +234,8 @@ function advanceWorld(p: Panel, count: number) {
 }
 function resetPanel(p: Panel) {
   p.playing = false; p.accumulator = 0; p.cursor = 0;
-  p.view.dispose(); p.world = createScenario({ seed, scenario, rotation, variant: p.variant.id });
-  p.view = new BattleView(p.world, p.gfx.camera, { visualSeed: seed ^ 0x5f3759df }); p.gfx.scene.add(p.view.group); p.finished = false;
+  p.view.dispose(); p.world = createScenario({ seed, scenario, rotation, variant: p.variant.scenarioVariant });
+  p.view = new BattleView(p.world, p.gfx.camera, { visualSeed: seed ^ 0x5f3759df, spellReadability: p.variant.spellReadability }); p.gfx.scene.add(p.view.group); p.finished = false;
 }
 function reset() {
   elapsedTicks = 0; accumulator = 0; last = null;
@@ -275,7 +285,7 @@ const presets = COMPARISON_BRIEFS;
 function updateExample() {
   const preset = comparisonBrief(scenario, seed, rotation);
   $('#example-title').textContent = preset?.title ?? 'Custom match';
-  $('#example-description').textContent = preset?.description ?? 'The selected setup is active in all three panels.';
+  $('#example-description').textContent = preset?.description ?? 'The selected setup is active in every panel.';
   $('#active-match').textContent = `${scenario === 'duel' ? 'Red / blue duel' : 'Four wizards'} · seed ${seed} · ${rotation === 0 ? 'original layout' : 'quarter-turn layout'}`;
   $<HTMLButtonElement>('#show-evidence').disabled = !preset;
   for (const button of document.querySelectorAll<HTMLButtonElement>('#presets button')) button.setAttribute('aria-pressed', String(button.dataset.preset === preset?.id));
@@ -370,7 +380,7 @@ $('#save-note').onclick = () => {
   $<HTMLTextAreaElement>('#note').value = ''; persist(); renderNotes();
 };
 const comparison = {
-  metadata: { experiment: EXPERIMENT.id, source, dt: SIMULATION_DT, browser: navigator.userAgent },
+  metadata: { experiment: EXPERIMENT.id, source, alternatives: VARIANTS.map(v => ({ id: v.id, scenarioVariant: v.scenarioVariant, spellReadability: v.spellReadability })), dt: SIMULATION_DT, browser: navigator.userAgent },
   seek, states, loadExample,
   viewing() { return { mode, focusedVariant, panels: panels.map(p => ({ variant: p.variant.id, playing: p.playing, cursor: p.cursor * SIMULATION_DT, clip: p.clip })) }; },
   ready: () => feedbackReady,
@@ -421,7 +431,7 @@ function tick(now: number) {
 requestAnimationFrame(tick);
 
 // Reports are optional; the live comparison works before a batch is available.
-void fetch('./experiments/movement-pacing-v1/report.json').then(async response => {
+void fetch(`./experiments/${EXPERIMENT.id}/report.json`).then(async response => {
   if (!response.ok) return;
   const report = await response.json();
   $('#evidence').replaceChildren();
@@ -432,9 +442,9 @@ void fetch('./experiments/movement-pacing-v1/report.json').then(async response =
   table.append(header);
   for (const row of report.summary) { const tr = document.createElement('tr'); for (const value of [row.group, row.matches, `${row.duration.mean.toFixed(1)}s`, row.winners.timeout ?? 0]) { const td = document.createElement('td'); td.textContent = String(value); tr.append(td); } table.append(tr); }
   $('#evidence').append(table);
-  const link = document.createElement('a'); link.href = './experiments/movement-pacing-v1/report.json'; link.textContent = 'Full report / run identities'; $('#evidence').append(link);
+  const link = document.createElement('a'); link.href = `./experiments/${EXPERIMENT.id}/report.json`; link.textContent = 'Full report / run identities'; $('#evidence').append(link);
 }).catch(() => {});
-void fetch('./experiments/movement-pacing-v1/reviews.json').then(async response => {
+void fetch(`./experiments/${EXPERIMENT.id}/reviews.json`).then(async response => {
   if (!response.ok) return;
   const reviews = await response.json();
   for (const review of reviews.reviews) {
@@ -448,7 +458,7 @@ void fetch('./experiments/movement-pacing-v1/reviews.json').then(async response 
   }
 }).catch(() => {});
 
-void fetch('./experiments/movement-pacing-v1/triage.json').then(async response => {
+void fetch(`./experiments/${EXPERIMENT.id}/triage.json`).then(async response => {
   if (!response.ok) return;
   const triage = await response.json();
   const details = document.createElement('details'); const title = document.createElement('summary'); title.textContent = 'Review triage / what changed'; details.append(title);

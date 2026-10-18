@@ -49,8 +49,8 @@ button[aria-pressed=true] { background: #c6bdff; color: #191425; border-color: #
 .example-heading h2, .example-heading p { margin: 6px 0; }
 #save-status { font-size: 13px; overflow-wrap: anywhere; color: #cfccf7; }
 [hidden] { display: none !important; }
-.panels.evidence-mode { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.panels.evidence-mode.enlarged { grid-template-columns: 1fr; }
+.panels.two-panels, .panels.evidence-mode { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.panels.two-panels.enlarged, .panels.evidence-mode.enlarged { grid-template-columns: 1fr; }
 .panel.playing { border-color: #c6bdff; }
 .clip-caption { padding: 0 16px 12px; }
 .clip-caption h3 { margin: 0; font-size: 18px; }
@@ -59,7 +59,7 @@ button[aria-pressed=true] { background: #c6bdff; color: #191425; border-color: #
 .clip-controls input[type=range] { width: 150px; }
 .clip-clock { font-size: 13px; width: 100%; color: #c6bdff; }
 button:disabled { opacity: .5; cursor: default; }
-@media(max-width: 900px) { .panels.evidence-mode { grid-template-columns: 1fr; } }
+@media(max-width: 900px) { .panels.two-panels, .panels.evidence-mode { grid-template-columns: 1fr; } }
 .panels.evidence-mode canvas { aspect-ratio: 1.8; }
 .clip-controls { border-top: 1px solid #343846; }
 #evidence-help { font-size: 14px; }

@@ -702,6 +702,7 @@ export class BasicWizard implements Contestant {
     const cooldown = effective.cooldown || 1.0;
     this.readyAt.set(factory, this.world.time + cooldown);
     this.world.emit("cast_release", this.id, {
+      position: { x: this.position.x, y: this.position.y, z: this.position.z },
       factory: factory.metadata.id,
       modifier: modifier?.id ?? null,
       effectiveSpellId: effective.id,

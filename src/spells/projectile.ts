@@ -371,6 +371,8 @@ export class Projectile implements Spell {
     world.addSpell(child);
     world.emit("projectile_emit", this.caster.id, {
       spell: this.spec.id,
+      position: { x: origin.x, y: origin.y, z: origin.z },
+      direction: { x: dir.x, z: dir.z },
       childIndex: this.emitterFired,
       childOf: childSpec.id,
     });
@@ -450,6 +452,7 @@ export class Projectile implements Spell {
     target.hp -= this.spec.damage;
     world.emit("damage", this.caster.id, {
       victim: target.id,
+      position: { x: target.position.x, y: target.position.y, z: target.position.z },
       amount: this.spec.damage,
       spell: this.spec.id,
       hpAfter: target.hp,
@@ -493,6 +496,7 @@ export class Projectile implements Spell {
       hits++;
       world.emit("damage", this.caster.id, {
         victim: c.id,
+        position: { x: c.position.x, y: c.position.y, z: c.position.z },
         amount: dmg,
         spell: this.spec.id,
         hpAfter: c.hp,

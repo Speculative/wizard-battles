@@ -163,6 +163,7 @@ export class IceShard implements Spell {
       hits++;
       world.emit("damage", this.caster.id, {
         victim: c.id,
+        position: { x: c.position.x, y: c.position.y, z: c.position.z },
         amount: dmg,
         spell: this.spec.id,
         hpAfter: c.hp,

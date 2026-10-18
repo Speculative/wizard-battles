@@ -87,6 +87,7 @@ export class MeleeAttack implements Spell {
       c.hp -= DAMAGE;
       world.emit("damage", this.caster.id, {
         victim: c.id,
+        position: { x: c.position.x, y: c.position.y, z: c.position.z },
         amount: DAMAGE,
         spell: MELEE_METADATA.id,
         hpAfter: c.hp,
