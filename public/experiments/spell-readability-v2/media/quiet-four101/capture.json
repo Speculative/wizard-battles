@@ -1,0 +1,245 @@
+{
+  "metadata": {
+    "experiment": "spell-readability-v2",
+    "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+    "alternatives": [
+      {
+        "id": "cues",
+        "scenarioVariant": "burst",
+        "spellReadability": true
+      },
+      {
+        "id": "rings",
+        "scenarioVariant": "burst",
+        "spellReadability": "rings"
+      },
+      {
+        "id": "reaction",
+        "scenarioVariant": "burst",
+        "spellReadability": "reaction"
+      }
+    ],
+    "dt": 0.016666666666666666,
+    "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+  },
+  "url": "http://127.0.0.1:5174/compare.html?capture=1&experiment=spell-readability-v2&scenario=four-wizards&seed=101",
+  "viewport": {
+    "width": 1440,
+    "height": 1050
+  },
+  "fps": 10,
+  "start": 35,
+  "duration": 0,
+  "frames": [
+    {
+      "frame": 0,
+      "requestedTime": 35,
+      "panels": [
+        {
+          "variant": "cues",
+          "time": 34.9999999999993,
+          "tick": 2100,
+          "finished": false,
+          "contestants": [
+            {
+              "id": "red",
+              "hp": 13,
+              "alive": true,
+              "position": {
+                "x": 179.61575622784122,
+                "y": 33,
+                "z": 291.6381272394346
+              },
+              "velocity": {
+                "x": 276.1422517509292,
+                "y": 0,
+                "z": -46.31907596149181
+              }
+            },
+            {
+              "id": "blue",
+              "hp": 92.13454542983379,
+              "alive": true,
+              "position": {
+                "x": 409.3899438570115,
+                "y": 33,
+                "z": 145.19249275780737
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": -22.171504915198728
+              }
+            },
+            {
+              "id": "green",
+              "hp": -10,
+              "alive": false,
+              "position": {
+                "x": -56.13518181629472,
+                "y": 33,
+                "z": -4.0503182463874134
+              },
+              "velocity": {
+                "x": 34.936575134352665,
+                "y": 0,
+                "z": 2.4206200067142403
+              }
+            },
+            {
+              "id": "yellow",
+              "hp": -10,
+              "alive": false,
+              "position": {
+                "x": -46.43011790312578,
+                "y": 33,
+                "z": -3.8676160171283134
+              },
+              "velocity": {
+                "x": 31.23259108593913,
+                "y": 0,
+                "z": -15.614814306639333
+              }
+            }
+          ]
+        },
+        {
+          "variant": "rings",
+          "time": 34.9999999999993,
+          "tick": 2100,
+          "finished": false,
+          "contestants": [
+            {
+              "id": "red",
+              "hp": 13,
+              "alive": true,
+              "position": {
+                "x": 179.61575622784122,
+                "y": 33,
+                "z": 291.6381272394346
+              },
+              "velocity": {
+                "x": 276.1422517509292,
+                "y": 0,
+                "z": -46.31907596149181
+              }
+            },
+            {
+              "id": "blue",
+              "hp": 92.13454542983379,
+              "alive": true,
+              "position": {
+                "x": 409.3899438570115,
+                "y": 33,
+                "z": 145.19249275780737
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": -22.171504915198728
+              }
+            },
+            {
+              "id": "green",
+              "hp": -10,
+              "alive": false,
+              "position": {
+                "x": -56.13518181629472,
+                "y": 33,
+                "z": -4.0503182463874134
+              },
+              "velocity": {
+                "x": 34.936575134352665,
+                "y": 0,
+                "z": 2.4206200067142403
+              }
+            },
+            {
+              "id": "yellow",
+              "hp": -10,
+              "alive": false,
+              "position": {
+                "x": -46.43011790312578,
+                "y": 33,
+                "z": -3.8676160171283134
+              },
+              "velocity": {
+                "x": 31.23259108593913,
+                "y": 0,
+                "z": -15.614814306639333
+              }
+            }
+          ]
+        },
+        {
+          "variant": "reaction",
+          "time": 34.9999999999993,
+          "tick": 2100,
+          "finished": false,
+          "contestants": [
+            {
+              "id": "red",
+              "hp": 13,
+              "alive": true,
+              "position": {
+                "x": 179.61575622784122,
+                "y": 33,
+                "z": 291.6381272394346
+              },
+              "velocity": {
+                "x": 276.1422517509292,
+                "y": 0,
+                "z": -46.31907596149181
+              }
+            },
+            {
+              "id": "blue",
+              "hp": 92.13454542983379,
+              "alive": true,
+              "position": {
+                "x": 409.3899438570115,
+                "y": 33,
+                "z": 145.19249275780737
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": -22.171504915198728
+              }
+            },
+            {
+              "id": "green",
+              "hp": -10,
+              "alive": false,
+              "position": {
+                "x": -56.13518181629472,
+                "y": 33,
+                "z": -4.0503182463874134
+              },
+              "velocity": {
+                "x": 34.936575134352665,
+                "y": 0,
+                "z": 2.4206200067142403
+              }
+            },
+            {
+              "id": "yellow",
+              "hp": -10,
+              "alive": false,
+              "position": {
+                "x": -46.43011790312578,
+                "y": 33,
+                "z": -3.8676160171283134
+              },
+              "velocity": {
+                "x": 31.23259108593913,
+                "y": 0,
+                "z": -15.614814306639333
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

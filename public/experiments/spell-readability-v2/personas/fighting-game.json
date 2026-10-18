@@ -1,0 +1,335 @@
+{
+  "persona": "Fighting-game spectator",
+  "model": "gpt-6.1-sol",
+  "createdAt": "2026-10-18T09:13:15.107653+00:00",
+  "experiment": "spell-readability-v2",
+  "source": "sha256:d62658bc42d37addb48b43c8c7cf684f3c55ae4a4cd6f386974654e2e37dc7f6",
+  "hypothesis": "Can damage-only ground rings or fighter reactions preserve stronger impact while distinguishing casting from damage?",
+  "evidenceInspected": {
+    "method": "Sixteen composite stills opened with view_image at native composite resolution, all three labeled alternatives visible. Event JSONL windows read separately. No continuous footage, live browser, or full-fight playback inspected.",
+    "frames": [
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00007.png",
+        "fightTime": 9.0,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00013.png",
+        "fightTime": 9.6,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00014.png",
+        "fightTime": 9.7,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00015.png",
+        "fightTime": 9.8,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00029.png",
+        "fightTime": 11.2,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00032.png",
+        "fightTime": 11.5,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four19/frame-00003.png",
+        "fightTime": 6.1,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four19/frame-00004.png",
+        "fightTime": 6.2,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four19/frame-00012.png",
+        "fightTime": 7.0,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four19/frame-00015.png",
+        "fightTime": 7.3,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four19/frame-00018.png",
+        "fightTime": 7.6,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four19/frame-00023.png",
+        "fightTime": 8.1,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four1/frame-00006.png",
+        "fightTime": 0.7,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four1/frame-00009.png",
+        "fightTime": 1.0,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four1/frame-00012.png",
+        "fightTime": 1.3,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four1/frame-00021.png",
+        "fightTime": 2.2,
+        "alternatives": [
+          "A Previous cues",
+          "B Damage rings \u00b7 release sparks",
+          "C Fighter flash \u00b7 impact sparks"
+        ]
+      }
+    ],
+    "logs": [
+      {
+        "path": "runs-experiment/spell-readability-v2-screening/duel-s7-r0-burst/events.jsonl",
+        "range": [
+          8.3,
+          12.6
+        ],
+        "typesRead": [
+          "cast_release",
+          "damage",
+          "spell_impact",
+          "death"
+        ]
+      },
+      {
+        "path": "runs-experiment/spell-readability-v2-screening/four-wizards-s19-r0-burst/events.jsonl",
+        "range": [
+          5.8,
+          8.1
+        ],
+        "typesRead": [
+          "cast_release",
+          "damage",
+          "spell_impact",
+          "death"
+        ]
+      },
+      {
+        "path": "runs-experiment/spell-readability-v2-screening/four-wizards-s1-r0-burst/events.jsonl",
+        "range": [
+          0.1,
+          2.2
+        ],
+        "typesRead": [
+          "cast_release",
+          "damage",
+          "spell_impact",
+          "death"
+        ]
+      }
+    ],
+    "context": [
+      "docs/PERSONA_REVIEW.md",
+      ".agents/skills/experiment-comparison/SKILL.md",
+      "src/spellReadabilityRevision.ts",
+      "src/expectations.ts",
+      "public/experiments/spell-readability-v2/feedback-findings.json",
+      "public/experiments/spell-readability-v2/report.json provenance, hypothesis and variant definitions"
+    ]
+  },
+  "observations": [
+    {
+      "setup": "duel seed7 rotation0",
+      "times": [
+        9.6,
+        9.7,
+        9.8
+      ],
+      "expectationIds": [
+        "WB-E004",
+        "WB-E005"
+      ],
+      "observed": "B and C show an orange melee wedge by red at 9.7; A is less distinct. Blue stays blue and neither revised panel shows a damage reaction. HP is unchanged across these frames. The log has red releasing melee at 9.6333 with no associated damage.",
+      "interpretation": "The revisions make the empty commitment more legible without claiming a hit. This is a useful local distinction between pressure and successful consequence; frame sampling does not establish whether the tell is readable in motion."
+    },
+    {
+      "setup": "duel seed7 rotation0",
+      "times": [
+        11.2,
+        11.5
+      ],
+      "expectationIds": [
+        "WB-E004",
+        "WB-E005",
+        "WB-E006"
+      ],
+      "observed": "At 11.2 C turns red pale orange with a star-like impact around the body, while B has a small dark ring below red and A retains red coloring. At 11.5 C turns blue pale purple/white while red stays red. Logs identify blue fireball damage to red at 11.1833 and red melee damage to blue at 11.4333.",
+      "interpretation": "C makes the hurt fighter easiest for me to locate at this three-panel scale and makes the exchange of consequences clearer. B preserves identity better but its foot ring is easy to overlook against the grid. C temporarily weakens fighter color identity."
+    },
+    {
+      "setup": "four-wizards seed19 rotation0",
+      "times": [
+        6.1,
+        6.2,
+        7.0,
+        7.3,
+        7.6,
+        8.1
+      ],
+      "expectationIds": [
+        "WB-E004",
+        "WB-E005",
+        "WB-E006"
+      ],
+      "observed": "At 6.2 C visibly pales green while red remains red; B places a small dark ring at green. The ice shard is dark outlined in B/C at 7.0 compared with the pale shard in A. At 7.3 no surviving fighter has a damage flash. At 7.6 C pales red while B places dark overlapping rings at red\u2019s feet. Logs identify green taking red melee at 6.1833, dying at 6.9833, ice landing without damage at 7.2333 and red taking yellow spread at 7.5667 and 7.6.",
+      "interpretation": "C best separates who committed from who suffered in the sampled hit frames. The stronger ice outline helps identify a threat, and lack of a damage reaction on its miss gives the right consequence distinction. These cues still do not explain red\u2019s new pursuit target by themselves; that explanation comes from context/logs, not a target-switch animation."
+    },
+    {
+      "setup": "four-wizards seed1 rotation0",
+      "times": [
+        0.7,
+        1.0,
+        1.3,
+        2.2
+      ],
+      "expectationIds": [
+        "WB-E004",
+        "WB-E005",
+        "WB-E006"
+      ],
+      "observed": "Yellow\u2019s projectile stream remains visible in all panels; B/C have a small warm release spark by yellow at 0.7. At 1.0 C pales red near green, while B has a dark ring at red\u2019s feet. At 2.2 C pales green in a close red/green overlap, with the dark outlined falling ice nearby. Logs identify green spread damage to red around 0.9833\u20131.0167 and red melee damage to green at 2.1667.",
+      "interpretation": "The crowd is a real tradeoff: C\u2019s reaction draws attention to the hurt body, but in a close overlap the temporary color loss makes identity harder. B\u2019s rings are less intrusive but smaller than nearby telegraphs. Neither gives unique projectile attribution. Sampled shots do not establish that rapid-fire rhythm or pressure feels better over time."
+    }
+  ],
+  "rankedConcerns": [
+    {
+      "rank": 1,
+      "concern": "Consequences still need a cue large enough to read at the normal comparison scale. B\u2019s damage rings can blend with the floor and other rings.",
+      "evidence": [
+        "duel7 11.2",
+        "four19 7.6"
+      ],
+      "expectationIds": [
+        "WB-E004",
+        "WB-E005"
+      ]
+    },
+    {
+      "rank": 2,
+      "concern": "C sacrifices fighter color during a hit; this becomes harder to parse when bodies overlap.",
+      "evidence": [
+        "duel7 11.5",
+        "four1 2.2"
+      ],
+      "expectationIds": [
+        "WB-E006",
+        "WB-E004"
+      ]
+    },
+    {
+      "rank": 3,
+      "concern": "Neither reaction vocabulary establishes who currently has initiative or who red chooses after a kill. Local hit confirmation is narrower than understanding the tactical exchange.",
+      "evidence": [
+        "four19 7.0\u20138.1"
+      ],
+      "expectationIds": [
+        "WB-E005",
+        "WB-E004"
+      ]
+    },
+    {
+      "rank": 4,
+      "concern": "Startup softness, rapid-fire rhythm, distraction and impact timing remain unjudged without continuous playback.",
+      "evidence": [
+        "all sampled excerpts"
+      ],
+      "expectationIds": [
+        "WB-E001",
+        "WB-E002",
+        "WB-E005"
+      ]
+    }
+  ],
+  "tentativePreference": "C \u00b7 Fighter flash \u00b7 impact sparks",
+  "preferenceReason": "I tentatively prefer C for this lens because the hurt fighter carries the consequence, particularly where the owner missed the second fireball. B has a cleaner color-preservation tradeoff but its ground ring feels too subtle at normal panel scale in these stills. Both revisions improve cast-versus-hit separation over A; this is no claim of owner acceptance.",
+  "contraryCase": "Four-way seed1 at 2.2: red/green overlap plus green\u2019s pale reaction makes fighter identity less immediate. B retains identity and may prove preferable during actual playback.",
+  "blockers": [],
+  "limitations": [
+    "Only sixteen composite stills and three event windows inspected; no continuous playback or full fights.",
+    "No claim about smoothness, experienced pacing, pressure over time, animation feel, beauty or sustained distraction.",
+    "C body compression is a variant definition, not an independently established animation-quality observation from these stills.",
+    "No new combat rules were reviewed; all variants are specified as identical C/burst gameplay.",
+    "No unique cast/projectile IDs, so I do not assign individual spread children to specific hits.",
+    "These are a role lens\u2019s judgments, not calibrated owner preference or a balance conclusion."
+  ],
+  "displaySummary": {
+    "title": "C makes the hurt fighter easiest to spot",
+    "text": "I tentatively prefer the fighter flash: blue\u2019s second fireball hitting red and red\u2019s later melee hitting blue stand out more than the small ground rings. The cost is briefly losing fighter color, especially when bodies overlap. Stills cannot settle the feel or distraction during playback."
+  }
+}

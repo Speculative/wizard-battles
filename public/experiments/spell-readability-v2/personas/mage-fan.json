@@ -1,0 +1,327 @@
+{
+  "persona": "mage-fight fan",
+  "model": "gpt-6.1-sol",
+  "reviewedAt": "2026-10-18T09:13:16.242402+00:00",
+  "source": "sha256:d62658bc42d37addb48b43c8c7cf684f3c55ae4a4cd6f386974654e2e37dc7f6",
+  "hypothesis": "Can release sparks and either damage rings or fighter reactions make magical buildup and consequences clearer without losing the impact the owner liked?",
+  "evidenceInspected": {
+    "method": "Direct view_image inspection of 16 composite stills, each displaying A/B/C; no continuous playback.",
+    "frames": [
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00007.png",
+        "requestedTime": 9.0,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00010.png",
+        "requestedTime": 9.3,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00013.png",
+        "requestedTime": 9.6,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00029.png",
+        "requestedTime": 11.2,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00032.png",
+        "requestedTime": 11.5,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/duel7/frame-00040.png",
+        "requestedTime": 12.3,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four19/frame-00003.png",
+        "requestedTime": 6.1,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four19/frame-00012.png",
+        "requestedTime": 7.0,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four19/frame-00018.png",
+        "requestedTime": 7.6,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four19/frame-00023.png",
+        "requestedTime": 8.1,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four1/frame-00001.png",
+        "requestedTime": 0.2,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four1/frame-00003.png",
+        "requestedTime": 0.4,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four1/frame-00006.png",
+        "requestedTime": 0.7,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four1/frame-00009.png",
+        "requestedTime": 1.0,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four1/frame-00012.png",
+        "requestedTime": 1.3,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      },
+      {
+        "path": "public/experiments/spell-readability-v2/media/four1/frame-00021.png",
+        "requestedTime": 2.2,
+        "panels": [
+          "A cues",
+          "B rings",
+          "C reaction"
+        ]
+      }
+    ],
+    "documents": [
+      "docs/PERSONA_REVIEW.md",
+      "src/spellReadabilityRevision.ts",
+      "src/expectations.ts",
+      "public/experiments/spell-readability-v2/feedback-findings.json",
+      "public/experiments/spell-readability-v2/report.json",
+      "public/experiments/spell-readability-v2/media/duel7/capture.json"
+    ],
+    "logs": [
+      {
+        "path": "runs-experiment/spell-readability-v2-screening/duel-s7-r0-burst/events.jsonl",
+        "timeRange": [
+          9.1,
+          12.3
+        ],
+        "eventTypes": [
+          "damage",
+          "cast_release",
+          "spell_impact",
+          "death"
+        ]
+      },
+      {
+        "path": "runs-experiment/spell-readability-v2-screening/four-wizards-s19-r0-burst/events.jsonl",
+        "timeRange": [
+          6,
+          7.7
+        ],
+        "eventTypes": [
+          "damage",
+          "cast_release",
+          "spell_impact",
+          "death"
+        ]
+      },
+      {
+        "path": "runs-experiment/spell-readability-v2-screening/four-wizards-s1-r0-burst/events.jsonl",
+        "timeRange": [
+          0.1,
+          2.3
+        ],
+        "eventTypes": [
+          "damage",
+          "cast_release",
+          "spell_impact",
+          "death"
+        ]
+      }
+    ]
+  },
+  "observations": [
+    {
+      "setup": "duel seed7 rotation0",
+      "times": [
+        9.3,
+        11.2,
+        11.5
+      ],
+      "facts": "At 9.3 and 11.2, B has a dark ground ring by red; C places a bright star and pale flash at red. At 11.5, C makes blue pale while B keeps blue blue and places the ring beneath. Logs record fireball damage to red at 9.25/11.1833 and melee damage to blue at 11.4333.",
+      "interpretation": "C makes the person receiving the consequence the strongest local feature. That is more satisfying to this lens than reading an extra floor symbol, but exact animation force remains untested.",
+      "expectationIds": [
+        "WB-E001",
+        "WB-E004",
+        "WB-E006"
+      ]
+    },
+    {
+      "setup": "duel seed7 rotation0",
+      "times": [
+        9.6,
+        12.2
+      ],
+      "facts": "At 9.6 red and blue remain colored in all alternatives; no damage flash is visible. At 12.2 B/C show a broad warm melee sweep where A has a much fainter pale shape. Log places missed red release at9.6333 and the final damaging release at12.1833; final damage/death is12.2167.",
+      "interpretation": "The revised melee has a recognizable sweeping form, helping sell a committed attack separately from damage. A release frame alone still does not reveal whether the swing succeeds.",
+      "expectationIds": [
+        "WB-E001",
+        "WB-E004"
+      ]
+    },
+    {
+      "setup": "four-wizards seed19 rotation0",
+      "times": [
+        6.1,
+        7,
+        7.6,
+        8.1
+      ],
+      "facts": "At7.0 the falling shard has dark edges in B/C and a faint pale silhouette in A. B/C also show a broad warm sweep around red. At7.6 C makes red pale with a bright star; B keeps red colored over a dark ground ring. At8.1 all living fighter colors are intact. Logs put green death6.9833, ice impact7.2333 without damage, then yellow spread damage to red7.5667 and7.6.",
+      "interpretation": "B/C improve the distinct shard/sweep silhouettes. C offers the clearest sampled consequence when red runs into the spread, but does not identify yellow as the source of each incoming shot. The non-damaging shard remains important contrary evidence: a dramatic spell landing must not itself count as a hit.",
+      "expectationIds": [
+        "WB-E001",
+        "WB-E004",
+        "WB-E006",
+        "WB-E007"
+      ]
+    },
+    {
+      "setup": "four-wizards seed1 rotation0",
+      "times": [
+        0.2,
+        0.4,
+        0.7,
+        1,
+        1.3,
+        2.2
+      ],
+      "facts": "At.2 blue/yellow have dark ground preparation marks in A and fainter pale marks in B/C. At1.0 C makes red pale while B retains red with a dark ring beneath. At1.3 a row of warm projectiles remains visible between yellow and blue across all panels; B/C have a darker ice projectile edge near red. At2.2 C makes green pale while B has a ring beneath; the falling ice has dark outline in both revisions.",
+      "interpretation": "The revision retains the visible rapid-fire chain rather than burying it. C momentarily costs color identity in both early exchanges; with several hits this could turn readability into flashing noise. Softer start is plausible from still samples but its smoothness and shot rhythm cannot be established.",
+      "expectationIds": [
+        "WB-E001",
+        "WB-E002",
+        "WB-E006"
+      ]
+    }
+  ],
+  "rankedConcerns": [
+    {
+      "rank": 1,
+      "severity": "tradeoff for owner playback",
+      "concern": "C briefly replaces the victim color with a pale flash; with small adjacent fighters, identity is weaker at exactly the consequential moment. B is safer for color tracking.",
+      "expectationIds": [
+        "WB-E006"
+      ]
+    },
+    {
+      "rank": 2,
+      "severity": "remaining limitation",
+      "concern": "Release and damage sparks are warm and generic even around ice damage. The more visible ice shard improves elemental identity, but effects do not yet make every fighter feel like a distinctive magician.",
+      "expectationIds": [
+        "WB-E001",
+        "WB-E006",
+        "WB-E007"
+      ]
+    },
+    {
+      "rank": 3,
+      "severity": "remaining limitation",
+      "concern": "B ground rings remain small visual instrumentation against the grid floor; the spell world feels less bodily than C. A persistent ring can be noticed without the viewer knowing who caused it.",
+      "expectationIds": [
+        "WB-E001",
+        "WB-E004"
+      ]
+    },
+    {
+      "rank": 4,
+      "severity": "unresolved from supplied medium",
+      "concern": "Anticipation, preparation easing, rapid-fire timing and distraction need actual playback. Do not describe still review as approval of those qualities.",
+      "expectationIds": [
+        "WB-E001",
+        "WB-E002",
+        "WB-E004"
+      ]
+    }
+  ],
+  "tentativePreference": {
+    "alternative": "reaction",
+    "label": "C \u00b7 Fighter flash \u00b7 impact sparks",
+    "confidence": "low to moderate, sampled stills only",
+    "reason": "The hurt body carries the consequence, giving the two fireballs and melee a more direct payoff. Prefer C narrowly for magical fight spectacle; B remains a credible alternative if preserving fighter color matters more."
+  },
+  "blockers": [],
+  "limitations": [
+    "No continuous footage or browser playback inspected; no claims about felt rhythm, smoothness, animation force or prolonged distraction.",
+    "No calibrated owner taste model; the owner has not accepted either revision.",
+    "Three curated setups do not establish general readability across seeds or rotations.",
+    "Logs describe spell families without unique projectile lineage.",
+    "The same combat across variants supports presentation comparison only; no new tactical identity, surprising ability behavior or balance improvement follows."
+  ],
+  "displaySummary": {
+    "title": "C gives hits a more direct payoff",
+    "text": "I narrowly favor the fighter flash: fireballs and melee visibly affect the person being hit. B preserves fighter colors better. The darker ice and clearer sweep help both revisions, but the generic sparks add little magical identity. This is a still-frame judgment; rhythm and distraction need playback."
+  }
+}

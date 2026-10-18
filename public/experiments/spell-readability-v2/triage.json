@@ -1,0 +1,40 @@
+{
+  "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+  "findings": [
+    {
+      "status": "addressed in alternatives",
+      "finding": "Casting and damage shared a ring vocabulary.",
+      "action": "B/C use warm airborne release sparks; B reserves its ground ring for damage and C uses body reaction plus impact sparks. A preserves the former design for comparison."
+    },
+    {
+      "status": "addressed in alternatives",
+      "finding": "The original hit cross could be occluded at body height.",
+      "action": "B moves the marker to the floor; C uses camera-facing surface sparks and a victim reaction. Tests cover event-time reconstruction, expiry and damage-only triggering."
+    },
+    {
+      "status": "addressed; feel awaits owner playback",
+      "finding": "Preparation backing appeared abruptly, and melee/ice lacked contrast.",
+      "action": "Both revisions fade preparation over 0.14s and strengthen melee rim, ice edges and area contrast. Stills do not establish the feel of those transitions."
+    },
+    {
+      "status": "retained tradeoff",
+      "finding": "C makes damage conspicuous but briefly washes out fighter color.",
+      "action": "Keep B available as the color-preserving alternative. Propose C for local confirmation; owner playback decides whether its style is acceptable."
+    },
+    {
+      "status": "retained limitation",
+      "finding": "B rings are subtle; neither treatment identifies every attacker or explains target pursuit.",
+      "action": "Captions/log findings explain the selected exchange without claiming the visuals solve tactical attribution. No combat changes added."
+    },
+    {
+      "status": "not reproduced as UI defect",
+      "finding": "A reviewer reported health text clipped in some three-panel capture displays.",
+      "action": "Direct-seek and repeated-step screenshots at four1/1.0s are byte-identical to the retained image. All footer text ranges fit their panels; scrollWidth equals clientWidth. Reopened image showed complete text. Retain the reported observation and evidence of investigation."
+    },
+    {
+      "status": "corrected wording",
+      "finding": "One reviewer summary ambiguously attributed the second fireball to red.",
+      "action": "Reviewer corrected it to blue\u2019s second fireball hitting red; preference and concerns remain unchanged."
+    }
+  ]
+}

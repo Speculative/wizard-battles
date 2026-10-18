@@ -1,0 +1,78 @@
+{
+  "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+  "priorSource": "sha256:3eab2014d6c60f477cec56e5c2dcd020401aee2aa4c66082121e8664fd219c60",
+  "gameplayComparison": {
+    "identicalEventStreams": 24,
+    "excludedFields": [
+      "match_end.meta.wallMs"
+    ],
+    "runIds": [
+      "four-wizards-s42-r0-burst",
+      "four-wizards-s1-r1-burst",
+      "duel-s1-r0-burst",
+      "duel-s101-r1-burst",
+      "four-wizards-s211-r0-burst",
+      "four-wizards-s7-r0-burst",
+      "four-wizards-s7-r1-burst",
+      "four-wizards-s42-r1-burst",
+      "four-wizards-s101-r1-burst",
+      "duel-s19-r0-burst",
+      "duel-s7-r0-burst",
+      "duel-s42-r0-burst",
+      "duel-s42-r1-burst",
+      "duel-s1-r1-burst",
+      "duel-s211-r0-burst",
+      "duel-s101-r0-burst",
+      "four-wizards-s1-r0-burst",
+      "four-wizards-s19-r1-burst",
+      "duel-s7-r1-burst",
+      "four-wizards-s19-r0-burst",
+      "four-wizards-s211-r1-burst",
+      "duel-s19-r1-burst",
+      "duel-s211-r1-burst",
+      "four-wizards-s101-r0-burst"
+    ]
+  },
+  "ownerFeedback": {
+    "snapshot": "runs-feedback/2026-10-18T08-57-23.819Z-1ab66377-b9da-40e9-9569-3f46fb7b00c7.json",
+    "count": 7,
+    "summary": "Owner finds B more readable and impactful but questions visual style; likes rapid-fire pulses and sees promise in hit rings. Casting rings can be mistaken for hits; asks about obscured hit cross, faint ice/melee, abrupt preparation and red retargeting. This is not blanket acceptance.",
+    "countScope": "Seven spell-readability-v1 notes; the same snapshot also contains one earlier movement-pacing-v1 note."
+  },
+  "answers": [
+    {
+      "question": "Does blue\u2019s second fireball land?",
+      "setup": "duel / seed 7 / original layout / C burst",
+      "answer": "Yes. Blue deals 10 fireball damage to red at 11.183333s; red drops from 80 to 70 HP. A spell impact occurs on the same tick. The previous cross is at body height and can be occluded; the damage is real.",
+      "events": [
+        {
+          "t": 11.183333333333469,
+          "type": "damage",
+          "who": "blue",
+          "victim": "red",
+          "amount": 10,
+          "hpAfter": 70
+        }
+      ]
+    },
+    {
+      "question": "Did green shoot red point blank before dying?",
+      "setup": "four-wizards / seed 19 / original layout / C burst",
+      "answer": "No damage to red occurs from 5.8s until 7.566667s. The rings on red at 6.15s and 6.95s are melee release cues. Red damages green at 6.183333s and 6.983333s, killing green on the second. Green releases an ice shard at 6.683333s; it impacts at 7.233333s without damage."
+    },
+    {
+      "question": "Does red switch opponents or just continue through green?",
+      "setup": "four-wizards / seed 19 / original layout / C burst",
+      "answer": "Green dies at 6.983333s. At the 7.0s frame red is sprinting under duelist with yellow as nearest living enemy. DuelistCharge.update selects nearestEnemy each tick. Yellow had already emitted spread shots at 6.883333s targeting green; two hit the approaching red at 7.566667s and 7.6s. Red subsequently requests melee against yellow at 8.3s. This establishes pursuit of yellow after green dies; there is no separate target-switch animation.",
+      "limits": "Telemetry has spell types, not unique projectile lineage. The spread family and timing support the explanation; individual child indices are not assigned to specific hits."
+    }
+  ],
+  "scope": "Presentation-only alternatives. No gameplay rules, selection or movement changes. Source snapshot and raw events/frames retained in runs-experiment/spell-readability-v2-final.",
+  "reviewFollowup": {
+    "originalReviewedSource": "sha256:d62658bc42d37addb48b43c8c7cf684f3c55ae4a4cd6f386974654e2e37dc7f6",
+    "finalSource": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+    "onlySourceChange": "Designer recommendation prose now proposes C after inspecting the evidence; no visual or gameplay changes.",
+    "byteIdenticalRecapturedImages": 121,
+    "identicalScreeningFinalEventStreams": 28
+  }
+}

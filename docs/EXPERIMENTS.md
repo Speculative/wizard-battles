@@ -135,3 +135,32 @@ complete setups against headless C results, independent excerpt controls,
 durable comments/recovery and two-panel enlargement. Existing captures and
 experiments default to movement pacing. Feedback continues to save under
 `runs-feedback/`, with the new experiment and exact evidence identities.
+
+## Spell readability revision
+
+`compare.html?experiment=spell-readability-v2` preserves the first round and
+its comments under `spell-readability-v1`. Round two compares the previous B
+(now labeled A), damage-only ground rings with release sparks (B), and fighter
+flash/compression with impact sparks (C). All use the same C/burst gameplay.
+The revisions share preparation fade-in and stronger melee/ice contrast, so
+B versus C isolates the damage treatment; A versus either revision tests the
+whole presentation package.
+
+Three retained moments revisit the owner's questions: duel seed 7 at
+8.3–12.6s, intersecting four-way seed 19 at 5.8–9.8s, and crowded four-way seed 1
+at 0.1–3.9s. Each of the nine clips has its own controls and comment identity.
+The third alternative appears below the first pair at the same viewing size.
+Full context offers all three alternatives and enlargement. Custom setups have
+no curated clips. Do not interpret old comments as reviews of the revision.
+
+The retained packet is `public/experiments/spell-readability-v2/README.md`.
+`feedback-findings.json` answers the ambiguous-hit and retargeting questions;
+`reviews.json` and `personas/` retain independent reviewer judgments and source
+identities. Raw batch/source are in `runs-experiment/spell-readability-v2-final`.
+Run `npm run check:spell-comparison -- --revision --production` after a build
+for the revision's browser checks. The original command still checks round one.
+
+The next owner decision is whether either revision preserves the impact gain
+with acceptable style and phase clarity. The agent should then recommend
+adoption, keeping the earlier approach, or parking the direction rather than
+starting another round without a concrete unresolved question.

@@ -1,0 +1,62 @@
+{
+  "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+  "recordedAt": "2026-10-18T09:21:25.999174+00:00",
+  "checks": [
+    {
+      "command": "npm test",
+      "result": "passed",
+      "tests": 34,
+      "scope": "Complete seeded simulation equivalence across false/previous/rings/reaction modes, including fresh307; observational RNG, cue trigger/expiry/reconstruction, duplicate emitter pulse suppression, and evidence assertions."
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "note": "Existing large-bundle advisory remains."
+    },
+    {
+      "command": "npm run check:spell-comparison -- --revision --production",
+      "result": "passed",
+      "scope": "Nine clips, independent A/B/C playback and scrubbing, named persona headings, durable comment recovery, experiment scoping, enlargement/restore and28 complete browser/headless setups across3 visual alternatives."
+    },
+    {
+      "check": "Prior room smoke check",
+      "result": "passed",
+      "scope": "Original two alternatives and named persona reports remain available."
+    },
+    {
+      "check": "Actual final room and feedback recovery",
+      "result": "passed",
+      "scope": "Default proposalC; all3 reviewer names; source matches batch;7 old spell comments plus prior movement note retained; no revision clip inherits reviewed label."
+    },
+    {
+      "check": "Artifact identity",
+      "result": "passed",
+      "scope": "All121 final selected images byte-identical to initial reviewer captures; all28 final/screening event streams match excluding match_end.meta.wallMs;24 shared event streams match round1. Captured A/B/C contestant states match at every retained time."
+    }
+  ],
+  "presentationSelfReview": {
+    "method": "Browser controls plus sampled rendered images; no claim of continuous-footage viewing.",
+    "actualRoomScreenshots": [
+      "media/ui-card-c.png",
+      "media/ui-reviews.png"
+    ],
+    "sampledContent": [
+      "duel7 at11.2",
+      "four19 at7.6",
+      "four1 at1.0",
+      "fresh duel307 at4.2",
+      "quiet four101 at35.0"
+    ],
+    "findings": "C clearly lights the damaged fighter in the samples; B retains body color but its ring is quieter. Third card below first pair retains685px viewing size. Reviewer names and limits are visible. Full context/enlargement and comments tested."
+  },
+  "resolvedVerificationFailures": [
+    "An initial preview check launched before the new public review packet was copied into dist and timed out waiting for headings. Rebuilt the package with the reports present; complete production check passed.",
+    "A manual recovery assertion expected8 spell notes. Snapshot contains7 spell notes and1 earlier movement note. Corrected the assertion and packet count; no feedback was lost or modified."
+  ],
+  "limits": [
+    "Stills/logs cannot establish animation feel, rapid-fire rhythm or temporal distraction.",
+    "C flash briefly reduces fighter color identity; B rings can be subtle against the grid.",
+    "Generic sparks do not solve attacker attribution or elemental identity.",
+    "Existing C movement stalls persist; gameplay is unchanged."
+  ]
+}

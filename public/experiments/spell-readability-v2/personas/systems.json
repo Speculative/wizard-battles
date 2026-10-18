@@ -1,0 +1,175 @@
+{
+  "persona": "Systems-curious spectator",
+  "model": "gpt-6.1-sol",
+  "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+  "reviewScope": "Independent bounded final evidence inspection; stills and event logs, not continuous footage.",
+  "evidenceInspected": [
+    {
+      "path": "media/duel7/frame-00029.png",
+      "scenario": "duel",
+      "seed": 7,
+      "rotation": 0,
+      "time": 11.2,
+      "panels": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "path": "media/four19/frame-00018.png",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "time": 7.6,
+      "panels": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "path": "media/four1/frame-00009.png",
+      "scenario": "four-wizards",
+      "seed": 1,
+      "rotation": 0,
+      "time": 1.0,
+      "panels": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "path": "media/fresh-duel307/frame-00004.png",
+      "scenario": "duel",
+      "seed": 307,
+      "rotation": 0,
+      "time": 4.2,
+      "panels": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "path": "media/quiet-four101/frame-00000.png",
+      "scenario": "four-wizards",
+      "seed": 101,
+      "rotation": 0,
+      "time": 35.0,
+      "panels": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "path": "report.json",
+      "inspection": "Experiment metadata, provenance, setup count and evidence limits."
+    },
+    {
+      "path": "feedback-findings.json",
+      "inspection": "Owner feedback summary, three factual answers and final-source follow-up."
+    },
+    {
+      "path": "README.md",
+      "inspection": "Variant definitions, scope, recommendation and stopping condition."
+    },
+    {
+      "path": "src/spellReadabilityRevision.ts",
+      "inspection": "Named alternatives and three clip captions."
+    },
+    {
+      "path": "runs-experiment/spell-readability-v2-final/*/events.jsonl",
+      "inspection": "Damage/release/impact events around duel7 11.15\u201311.21; four19 7.55\u20137.61; four1 0.8\u20131.01; duel307 3.9\u20134.2; four101 34.5\u201335.05."
+    }
+  ],
+  "observations": [
+    {
+      "setup": "duel seed7, 11.2s",
+      "fact": "All panels show red at 70 HP and blue at 34. A shows the red body without an obvious exposed cross at this instant; B adds a small dark ground ring; C shows a conspicuous pale orange victim flash. Log records blue dealing 10 damage to red at 11.183333s.",
+      "interpretation": "C directs attention to the victim most immediately in this sampled frame. B preserves red color but demands reading a much smaller mark against floor lines.",
+      "expectationIDs": [
+        "WB-E004",
+        "WB-E006"
+      ]
+    },
+    {
+      "setup": "four-wizards seed19, 7.6s",
+      "fact": "Red is colored red in A and B, pale in C. B has a dark ring below red; all panels retain other projectiles and surviving fighters. Logs give yellow two 4.5-damage spread hits on red at 7.566667s and 7.6s.",
+      "interpretation": "C identifies the current victim locally, but none of these stills directly explains that yellow fired before green died or establishes individual projectile lineage. That explanation depends on context/logs.",
+      "expectationIDs": [
+        "WB-E004",
+        "WB-E006",
+        "WB-E007"
+      ]
+    },
+    {
+      "setup": "four-wizards seed1, 1.0s",
+      "fact": "C lights red while green stays green and yellow/blue retain their colors; B keeps red red with a small dark ellipse below. Multiple projectiles and a larger preparation outline remain. Logs record two green spread hits on red at 0.983333s.",
+      "interpretation": "The contrast between body flash and preparation shape is clearer than asking a viewer to distinguish small and large rings. The flash temporarily removes the hurt fighter\u2019s main color identity.",
+      "expectationIDs": [
+        "WB-E004",
+        "WB-E006",
+        "WB-E007"
+      ]
+    },
+    {
+      "setup": "fresh duel seed307, 4.2s",
+      "fact": "The close fighters overlap in screen space. B retains blue and red body colors with a dark ring below blue; C makes the lower blue victim pale with sparks. Logs record red releasing melee at 4.116667s and dealing 22 to blue at 4.15s.",
+      "interpretation": "The same local victim emphasis recurs on fresh melee evidence, but a still cannot establish whether compression feels satisfying or flicker distracts during overlap.",
+      "expectationIDs": [
+        "WB-E004",
+        "WB-E006"
+      ]
+    },
+    {
+      "setup": "quiet four-wizards seed101, 35s",
+      "fact": "All alternatives keep red and blue colored, apart and readable; B/C show preparation around blue without a bright body hit flash. The inspected window contains blue release at 35.033333s, with no damage event.",
+      "interpretation": "Revisions do not inherently make a quiet preparation look like the sampled damage flashes. This single quiet frame neither proves good pacing nor fixes the existing stall.",
+      "expectationIDs": [
+        "WB-E004",
+        "WB-E006"
+      ]
+    }
+  ],
+  "rankedConcerns": [
+    {
+      "rank": 1,
+      "concern": "Victim identification is improved more than attacker attribution.",
+      "severity": "scope limit",
+      "detail": "Crowded events still require watching projectile paths or reading explanatory context; no attack-to-victim line or unique projectile lineage is provided."
+    },
+    {
+      "rank": 2,
+      "concern": "C briefly weakens fighter color identity.",
+      "severity": "owner tradeoff",
+      "detail": "The pale victim in sampled C frames is conspicuous but less immediately red or blue. Timing and perceptual recovery need actual playback judgment."
+    },
+    {
+      "rank": 3,
+      "concern": "B\u2019s damage rings compete with preparation shapes and floor grid.",
+      "severity": "owner tradeoff",
+      "detail": "They are visible in inspected frames but small at full three-panel scale; their calmer treatment may still be preferable for preserving identity."
+    }
+  ],
+  "preference": {
+    "variant": "C",
+    "strength": "tentative",
+    "reason": "Most direct local victim identification across the inspected known hit, crowded spread hit and fresh melee case. B remains a credible choice if color identity and quieter effects matter more."
+  },
+  "blockers": [],
+  "limitations": [
+    "Inspected five stills and selected event windows; did not watch continuous footage or exercise browser controls.",
+    "Cannot establish animation feel, rhythm, temporal distraction, preparation fade quality or experienced pacing from stills.",
+    "The source and full-batch equivalence claims are packet metadata, not independently rerun here.",
+    "Document recommendation was visible before image inspection; this was an informed critique, not a blind preference test.",
+    "No inference of owner acceptance, gameplay improvement, balance or customer demand.",
+    "Reported footer clipping investigation was supplied by the parent; no browser DOM investigation was repeated here."
+  ],
+  "displaySummary": {
+    "title": "C points most directly to the hurt fighter",
+    "text": "In sampled hits, C makes the victim easiest to locate. B keeps fighter colors intact but its small rings compete with preparation and the grid. Neither explains who fired each crowded shot. This is a tentative stills-and-logs judgment; playback must decide the flash\u2019s identity cost and distraction."
+  }
+}
