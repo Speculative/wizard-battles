@@ -7,7 +7,8 @@ import { COMPARISON_BRIEFS, comparisonBrief, type EvidenceClip } from './compari
 import { EXPERIMENT, VARIANTS } from './experiment';
 import { initialExpectations, type Decision } from './expectations';
 
-import { validateFeedback, mergeFeedback, type Feedback } from './feedback';
+import { evidenceReference, evidenceKey, notesForEvidence } from './evidenceFeedback';
+import { validateFeedback, mergeFeedback, type Feedback, type EvidenceReference } from './feedback';
 
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 const params = new URLSearchParams(location.search);
@@ -15,6 +16,8 @@ const source = typeof __BUILD_SOURCE__ === 'undefined' ? 'development' : __BUILD
 const app = $('#app');
 app.innerHTML = `
 <header><div><div class="eyebrow">Wizard Battles / Experiment room</div><h1>Pressure, commitment, escape</h1></div><div id="build" class="muted"></div></header>
+<nav class="controls" role="tablist" aria-label="Experiment room"><button id="comparison-tab" role="tab" aria-selected="true" aria-controls="comparison-page">Comparison</button><button id="goals-tab" role="tab" aria-selected="false" aria-controls="goals-page" tabindex="-1">Goals</button></nav>
+<div id="comparison-page" role="tabpanel" aria-labelledby="comparison-tab">
 <div id="presets" class="controls" aria-label="Recommended matches"></div>
 <div class="example-heading"><h2 id="example-title"></h2><p id="example-description"></p><p id="active-match" class="muted" role="status"></p></div>
 <div class="controls" aria-label="Comparison mode"><button id="show-evidence" aria-pressed="true">Selected evidence</button><button id="full-fight" aria-pressed="false">Full fights / context</button></div>
@@ -28,13 +31,13 @@ app.innerHTML = `
 <label>Time <input id="time" type="range" min="0" max="120" step="0.5" value="0"></label><output id="clock">0.0s / 120s</output></div>
 <div id="panels" class="panels"></div>
 <p class="muted">Full fights are available for context. Evidence excerpts are deliberately chosen, not a representative sample or a ranking score. Names and designer commentary stay visible so you can assess the proposal.</p>
-<div class="cards"><section class="card"><h2>Your viewing notes</h2><p class="muted">What reads best? A note captures this match, each panel’s time, the selected excerpts and which one you were watching.</p>
-<div class="stack"><div class="feedback-row"><select id="preference" aria-label="Preference"><option value="unsure">Unsure</option><option>A</option><option>B</option><option>C</option><option value="no-difference">No meaningful difference</option><option value="none">None works</option></select><textarea id="note" aria-label="Viewing note" placeholder="What caught your attention, or lost it?"></textarea></div><button id="save-note">Save timestamped note</button><p id="save-status" role="status">Checking workspace saves…</p><button id="retry-save">Retry workspace save</button><ol id="notes-list"></ol></div></section>
+<div class="cards"><section class="card"><h2>General comparison notes</h2><p class="muted">For an overall comparison or a full fight. Use the comment form on an evidence card to record your response to that specific piece.</p>
+<div class="stack"><div class="feedback-row"><select id="preference" aria-label="Preference"><option value="unsure">Unsure</option><option>A</option><option>B</option><option>C</option><option value="no-difference">No meaningful difference</option><option value="none">None works</option></select><textarea id="note" aria-label="Viewing note" placeholder="What caught your attention, or lost it?"></textarea></div><button id="save-note">Save timestamped note</button><ol id="notes-list"></ol></div></section>
 <section class="card"><h2>Evidence, after watching</h2><details><summary>Reveal approaches and experiment identity</summary><div id="variants"></div><small id="identity"></small></details><details><summary>Batch results and persona judgments</summary><div id="evidence">No saved report loaded. Run npm run experiment to generate evidence.</div><div id="reviews"></div></details><p class="muted">Descriptive evidence, no fun score. Expectation approval and build satisfaction are separate. Your recorded viewing preference favors C; the agent reviews retain their original uncertainty.</p></section></div>
-<section class="card" style="margin-top:24px"><h2>What you want from battles</h2><p>These are goals for future experiments. Approving a goal means “I care about this,” not “the current fights achieve this.” The seven starting goals were already approved in our discussion; you do not need to approve them again.</p>
+</div><section id="goals-page" role="tabpanel" aria-labelledby="goals-tab" hidden class="card"><h2>What you want from battles</h2><p>These are goals for future experiments. Approving a goal means “I care about this,” not “the current fights achieve this.” The seven starting goals were already approved in our discussion; you do not need to approve them again.</p>
 <p>Edit a goal and <strong>Save edits</strong> to refine it. For a new proposal, <strong>Approve</strong> keeps it as a goal; <strong>Decline</strong> says it is not something you want. <strong>Remove</strong> retires a goal and <strong>Reopen</strong> asks to review it again. History is kept.</p>
-<p class="muted">Targets are optional and can be plain language. For example: “Separate duels should sometimes collide in four-way battles.” Use viewing notes above for reactions to a specific fight; use this list for qualities you want us to preserve or improve across experiments. Changes use the same workspace save and browser backup as your notes.</p><p id="expectation-counts" role="status"></p>
-<div class="controls"><label>Show <select id="filter"><option value="all">All goals / history</option><option value="unreviewed">Needs your review</option><option value="approved">Approved goals</option><option value="declined">Declined proposals</option><option value="removed">Removed goals</option></select></label><button id="add-expectation">Propose expectation</button><button id="export">Export feedback JSON</button><label>Import JSON <input id="import" type="file" accept="application/json"></label></div><div id="expectations"></div></section><p id="notice" class="notice" role="status"></p>`;
+<p class="muted">Targets are optional and can be plain language. For example: “Separate duels should sometimes collide in four-way battles.” Use comments and viewing notes on the Comparison tab for reactions to specific fights; use this list for qualities you want us to preserve or improve across experiments. Changes use the same workspace save and browser backup as your notes.</p><p id="expectation-counts" role="status"></p>
+<div class="controls"><label>Show <select id="filter"><option value="all">All goals / history</option><option value="unreviewed">Needs your review</option><option value="approved">Approved goals</option><option value="declined">Declined proposals</option><option value="removed">Removed goals</option></select></label><button id="add-expectation">Propose expectation</button></div><div id="expectations"></div></section><details id="feedback-tools"><summary>Feedback saves and backups</summary><p id="save-status" role="status">Checking workspace saves…</p><div class="controls"><button id="retry-save">Retry workspace save</button><button id="export">Export feedback JSON</button><label>Import JSON <input id="import" type="file" accept="application/json"></label></div></details><p id="notice" class="notice" role="status"></p>`;
 $('#build').textContent = `${EXPERIMENT.id} · ${source.slice(0, 23)}`;
 $('#build').title = source;
 $('#identity').textContent = `${EXPERIMENT.id}; fixed dt ${SIMULATION_DT}; source ${source}`;
@@ -47,7 +50,7 @@ function notify(message: string) { $('#notice').textContent = message; }
 function saveBrowser() {
   try { localStorage.setItem(storageKey, JSON.stringify(feedback)); return true; } catch { return false; }
 }
-let saveQueue = Promise.resolve();
+let saveQueue: Promise<boolean | void> = Promise.resolve();
 let saveRevision = 0;
 function persist() {
   const revision = ++saveRevision;
@@ -58,14 +61,20 @@ function persist() {
     const response = await fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(feedback) });
     if (!response.ok) throw new Error('Workspace save unavailable');
     const saved = await response.json();
-    if (revision !== saveRevision) return;
+    if (revision !== saveRevision) return true;
     $('#save-status').textContent = `Saved to ${saved.file} at ${new Date(saved.savedAt).toLocaleTimeString()}. Browser backup ${browserSaved ? 'saved' : 'unavailable'}.`;
-  }).catch(() => { $('#save-status').textContent = browserSaved ? 'Workspace save failed. This change is only in this browser. Retry or export JSON to keep a separate copy.' : 'Save failed in both workspace and browser. Export JSON now to keep this change.'; });
+    return true;
+  }).catch(() => { $('#save-status').textContent = browserSaved ? 'Workspace save failed. This change is only in this browser. Retry or export JSON to keep a separate copy.' : 'Save failed in both workspace and browser. Export JSON now to keep this change.'; return false; });
+  return saveQueue;
 }
-$('#retry-save').onclick = persist;
+$('#retry-save').onclick = async () => {
+  const saved = await persist();
+  if (saved) for (const [key, status] of commentSaves) if (status.startsWith('Workspace save failed')) commentSaves.set(key, 'Saved to workspace.');
+  renderEvidenceFeedback();
+};
 function renderNotes() {
   $('#notes-list').replaceChildren();
-  for (const n of feedback.notes) {
+  for (const n of feedback.notes.filter(n => !n.evidence)) {
     const li = document.createElement('li');
     const context = n.viewing?.mode === 'evidence'
       ? `evidence ${n.viewing.briefId} · ${n.viewing.clips.map(c => `${c.variant} at ${(n.panelTimes[n.variants.indexOf(c.variant)] ?? 0).toFixed(1)}s`).join(' / ')} · focused ${n.viewing.focusedVariant ?? 'none'}`
@@ -73,6 +82,7 @@ function renderNotes() {
     li.textContent = `${n.scenario}, seed ${n.seed}, ${context} · ${n.preference}: ${n.text}`;
     $('#notes-list').append(li);
   }
+  renderEvidenceFeedback();
 }
 function renderExpectations() {
   const container = $('#expectations'); container.replaceChildren();
@@ -145,13 +155,15 @@ let accumulator = 0;
 let last: number | null = null;
 const panels = VARIANTS.map((variant, index) => {
   const element = document.createElement('section'); element.className = 'panel';
-  element.innerHTML = `<div class="panel-head"><strong></strong><button aria-label="Enlarge panel ${String.fromCharCode(65 + index)}">Enlarge</button></div><div class="clip-caption"><h3></h3><p class="watch-for"></p><details><summary>Why this moment?</summary><p class="clip-reason"></p></details></div><div class="clip-controls"><button class="clip-play" aria-label="Play excerpt ${String.fromCharCode(65 + index)}">Play excerpt</button><button class="clip-replay" aria-label="Replay excerpt ${String.fromCharCode(65 + index)}">Replay</button><label>Clip time <input class="clip-time" aria-label="Excerpt time ${String.fromCharCode(65 + index)}" type="range" step="0.016666666666666666"></label><label><input class="clip-loop" aria-label="Loop excerpt ${String.fromCharCode(65 + index)}" type="checkbox"> Loop</label><button class="clip-full" aria-label="Full fight ${String.fromCharCode(65 + index)}">Full fight</button><output class="clip-clock"></output></div><canvas aria-label="Battle panel ${String.fromCharCode(65 + index)}"></canvas><footer></footer>`;
+  element.innerHTML = `<div class="panel-head"><strong></strong><button aria-label="Enlarge panel ${String.fromCharCode(65 + index)}">Enlarge</button></div><div class="clip-caption"><h3></h3><p class="review-status" role="status"></p><p class="watch-for"></p><details><summary>Why this moment?</summary><p class="clip-reason"></p></details></div><div class="clip-controls"><button class="clip-play" aria-label="Play excerpt ${String.fromCharCode(65 + index)}">Play excerpt</button><button class="clip-replay" aria-label="Replay excerpt ${String.fromCharCode(65 + index)}">Replay</button><label>Clip time <input class="clip-time" aria-label="Excerpt time ${String.fromCharCode(65 + index)}" type="range" step="0.016666666666666666"></label><label><input class="clip-loop" aria-label="Loop excerpt ${String.fromCharCode(65 + index)}" type="checkbox"> Loop</label><button class="clip-full" aria-label="Full fight ${String.fromCharCode(65 + index)}">Full fight</button><output class="clip-clock"></output></div><canvas aria-label="Battle panel ${String.fromCharCode(65 + index)}"></canvas><footer></footer><section class="evidence-comment"><h3>Your comment on this evidence</h3><label>Comment<textarea class="comment-text" aria-label="Comment on evidence ${String.fromCharCode(65 + index)}" placeholder="What works here, what doesn't, or what are you unsure about?"></textarea></label><button class="save-comment" aria-label="Save evidence comment ${String.fromCharCode(65 + index)}">Save comment</button><p class="comment-save" role="status"></p><ol class="evidence-notes"></ol></section>`;
   $('#panels').append(element);
   const canvas = element.querySelector('canvas')!;
   const gfx = new GameRenderer(canvas, { pixelRatio: 1, shadowMapSize: 512 }); gfx.scene.add(buildArena());
   const world = createScenario({ seed, scenario, rotation, variant: variant.id });
   const view = new BattleView(world, gfx.camera, { visualSeed: seed ^ 0x5f3759df }); gfx.scene.add(view.group);
   const panel = { variant, element, gfx, world, view, finished: false, clip: undefined as EvidenceClip | undefined, cursor: 0, playing: false, accumulator: 0 };
+  element.querySelector<HTMLButtonElement>('.save-comment')!.onclick = () => saveEvidenceComment(panel);
+  element.querySelector<HTMLTextAreaElement>('.comment-text')!.oninput = event => { const reference = panelReference(panel); if (reference) commentDrafts.set(evidenceKey(reference), (event.target as HTMLTextAreaElement).value); };
   element.querySelector<HTMLButtonElement>('.clip-play')!.onclick = () => playExcerpt(panel);
   element.querySelector<HTMLButtonElement>('.clip-replay')!.onclick = () => { if (panel.clip) seekPanel(panel, panel.clip.start); playExcerpt(panel, true); };
   element.querySelector<HTMLInputElement>('.clip-time')!.oninput = event => { for (const other of panels) other.playing = false; seekPanel(panel, Number((event.target as HTMLInputElement).value)); focusedVariant = variant.id; render(); };
@@ -176,6 +188,7 @@ function render() {
     p.element.querySelector('strong')!.textContent = `${String.fromCharCode(65 + i)} · ${p.variant.name}`;
     p.element.querySelector<HTMLElement>('.clip-caption')!.hidden = mode !== 'evidence';
     p.element.querySelector<HTMLElement>('.clip-controls')!.hidden = mode !== 'evidence';
+    p.element.querySelector<HTMLElement>('.evidence-comment')!.hidden = mode !== 'evidence';
     if (p.clip) {
       p.element.querySelector('.clip-play')!.textContent = p.playing ? 'Pause excerpt' : 'Play excerpt';
       p.element.querySelector('.clip-clock')!.textContent = `${(p.cursor * SIMULATION_DT).toFixed(2)}s · excerpt ${p.clip.start}–${p.clip.end}s`;
@@ -240,7 +253,7 @@ function showEvidence() {
     p.element.querySelector('.clip-reason')!.textContent = p.clip.why;
     seekPanel(p, p.clip.start);
   }
-  render();
+  renderEvidenceFeedback(); render();
 }
 function playExcerpt(p: Panel, replay = false) {
   if (mode !== 'evidence' || !p.clip) return;
@@ -282,12 +295,78 @@ for (const preset of presets) {
   button.onclick = () => loadExample({ seed: preset.seed, scenario: preset.scenario, rotation: 0 }); $('#presets').append(button);
 }
 for (const id of ['seed', 'scenario', 'rotation']) $(`#${id}`).onchange = () => loadExample({ seed: Number($<HTMLInputElement>('#seed').value), scenario: $<HTMLSelectElement>('#scenario').value, rotation: Number($<HTMLSelectElement>('#rotation').value) });
+const commentDrafts = new Map<string, string>();
+const commentSaves = new Map<string, string>();
+function panelReference(p: Panel) {
+  const brief = comparisonBrief(scenario, seed, rotation);
+  return brief && p.clip ? evidenceReference(brief.id, p.clip) : undefined;
+}
+function scope() { return { experiment: EXPERIMENT.id, scenario, seed, rotation }; }
+function renderEvidenceFeedback() {
+  for (const p of panels) {
+    const reference = panelReference(p);
+    if (!reference) continue;
+    const notes = notesForEvidence(feedback.notes, scope(), reference);
+    const status = p.element.querySelector<HTMLElement>('.review-status')!;
+    status.textContent = notes.length ? `Commented · ${notes.length} ${notes.length === 1 ? 'comment' : 'comments'}` : 'Not reviewed';
+    status.classList.toggle('commented', notes.length > 0);
+    const key = evidenceKey(reference);
+    p.element.querySelector<HTMLTextAreaElement>('.comment-text')!.value = commentDrafts.get(key) ?? '';
+    p.element.querySelector('.comment-save')!.textContent = commentSaves.get(key) ?? '';
+    const list = p.element.querySelector('.evidence-notes')!; list.replaceChildren();
+    for (const note of notes) {
+      const li = document.createElement('li'); li.textContent = `${new Date(note.at).toLocaleString()} · ${note.time.toFixed(2)}s: ${note.text}`; list.append(li);
+    }
+  }
+  for (const brief of presets) {
+    const reviewed = brief.clips.filter(clip => notesForEvidence(feedback.notes, { experiment: EXPERIMENT.id, scenario: brief.scenario, seed: brief.seed, rotation: 0 }, evidenceReference(brief.id, clip)).length > 0).length;
+    const button = document.querySelector<HTMLButtonElement>(`#presets button[data-preset="${brief.id}"]`);
+    if (!button) continue;
+    let badge = button.querySelector('span');
+    if (!badge) { badge = document.createElement('span'); badge.className = 'review-progress'; badge.id = `progress-${brief.id}`; button.append(badge); button.setAttribute('aria-label', brief.title); button.setAttribute('aria-describedby', badge.id); }
+    badge.textContent = `${reviewed}/${brief.clips.length} commented`;
+  }
+}
+function makeNote(text: string, preference: string, evidence?: EvidenceReference) {
+  const focus = evidence?.variant ?? focusedVariant;
+  return { at: new Date().toISOString(), experiment: EXPERIMENT.id, source, scenario, seed, rotation,
+    time: mode === 'evidence' ? (panels.find(p => p.variant.id === focus)?.world.time ?? 0) : elapsedTicks * SIMULATION_DT,
+    viewing: { mode, ...(mode === 'evidence' ? { briefId: comparisonBrief(scenario, seed, rotation)!.id } : {}), focusedVariant: focus, clips: mode === 'evidence' ? panels.filter(p => p.clip).map(p => ({ variant: p.variant.id, start: p.clip!.start, end: p.clip!.end })) : [] },
+    panelTimes: panels.map(p => p.world.time), variants: VARIANTS.map(v => v.id), preference, text, ...(evidence ? { evidence } : {}) };
+}
+async function saveEvidenceComment(p: Panel) {
+  const reference = panelReference(p); if (!reference) return;
+  const key = evidenceKey(reference);
+  const text = (commentDrafts.get(key) ?? '').trim();
+  if (!text) { commentSaves.set(key, 'Write a comment first.'); renderEvidenceFeedback(); return; }
+  focusedVariant = p.variant.id;
+  feedback.notes.push(makeNote(text, 'unsure', reference));
+  commentDrafts.delete(key); commentSaves.set(key, 'Comment recorded · saving to workspace…'); renderNotes();
+  const saved = await persist();
+  commentSaves.set(key, saved ? 'Saved to workspace.' : 'Workspace save failed. Browser backup only if available; retry under Feedback saves and backups.');
+  renderEvidenceFeedback();
+}
+function selectTab(tab: 'comparison' | 'goals') {
+  const comparisonActive = tab === 'comparison';
+  $('#comparison-page').hidden = !comparisonActive; $('#goals-page').hidden = comparisonActive;
+  for (const id of ['comparison', 'goals']) { const button = $<HTMLButtonElement>(`#${id}-tab`); button.setAttribute('aria-selected', String(id === tab)); button.tabIndex = id === tab ? 0 : -1; }
+  if (!comparisonActive) { paused = true; for (const p of panels) p.playing = false; }
+  render();
+}
+for (const id of ['comparison', 'goals'] as const) {
+  const button = $<HTMLButtonElement>(`#${id}-tab`); button.onclick = () => selectTab(id);
+  button.onkeydown = event => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault(); const next = event.key === 'Home' ? 'comparison' : event.key === 'End' ? 'goals' : id === 'comparison' ? 'goals' : 'comparison';
+    selectTab(next); $(`#${next}-tab`).focus();
+  };
+}
 $('#full-fight').onclick = showFullFights;
 $('#show-evidence').onclick = showEvidence;
 updateExample();
 if (params.get('capture') !== '1' && !params.has('time')) { if (comparisonBrief(scenario, seed, rotation)) showEvidence(); }
 $('#save-note').onclick = () => {
-  feedback.notes.push({ at: new Date().toISOString(), experiment: EXPERIMENT.id, source, scenario, seed, rotation, time: mode === 'evidence' ? (panels.find(p => p.variant.id === focusedVariant)?.world.time ?? 0) : elapsedTicks * SIMULATION_DT, viewing: { mode, ...(mode === 'evidence' ? { briefId: comparisonBrief(scenario, seed, rotation)!.id } : {}), focusedVariant, clips: mode === 'evidence' ? panels.filter(p => p.clip).map(p => ({ variant: p.variant.id, start: p.clip!.start, end: p.clip!.end })) : [] }, panelTimes: panels.map(p => p.world.time), variants: VARIANTS.map(v => v.id), preference: $<HTMLSelectElement>('#preference').value, text: $<HTMLTextAreaElement>('#note').value });
+  feedback.notes.push(makeNote($<HTMLTextAreaElement>('#note').value, $<HTMLSelectElement>('#preference').value));
   $<HTMLTextAreaElement>('#note').value = ''; persist(); renderNotes();
 };
 const comparison = {

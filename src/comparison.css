@@ -68,3 +68,14 @@ button:disabled { opacity: .5; cursor: default; }
 #evidence { overflow-x: auto; }
 label:has(input[type=file]) { max-width: 100%; flex-wrap: wrap; }
 input[type=file] { max-width: 100%; min-width: 0; }
+[role=tab][aria-selected=true] { background: #c6bdff; color: #191425; }
+.evidence-comment { border-top: 1px solid #343846; padding: 16px; }
+.evidence-comment h3 { font-size: 16px; margin: 10px 0; }
+.evidence-comment label { display: block; }
+.evidence-comment textarea { display: block; margin: 6px 0 12px; }
+.evidence-comment ol { padding-left: 20px; overflow-wrap: anywhere; }
+.review-status { margin: 0; color: #c6bdff; font-weight: 600; }
+.review-status.commented { color: #98e0ac; }
+.review-progress { display: block; font-size: 12px; margin-top: 4px; }
+.comment-save { font-size: 13px; }
+#feedback-tools { margin-top: 20px; }

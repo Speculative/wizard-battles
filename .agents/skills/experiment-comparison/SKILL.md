@@ -82,7 +82,12 @@ not replace the prepared comparison requested here.
 
 Retain viewing feedback outside browser-only storage. Show actual save success
 or failure, and preserve the chosen evidence, focused alternative, individual
-panel times and source identity. Keep older feedback readable. Export/import is
+panel times and source identity. Keep older feedback readable. Attach comments to the selected evidence in the
+interface, show which pieces the owner has commented on, and show progress across
+comparisons. Use stable evidence IDs with explicit revisions; changed footage or
+bounds must not inherit a reviewed label accidentally. Keep general notes separate
+unless the owner explicitly targets a piece of evidence. Keep editable goals in a
+separate view so they do not crowd the viewing task. Export/import is
 useful backup, not a substitute for the normal durable save path.
 
 ## 4. Self-review before spending owner attention

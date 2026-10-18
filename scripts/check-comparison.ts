@@ -37,6 +37,9 @@ try {
   await page.goto(url.href); await page.waitForFunction(() => !!window.comparison);
   await assertCanvasSizing();
   await page.evaluate(() => window.comparison.ready());
+  assert.equal(await page.locator('#goals-page').isVisible(), false);
+  await page.getByRole('tab', { name: 'Goals', exact: true }).click();
+  assert.equal(await page.locator('#comparison-page').isVisible(), false);
   assert.equal(await page.locator('#filter').inputValue(), 'all');
   assert.equal(await page.locator('.expectation').count(), 7, 'approved starting goals are visible on first visit');
   assert.match(await page.locator('#expectation-counts').innerText(), /7 approved · 0 need your review/);
@@ -44,6 +47,7 @@ try {
   assert.match(await page.locator('#expectations').innerText(), /Nothing needs your review.*7 approved goals/);
   await page.getByRole('button', { name: 'View all goals', exact: true }).click();
   assert.equal(await page.locator('.expectation').count(), 7);
+  await page.getByRole('tab', { name: 'Comparison', exact: true }).click();
   const states = await page.evaluate(() => window.comparison.seek(12));
   if (!uiOnly) for (const [i, variant] of VARIANTS.entries()) {
     const world = createScenario({ scenario: 'duel', seed: 7, variant: variant.id });
@@ -76,6 +80,7 @@ try {
   await page.reload(); await page.waitForFunction(() => !!window.comparison);
   await page.evaluate(() => window.comparison.ready());
   assert.deepEqual(await page.evaluate(() => window.comparison.feedback()), feedback);
+  await page.getByRole('tab', { name: 'Goals', exact: true }).click();
   await page.getByRole('button', { name: 'Propose expectation' }).click();
   const expectation = page.locator('.expectation').first();
   await expectation.getByLabel('Expectation', { exact: true }).fill('I can follow the opening');
@@ -86,6 +91,7 @@ try {
   await page.getByRole('button', { name: 'View all goals', exact: true }).click();
   const last = page.locator('.expectation').last();
   assert.equal(await last.getByLabel('Expectation', { exact: true }).inputValue(), 'I can follow the opening');
+  await page.locator('#feedback-tools').evaluate(el => { (el as HTMLDetailsElement).open = true; });
   const downloadPromise = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export feedback JSON' }).click();
   const download = await downloadPromise; const exported = `${output}/feedback.json`; await download.saveAs(exported);
   await page.locator('#import').setInputFiles(exported);
@@ -94,6 +100,7 @@ try {
   await page.locator('#import').setInputFiles(`${output}/invalid.json`);
   await page.waitForFunction(() => document.querySelector('#notice')!.textContent!.startsWith('Import failed'));
   assert.deepEqual(await page.evaluate(() => window.comparison.feedback()), merged);
+  await page.getByRole('tab', { name: 'Comparison', exact: true }).click();
   await page.evaluate(() => window.comparison.seek(120));
   const ends = await page.evaluate(() => window.comparison.states()); assert.ok(ends.every(s => s.finished));
   await page.evaluate(() => window.comparison.step(60)); assert.deepEqual(await page.evaluate(() => window.comparison.states()), ends);
@@ -183,15 +190,56 @@ try {
   await page.evaluate(() => window.comparison.loadExample({ scenario: 'duel', seed: 211, rotation: 0 }));
   assert.equal((await page.evaluate(() => window.comparison.viewing())).mode, 'full', 'custom setups never invent generic evidence windows');
   assert.equal(await page.locator('#show-evidence').isDisabled(), true);
+  // Per-evidence comments retain exact identity and do not mark other clips.
+  await page.getByRole('button', { name: '2 · When movement stalls', exact: true }).click();
+  const cCard = page.locator('.panel').nth(2);
+  assert.equal(await cCard.locator('.review-status').innerText(), 'Not reviewed');
+  await page.getByRole('button', { name: 'Save evidence comment C', exact: true }).click();
+  assert.equal(await cCard.locator('.review-status').innerText(), 'Not reviewed', 'empty submissions never count as opinions');
+  await page.getByLabel('Comment on evidence B', { exact: true }).fill('Draft about B');
+  await page.getByLabel('Comment on evidence C', { exact: true }).fill('The return to contact works here.');
+  await page.getByRole('button', { name: 'Save evidence comment C', exact: true }).click();
+  await page.waitForFunction(() => document.querySelectorAll('.comment-save')[2].textContent === 'Saved to workspace.');
+  assert.match(await cCard.locator('.review-status').innerText(), /Commented/);
+  assert.equal(await page.locator('.panel').nth(1).locator('.review-status').innerText(), 'Not reviewed');
+  assert.match(await page.locator('[data-preset="stalled-duel"] .review-progress').innerText(), /1\/2 commented/);
+  const attached = await page.evaluate(() => window.comparison.feedback().notes.at(-1)!);
+  assert.equal(attached.evidence?.id, 'duel1-burst-finish');
+  assert.equal(attached.evidence?.variant, 'burst');
+  await page.getByRole('button', { name: COMPARISON_BRIEFS[0].title, exact: true }).click();
+  assert.equal(await cCard.locator('.review-status').innerText(), 'Not reviewed');
+  await page.getByRole('button', { name: '2 · When movement stalls', exact: true }).click();
+  assert.equal(await page.getByLabel('Comment on evidence B', { exact: true }).inputValue(), 'Draft about B');
+  assert.match(await cCard.locator('.evidence-notes').innerText(), /The return to contact works here/);
+  const restored = await browser.newPage();
+  await restored.goto(new URL('compare.html?scenario=duel&seed=1', server.resolvedUrls!.local[0]).href);
+  await restored.waitForFunction(() => !!window.comparison); await restored.evaluate(() => window.comparison.ready());
+  assert.match(await restored.locator('.panel').nth(2).locator('.review-status').innerText(), /Commented/);
+  assert.equal(await restored.locator('.panel').nth(1).locator('.review-status').innerText(), 'Not reviewed');
+  assert.deepEqual(await restored.evaluate(() => window.comparison.feedback().notes.at(-1)), attached);
+  await restored.close();
+  // Goals are separate and pause clips without discarding the selection.
+  await page.getByRole('button', { name: 'Play excerpt C', exact: true }).click();
+  await page.getByRole('tab', { name: 'Goals', exact: true }).click();
+  assert.ok((await page.evaluate(() => window.comparison.viewing())).panels.every(p => !p.playing));
+  const tabState = await page.evaluate(() => window.comparison.states());
+  await page.getByRole('tab', { name: 'Goals', exact: true }).press('ArrowLeft');
+  assert.equal(await page.getByRole('tab', { name: 'Comparison', exact: true }).getAttribute('aria-selected'), 'true');
+  assert.deepEqual(await page.evaluate(() => window.comparison.states()), tabState);
+  await assertCanvasSizing();
+  await page.locator('#feedback-tools').evaluate(el => { (el as HTMLDetailsElement).open = true; });
   // A failed workspace save must not claim durability.
   await page.route('**/api/feedback', route => route.fulfill({ status: 503, body: '{}' }));
-  await page.getByLabel('Viewing note').fill('Offline note');
-  await page.getByRole('button', { name: 'Save timestamped note', exact: true }).click();
+  await page.getByLabel('Comment on evidence B', { exact: true }).fill('Offline evidence note');
+  await page.getByRole('button', { name: 'Save evidence comment B', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('#save-status')!.textContent!.startsWith('Workspace save failed'));
+  assert.match(await page.locator('.panel').nth(1).locator('.comment-save').innerText(), /Workspace save failed/);
   assert.deepEqual(errors.splice(0), ['Failed to load resource: the server responded with a status of 503 (Service Unavailable)']);
   await page.unroute('**/api/feedback');
   await page.getByRole('button', { name: 'Retry workspace save', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('#save-status')!.textContent!.startsWith('Saved to runs-feedback/'));
+  await page.waitForFunction(() => document.querySelectorAll('.comment-save')[1].textContent === 'Saved to workspace.');
+  await page.locator('#panels').screenshot({ path: `${output}/evidence-comments.png` });
   await page.screenshot({ path: `${output}/comparison-presets.png`, fullPage: true });
   // Centered-shot rounding once flipped a dodge side across Node/Chromium.
   // Compare complete matches, including the long stalled case and fresh seeds.
@@ -215,7 +263,7 @@ try {
   }
   if (!uiOnly) console.log('Complete-match browser/headless agreement verified for 72 matched cases, including fresh seeds.');
   assert.deepEqual(errors, []);
-  console.log(`Comparison checks passed (${production ? 'production' : 'development'}; Chromium ${browser.version()}): curated independent excerpts, exclusive playback, per-clip seek/loop/replay, evidence note context, fresh-browser workspace recovery, save failure/retry, resize/enlarge, feedback export/import, queue decisions, invalid import, end hold, shared live scheduler.`);
+  console.log(`Comparison checks passed (${production ? 'production' : 'development'}; Chromium ${browser.version()}): curated independent excerpts, exclusive playback, per-clip seek/loop/replay, evidence comments/progress/tabs, evidence note context, fresh-browser workspace recovery, save failure/retry, resize/enlarge, feedback export/import, queue decisions, invalid import, end hold, shared live scheduler.`);
 } finally {
   await browser.close();
   rmSync(feedbackDirectory, { recursive: true, force: true });

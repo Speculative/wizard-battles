@@ -6,10 +6,14 @@ export interface ViewingContext {
   focusedVariant: string | null;
   clips: { variant: string; start: number; end: number }[];
 }
+export interface EvidenceReference {
+  id: string; revision: number; briefId: string; variant: string;
+  start: number; end: number;
+}
 export interface Note {
   at: string; experiment: string; source: string; scenario: string; seed: number;
   rotation: number; time: number; panelTimes: number[]; variants: string[];
-  preference: string; text: string; viewing?: ViewingContext;
+  preference: string; text: string; viewing?: ViewingContext; evidence?: EvidenceReference;
 }
 export interface Feedback { schema: 'wizard-battles-feedback-v1'; expectations: Expectation[]; notes: Note[] }
 export function validateFeedback(value: unknown): asserts value is Feedback {
@@ -24,6 +28,10 @@ export function validateFeedback(value: unknown): asserts value is Feedback {
   }
   for (const n of data.notes) {
     if (!n || !(['at', 'experiment', 'source', 'scenario', 'preference', 'text'] as const).every(k => typeof n[k] === 'string') || ![n.seed, n.rotation, n.time].every(Number.isFinite) || !Array.isArray(n.variants) || !n.variants.every(v => typeof v === 'string') || !Array.isArray(n.panelTimes) || !n.panelTimes.every(Number.isFinite)) throw new Error('Invalid viewing note');
+    if (n.evidence !== undefined) {
+      const e = n.evidence;
+      if (!e || !['id', 'briefId', 'variant'].every(k => typeof e[k as keyof EvidenceReference] === 'string') || !Number.isSafeInteger(e.revision) || e.revision < 1 || !Number.isFinite(e.start) || !Number.isFinite(e.end) || e.start < 0 || e.end <= e.start || e.end > 120) throw new Error('Invalid evidence reference');
+    }
     if (n.viewing !== undefined) {
       const v = n.viewing;
       if (!v || !['full', 'evidence'].includes(v.mode) || (v.briefId !== undefined && typeof v.briefId !== 'string') || (v.focusedVariant !== null && typeof v.focusedVariant !== 'string') || !Array.isArray(v.clips) || !v.clips.every(c => c && typeof c.variant === 'string' && Number.isFinite(c.start) && Number.isFinite(c.end) && c.start >= 0 && c.end > c.start && c.end <= 120)) throw new Error('Invalid viewing context');
