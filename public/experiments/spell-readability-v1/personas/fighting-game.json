@@ -1,0 +1,499 @@
+{
+  "persona": "Fighting-game spectator",
+  "model": "gpt-6.1-sol (provider codex; inherited from root, confirmed by Ostraka active session metadata)",
+  "source": "sha256:987bdd05c1c867c35924e8428829f0f9246490ed5a03d425d589360eb009d09d",
+  "experiment": "spell-readability-v1",
+  "evidenceInspected": {
+    "captures": [
+      {
+        "capture": "runs-captures/spell-evidence-duel7",
+        "method": "Opened individual PNGs using view_image; inspected both labeled panels; read capture metadata and panel states. No continuous footage or browser playback.",
+        "frames": [
+          {
+            "file": "runs-captures/spell-evidence-duel7/frame-00003.png",
+            "requestedTime": 8.600000000000001,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 8.600000000000007
+              },
+              {
+                "alternative": "cues",
+                "time": 8.600000000000007
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-duel7/frame-00006.png",
+            "requestedTime": 8.9,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 8.900000000000022
+              },
+              {
+                "alternative": "cues",
+                "time": 8.900000000000022
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-duel7/frame-00007.png",
+            "requestedTime": 9,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 9.000000000000027
+              },
+              {
+                "alternative": "cues",
+                "time": 9.000000000000027
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-duel7/frame-00010.png",
+            "requestedTime": 9.3,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 9.300000000000042
+              },
+              {
+                "alternative": "cues",
+                "time": 9.300000000000042
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-duel7/frame-00013.png",
+            "requestedTime": 9.600000000000001,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 9.600000000000056
+              },
+              {
+                "alternative": "cues",
+                "time": 9.600000000000056
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-duel7/frame-00014.png",
+            "requestedTime": 9.700000000000001,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 9.700000000000061
+              },
+              {
+                "alternative": "cues",
+                "time": 9.700000000000061
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-duel7/frame-00029.png",
+            "requestedTime": 11.200000000000001,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 11.200000000000136
+              },
+              {
+                "alternative": "cues",
+                "time": 11.200000000000136
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-duel7/frame-00032.png",
+            "requestedTime": 11.5,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 11.500000000000151
+              },
+              {
+                "alternative": "cues",
+                "time": 11.500000000000151
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-duel7/frame-00040.png",
+            "requestedTime": 12.3,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 12.216666666666853
+              },
+              {
+                "alternative": "cues",
+                "time": 12.216666666666853
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "capture": "runs-captures/spell-evidence-four19",
+        "method": "Opened individual PNGs using view_image; inspected both labeled panels; read capture metadata and panel states. No continuous footage or browser playback.",
+        "frames": [
+          {
+            "file": "runs-captures/spell-evidence-four19/frame-00009.png",
+            "requestedTime": 6.7,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 6.6999999999999815
+              },
+              {
+                "alternative": "cues",
+                "time": 6.6999999999999815
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-four19/frame-00012.png",
+            "requestedTime": 7,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 6.9999999999999805
+              },
+              {
+                "alternative": "cues",
+                "time": 6.9999999999999805
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-four19/frame-00015.png",
+            "requestedTime": 7.3,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 7.299999999999979
+              },
+              {
+                "alternative": "cues",
+                "time": 7.299999999999979
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-four19/frame-00018.png",
+            "requestedTime": 7.6,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 7.599999999999978
+              },
+              {
+                "alternative": "cues",
+                "time": 7.599999999999978
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-four19/frame-00028.png",
+            "requestedTime": 8.6,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 8.600000000000007
+              },
+              {
+                "alternative": "cues",
+                "time": 8.600000000000007
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-four19/frame-00036.png",
+            "requestedTime": 9.4,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 9.400000000000047
+              },
+              {
+                "alternative": "cues",
+                "time": 9.400000000000047
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "capture": "runs-captures/spell-evidence-four1",
+        "method": "Opened individual PNGs using view_image; inspected both labeled panels; read capture metadata and panel states. No continuous footage or browser playback.",
+        "frames": [
+          {
+            "file": "runs-captures/spell-evidence-four1/frame-00004.png",
+            "requestedTime": 0.5,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 0.49999999999999994
+              },
+              {
+                "alternative": "cues",
+                "time": 0.49999999999999994
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-four1/frame-00006.png",
+            "requestedTime": 0.7,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 0.7000000000000005
+              },
+              {
+                "alternative": "cues",
+                "time": 0.7000000000000005
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-four1/frame-00010.png",
+            "requestedTime": 1.1,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 1.100000000000001
+              },
+              {
+                "alternative": "cues",
+                "time": 1.100000000000001
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-four1/frame-00013.png",
+            "requestedTime": 1.4000000000000001,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 1.4
+              },
+              {
+                "alternative": "cues",
+                "time": 1.4
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-four1/frame-00015.png",
+            "requestedTime": 1.6,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 1.5999999999999992
+              },
+              {
+                "alternative": "cues",
+                "time": 1.5999999999999992
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-four1/frame-00022.png",
+            "requestedTime": 2.3000000000000003,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 2.2999999999999967
+              },
+              {
+                "alternative": "cues",
+                "time": 2.2999999999999967
+              }
+            ]
+          },
+          {
+            "file": "runs-captures/spell-evidence-four1/frame-00023.png",
+            "requestedTime": 2.4,
+            "panelTimes": [
+              {
+                "alternative": "current",
+                "time": 2.3999999999999964
+              },
+              {
+                "alternative": "cues",
+                "time": 2.3999999999999964
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "logs": [
+      {
+        "file": "runs-experiment/spell-readability-v1-evidence/duel-s7-r0-burst/events.jsonl",
+        "times": [
+          8.3,
+          12.6
+        ],
+        "actions": "Read movement/charge/release and damage records, then filtered releases, damage and deaths."
+      },
+      {
+        "file": "runs-experiment/spell-readability-v1-evidence/four-wizards-s19-r0-burst/events.jsonl",
+        "times": [
+          5.8,
+          9.8
+        ],
+        "actions": "Read releases, damage, death and empty ice AOE records."
+      },
+      {
+        "file": "runs-experiment/spell-readability-v1-evidence/four-wizards-s1-r0-burst/events.jsonl",
+        "times": [
+          0.1,
+          3.9
+        ],
+        "actions": "Read event window; focused filtered releases, damage and AOE records through 2.4s."
+      }
+    ],
+    "definitions": [
+      "src/expectations.ts",
+      "src/spellReadabilityExperiment.ts",
+      "src/presentation/battleView.ts:65-150",
+      "docs/PERSONA_REVIEW.md"
+    ],
+    "disclosure": "Variant definitions and existing editorial captions were visible during inspection. Judgment is independent but this was not a blinded review. Full batch statistics and full-match clips were not evaluated."
+  },
+  "observations": [
+    {
+      "scenario": "duel",
+      "seed": 7,
+      "times": [
+        8.6,
+        8.9,
+        9,
+        9.3
+      ],
+      "alternatives": [
+        "current",
+        "cues"
+      ],
+      "expectationIds": [
+        "WB-E004"
+      ],
+      "facts": "Blue has a more legible outlined preparation ring in B at 8.6/8.9; by 9.0 a projectile is visible in both. At 9.3 red has 80 HP in both and B adds a white mark on red. Logs put blue release at 8.967 and damage at 9.25.",
+      "interpretation": "B makes a useful distinction between getting a shot ready and confirming contact. The visible shot already communicates travel in A; the improvement is additional phase information, not a wholly new readable attack."
+    },
+    {
+      "scenario": "duel",
+      "seed": 7,
+      "times": [
+        9.6,
+        9.7,
+        11.2,
+        11.5,
+        12.216666666666853
+      ],
+      "alternatives": [
+        "current",
+        "cues"
+      ],
+      "expectationIds": [
+        "WB-E004",
+        "WB-E005"
+      ],
+      "facts": "B shows red preparing near blue at 9.6, then a small release cue at 9.7 without a white damage mark; blue remains 34 HP. Later frames show blue at 12 HP and then dead with a white mark at the finishing position in B. Logs distinguish red release without damage at 9.633 from damaging melee at 11.433 and 12.217.",
+      "interpretation": "The missed swing is the strongest useful test: an action occurred without a successful hit. B helps avoid equating every effect with success. But even with B, the stills do not explain why that swing missed or prove that I would read the pressure reversal at normal playback speed."
+    },
+    {
+      "scenario": "four-wizards",
+      "seed": 19,
+      "times": [
+        6.7,
+        7,
+        7.3,
+        7.6,
+        8.6,
+        9.4
+      ],
+      "alternatives": [
+        "current",
+        "cues"
+      ],
+      "expectationIds": [
+        "WB-E004",
+        "WB-E005"
+      ],
+      "facts": "Both panels retain red/green contact, yellow projectiles, and blue firing. B puts a white mark near green after green dies and on red after yellow damage; later small marks appear around the red/yellow contact. At 7.3 the remote ice impact has no matching hit mark. Logs record green dying at 6.983, empty ice at 7.233 and yellow damage to red at 7.567/7.600.",
+      "interpretation": "B makes the recipient of damage easier to locate while preserving the intersecting engagement. It does not independently identify the attacker: yellow projectiles and red melee still need to be followed. A white cross should be described as damage happened here, never as proof of who had initiative or why a dodge failed."
+    },
+    {
+      "scenario": "four-wizards",
+      "seed": 1,
+      "times": [
+        0.5,
+        0.7,
+        1.1,
+        1.4,
+        1.6,
+        2.3,
+        2.4
+      ],
+      "alternatives": [
+        "current",
+        "cues"
+      ],
+      "expectationIds": [
+        "WB-E004",
+        "WB-E005"
+      ],
+      "facts": "B outlines green and yellow preparation at 0.5 and shows small release accents around the rapid-fire sequence. By 1.1 red has a prominent white mark; green later loses HP while the right-hand projectile chain continues. At 2.4 the ice has landed away from fighters without a white impact cross there. Logs record multiple spread hits on red within 0.983–1.017, melee damage to green at 1.367/2.167, and zero-hit ice at 2.317.",
+      "interpretation": "This contrary case shows the information is compact enough that bodies/projectiles remain visible in these samples. Still, the floor has charge rings, a large ice warning, tiny release rings and projectile trails together. Their priority is weak at this scale; I can understand damage more readily than which threat deserves my next look. Multiple simultaneous damage crosses should not be counted visually as distinct causally traced attacks."
+    }
+  ],
+  "rankedConcerns": [
+    {
+      "rank": 1,
+      "expectationIds": [
+        "WB-E005"
+      ],
+      "concern": "Initiative remains difficult to read when multiple fighters act. Confirming a victim is easier than seeing who controls space or what escape is available.",
+      "severity": "Material limit on the claim; not a blocker to comparing these alternatives."
+    },
+    {
+      "rank": 2,
+      "expectationIds": [
+        "WB-E004"
+      ],
+      "concern": "Preparation and release cues are small at the supplied two-panel scale; the ring outlines are clearer than their exact progression or directional detail.",
+      "severity": "Needs owner judgment in motion; do not claim anticipation solved."
+    },
+    {
+      "rank": 3,
+      "expectationIds": [
+        "WB-E004"
+      ],
+      "concern": "Hit confirmation establishes actual damage but not attacker/projectile lineage or the reason an attack missed. Empty explosions and absent hit marks require careful wording.",
+      "severity": "Keep captions precise."
+    }
+  ],
+  "tentativePreference": {
+    "alternative": "cues",
+    "strength": "Slight",
+    "reason": "The confirmed-hit versus released-but-missed distinction is useful. I do not see enough evidence that the extra ring/pointer detail substantially improves pressure reading."
+  },
+  "uncertainty": [
+    "Only 22 sampled paired frames were inspected, not continuous video. Timing feel, tension, animation quality and normal-speed perceptual load remain inconclusive.",
+    "Three curated local windows support a narrow presentation comparison; neither all seed behavior nor whole-match readability was assessed.",
+    "Preparation tells do not establish cancellability, punish windows or tactical commitment rules. No gameplay changes occurred between alternatives.",
+    "No unique projectile lineage was reconstructed. Logs corroborate damage/empty AOE events but cannot establish visual pleasure."
+  ],
+  "overallVerdict": "Tentatively prefer B for knowing a hit really happened. Its benefit to anticipation is modest in these samples, and reading initiative in four-way fights remains unresolved. Ready for a bounded owner comparison with those limits stated.",
+  "displaySummary": {
+    "title": "Hits are clearer; pressure is still hard to read",
+    "text": "B helps separate a missed swing from a real hit. In the crowded fight I still have to trace shots to know who is pressuring whom, and the preparation detail is small. Slight preference for B, based on sampled stills rather than continuous viewing."
+  },
+  "blockers": []
+}

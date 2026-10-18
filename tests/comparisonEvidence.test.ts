@@ -52,3 +52,36 @@ test('curation applies only to its documented setups', () => {
   assert.equal(comparisonBrief('duel', 1, Math.PI / 2), undefined);
   assert.equal(comparisonBrief('duel', 211, 0), undefined);
 });
+
+import { SPELL_BRIEFS } from '../src/spellReadabilityExperiment';
+test('spell readability clips retain their hit, miss and crowd evidence', () => {
+  for (const brief of SPELL_BRIEFS) {
+    const [current, cues] = brief.clips;
+    assert.deepEqual([current.start, current.end], [cues.start, cues.end], 'matched actions isolate presentation');
+    const events: { type: string; who: string | null; meta: Record<string, unknown>; t: number }[] = [];
+    const world = createScenario({ scenario: brief.scenario, seed: brief.seed, variant: 'burst',
+      telemetry: { event(type, who, meta = {}, t = 0) { events.push({ type, who, meta, t }); }, frame() {}, flush() {}, close() {} } });
+    while (world.tick < Math.round(current.end / SIMULATION_DT) && world.contestants.filter(c => c.alive).length > 1) world.update(SIMULATION_DT);
+    const during = events.filter(e => e.t >= current.start && e.t <= current.end);
+    const near = (type: string, who: string, t: number) => during.find(e => e.type === type && e.who === who && Math.abs(e.t-t) < .01);
+    if (brief.id === 'spell-duel-hit-miss') {
+      assert.ok(near('damage','blue',9.25)); assert.ok(near('damage','blue',11.18));
+      assert.ok(near('cast_release','red',9.63));
+      assert.equal(during.filter(e => e.type === 'damage' && e.t > 9.6 && e.t < 10.1).length, 0);
+      assert.ok(near('damage','red',11.43)); assert.ok(near('death','blue',12.22));
+    } else if (brief.id === 'spell-intersection') {
+      assert.ok(near('death','green',6.98)); assert.ok(near('damage','yellow',7.57)); assert.ok(near('damage','yellow',7.60));
+      assert.ok(near('damage','red',8.52)); assert.ok(near('damage','red',9.30));
+      assert.ok(near('spell_impact','green',7.23));
+      assert.equal(during.filter(e => e.type === 'damage' && e.meta.spell === 'iceShard').length,0);
+      assert.ok(world.contestants.find(c => c.id === 'blue')!.alive);
+    } else {
+      assert.equal(during.filter(e => e.type === 'projectile_emit' && e.who === 'green').length,5);
+      assert.equal(during.filter(e => e.type === 'projectile_emit' && e.who === 'yellow').length,6);
+      assert.equal(during.filter(e => e.type === 'damage' && e.who === 'green').length,3);
+      assert.equal(during.filter(e => e.type === 'damage' && e.who === 'red').length,3);
+      assert.ok(near('spell_impact','green',2.32));
+      assert.equal(during.filter(e => e.type === 'damage' && e.meta.spell === 'iceShard').length,0);
+    }
+  }
+});

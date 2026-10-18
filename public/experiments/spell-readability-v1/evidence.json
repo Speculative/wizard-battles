@@ -1,0 +1,2706 @@
+{
+  "source": "sha256:3eab2014d6c60f477cec56e5c2dcd020401aee2aa4c66082121e8664fd219c60",
+  "dt": 0.016666666666666666,
+  "media": [
+    {
+      "id": "duel7",
+      "capture": "media/duel7/capture.json",
+      "clip": "media/duel7/clip.mp4",
+      "originalDirectory": "runs-captures/spell-delivery-duel7",
+      "files": [
+        {
+          "path": "media/duel7/capture.json",
+          "sha256": "53146b255b01adf3936d4dc3e61e25a718e6d010a8683f478e282887944e06a3"
+        },
+        {
+          "path": "media/duel7/clip.mp4",
+          "sha256": "03d018e32e0d57898159c4881226d4ad40d9aec3acdba237a3bb6023825459a1"
+        },
+        {
+          "path": "media/duel7/frame-00000.png",
+          "sha256": "9ff8bb303361416279a93b71de85d1632fe20cd0cec656591842baadbbb11b00"
+        },
+        {
+          "path": "media/duel7/frame-00001.png",
+          "sha256": "3b888334ad45e7e24ae1de8ab3347bff8a73cbe3115dfd128743c8319ba1c755"
+        },
+        {
+          "path": "media/duel7/frame-00002.png",
+          "sha256": "f82a94d52ea7d1a88d33ea1275afa685fb0076ea75c98cfdc9d89e247b0bcad4"
+        },
+        {
+          "path": "media/duel7/frame-00003.png",
+          "sha256": "9bc70a850cccb7cad83400b7445dca7cbddc90aecb63bcda16a7a067dc3eac1d"
+        },
+        {
+          "path": "media/duel7/frame-00004.png",
+          "sha256": "dfe0d955c2d8e9874af3ec4bdddf6eb32149c60b90e31ab114aeed0515f60994"
+        },
+        {
+          "path": "media/duel7/frame-00005.png",
+          "sha256": "0f2995ad4aa87cce5fe734bd4d99d16650c6a3ca4959ce55282d466b7ad4b7da"
+        },
+        {
+          "path": "media/duel7/frame-00006.png",
+          "sha256": "0aa2234e39e8d40bb262a383eae82e9b537951e95ba983d3c78b9aba3d05693b"
+        },
+        {
+          "path": "media/duel7/frame-00007.png",
+          "sha256": "e4c58c0448b2097d07210916c4ca23f2d59424bde17c42acf2ae3184b1afe365"
+        },
+        {
+          "path": "media/duel7/frame-00008.png",
+          "sha256": "7ea6daff0255c06f7af925ad70e77d6f00b7b6cdc4fb318eed16ac5ce17b1696"
+        },
+        {
+          "path": "media/duel7/frame-00009.png",
+          "sha256": "f96c5cd4df065db278bdfa180a1ad80eb78a361117565d0be409a054831a2fa5"
+        },
+        {
+          "path": "media/duel7/frame-00010.png",
+          "sha256": "7406c5849c618eee1996057d777dcc972d22b4cd1a8789729dbc8b9f5425610c"
+        },
+        {
+          "path": "media/duel7/frame-00011.png",
+          "sha256": "49803a51eb32efe7525ec9d4afa43923394669c312ab5376306907a97b5e3882"
+        },
+        {
+          "path": "media/duel7/frame-00012.png",
+          "sha256": "55595e38513a43a0a3abf2a41da3e688baaf58d225b118e6a8389860e8bbbe92"
+        },
+        {
+          "path": "media/duel7/frame-00013.png",
+          "sha256": "830ca6ea0c7edbea72ccffbb8a2d697c2be1bd3148241bf27736dc7731a73064"
+        },
+        {
+          "path": "media/duel7/frame-00014.png",
+          "sha256": "2b0fd3e81d879bce4c58c4d31e0eab6ce3b97db5b86b9ba7c84363e7a0982399"
+        },
+        {
+          "path": "media/duel7/frame-00015.png",
+          "sha256": "4c60bf16133ae737c9ece82a8777df959e4727e39b619f82ecc594baeeb44d7a"
+        },
+        {
+          "path": "media/duel7/frame-00016.png",
+          "sha256": "3aed6c71af330e12cdfd71241940aa0350eee852ea5376dd8df8e206f359f9e3"
+        },
+        {
+          "path": "media/duel7/frame-00017.png",
+          "sha256": "b6560ad059272aaaefd8fb17a28376add29fa71f2ad66422edd25685fd490139"
+        },
+        {
+          "path": "media/duel7/frame-00018.png",
+          "sha256": "5848179591909739d7fe925905fb4e36ea6414d5e188768e0d86bc8bcff25882"
+        },
+        {
+          "path": "media/duel7/frame-00019.png",
+          "sha256": "ed7845f2f15ea476da1e9d35a58a128e15980ddbeb098d89d41c890b3d278607"
+        },
+        {
+          "path": "media/duel7/frame-00020.png",
+          "sha256": "a73c76821c272ea4c50e3e605f4ba7ca723f53cd2c8b52a1dc5dd40ab5f3294d"
+        },
+        {
+          "path": "media/duel7/frame-00021.png",
+          "sha256": "c626246c85729c96cb2926f8d932e3a460ac24f0fb0c790eafd71bfc53cec5d0"
+        },
+        {
+          "path": "media/duel7/frame-00022.png",
+          "sha256": "76a36f9c772416ab26d6848f0b21a5e4dc2814e77834d9b5cbefe54029d8c951"
+        },
+        {
+          "path": "media/duel7/frame-00023.png",
+          "sha256": "c7748fcedfa85a28fb66d6bb610a195e59350a73eeffc8f78bfcffc594fe9214"
+        },
+        {
+          "path": "media/duel7/frame-00024.png",
+          "sha256": "345499c6f73c2bdc644bd5c0927a9ad57452a346f08dbfc38464080d44b90ae7"
+        },
+        {
+          "path": "media/duel7/frame-00025.png",
+          "sha256": "9dd202aae041e3b79b266b326e49df401d4012638984ce09035db4e5303c6374"
+        },
+        {
+          "path": "media/duel7/frame-00026.png",
+          "sha256": "cdeaddde746be3cbccce8137f465cecf9acd74c1c7ccff8e1ac77db16b5e2ac8"
+        },
+        {
+          "path": "media/duel7/frame-00027.png",
+          "sha256": "2473b227d19fdeec9f630f92819cd3dc95ca8cf8783d7594f3b191d812b22354"
+        },
+        {
+          "path": "media/duel7/frame-00028.png",
+          "sha256": "ae6e3180c8d81674e78266e0ed176dbd8006976d193e81cb3948fa85e51a4a72"
+        },
+        {
+          "path": "media/duel7/frame-00029.png",
+          "sha256": "40d053199aaac6eb1973df9cb557609a03a4bb4b1e0edc74cc08f8ed93a09018"
+        },
+        {
+          "path": "media/duel7/frame-00030.png",
+          "sha256": "1cdf99b575a7d66ffc2cfe713d195c00e0f452395caa4647cf623b819784f217"
+        },
+        {
+          "path": "media/duel7/frame-00031.png",
+          "sha256": "553c5510f4eee6ebf1546f62c8996332433586916f6c54cf0bb26e9bf5ae07d0"
+        },
+        {
+          "path": "media/duel7/frame-00032.png",
+          "sha256": "4d75277d5217f1af54074ebd16420670d92487e85451c8c75456aaef239274c8"
+        },
+        {
+          "path": "media/duel7/frame-00033.png",
+          "sha256": "03a52fcf28c2ac8cd6a06c01be8a97b67674784883ac9cce24ed05b6830c8ad2"
+        },
+        {
+          "path": "media/duel7/frame-00034.png",
+          "sha256": "b4a23ed406f6b7228630b41d2282b8dde5b0c8e1710f4ffad166174fb10ca747"
+        },
+        {
+          "path": "media/duel7/frame-00035.png",
+          "sha256": "3d6a70186db132449b666d3854e08d08964b07201b1050f3e634856140a40a14"
+        },
+        {
+          "path": "media/duel7/frame-00036.png",
+          "sha256": "ba2613aa927d7bf9dcae965cdc7c4518a3a5bc956bf0c39a245980cbba5d0424"
+        },
+        {
+          "path": "media/duel7/frame-00037.png",
+          "sha256": "9382b591a839f63c9d8d432cf0bd9c2f57ebc097ab0e7b56118056599cec0192"
+        },
+        {
+          "path": "media/duel7/frame-00038.png",
+          "sha256": "dce4c7c443f8fe8d824570a0465585637ece74bd5fb71455459d786faccdf401"
+        },
+        {
+          "path": "media/duel7/frame-00039.png",
+          "sha256": "929fcea78607f8427799b2a680a9d5025ab9f62341406a6df825f5f846fd47db"
+        },
+        {
+          "path": "media/duel7/frame-00040.png",
+          "sha256": "837de8b1f2bc1e36ee31c113441a2f8ce89a6e11ab5bf4bf1bac9557b707f89b"
+        },
+        {
+          "path": "media/duel7/frame-00041.png",
+          "sha256": "837de8b1f2bc1e36ee31c113441a2f8ce89a6e11ab5bf4bf1bac9557b707f89b"
+        },
+        {
+          "path": "media/duel7/frame-00042.png",
+          "sha256": "837de8b1f2bc1e36ee31c113441a2f8ce89a6e11ab5bf4bf1bac9557b707f89b"
+        }
+      ]
+    },
+    {
+      "id": "four19",
+      "capture": "media/four19/capture.json",
+      "clip": "media/four19/clip.mp4",
+      "originalDirectory": "runs-captures/spell-delivery-four19",
+      "files": [
+        {
+          "path": "media/four19/capture.json",
+          "sha256": "cf5ca3c3432ab8bd4c130da73d3bcba1117d4ff351ec1a1dc24f0afd51d27ec2"
+        },
+        {
+          "path": "media/four19/clip.mp4",
+          "sha256": "b7549079e26d042484207d4f117252850e5910b1601317756b4018c116cadbf1"
+        },
+        {
+          "path": "media/four19/frame-00000.png",
+          "sha256": "29c271d1427bfdf650536bf0ac04d311ff58299ced8379a7c0d2098c6b53f012"
+        },
+        {
+          "path": "media/four19/frame-00001.png",
+          "sha256": "5c59a2b8dcc9e931d44184e341a8452e09c40545e41e7f220b18b5a36fb99079"
+        },
+        {
+          "path": "media/four19/frame-00002.png",
+          "sha256": "bec407de0c30cbde52e3f319fed9175efa30e4b66822cfde691ee0cb3d2b914c"
+        },
+        {
+          "path": "media/four19/frame-00003.png",
+          "sha256": "bbc47b3af3613975bb27b23a4f300976c7011742c07319be8678ac2894042e59"
+        },
+        {
+          "path": "media/four19/frame-00004.png",
+          "sha256": "5bc564fef069f76cea49e3a84c861c795a063a9e11136781c9a6a61d06cabac5"
+        },
+        {
+          "path": "media/four19/frame-00005.png",
+          "sha256": "f42b082e7d34dfe9d232be4823df051fa902f50fcae257d845a836ecb8177ee3"
+        },
+        {
+          "path": "media/four19/frame-00006.png",
+          "sha256": "61c1e3bef41864a52104750921dd5c43db7034bd2dd0d7d3841ff61dcfc97833"
+        },
+        {
+          "path": "media/four19/frame-00007.png",
+          "sha256": "7d846fac47a519876d1ad73b4299f1c16f46e960102502751fd35972bb6ebea1"
+        },
+        {
+          "path": "media/four19/frame-00008.png",
+          "sha256": "68f48e2daaa15eb3f248c90d361ebcb12bde23272f540c74072a619aa91f8aa9"
+        },
+        {
+          "path": "media/four19/frame-00009.png",
+          "sha256": "adc5cbea5dad3b5a7aa306ee0112d9d1d6832c86cc9a84cb8b8acb454856cb14"
+        },
+        {
+          "path": "media/four19/frame-00010.png",
+          "sha256": "67e7f51cac654db4d875af745bdda4a69d5c9cf95701ca7e1360243c2897a0ca"
+        },
+        {
+          "path": "media/four19/frame-00011.png",
+          "sha256": "65aee627357484a823b551ddde4fb481af24fc82bcd405e174b42a48005854a3"
+        },
+        {
+          "path": "media/four19/frame-00012.png",
+          "sha256": "b09268f1b0bac65c5422a7575946af4720927cf9b6f47c42ea4eac5d16de3f2b"
+        },
+        {
+          "path": "media/four19/frame-00013.png",
+          "sha256": "8f2cca8a98e822577f5edbc4c371a796da1d1ba9c60d79b2d0a14f2b259b3216"
+        },
+        {
+          "path": "media/four19/frame-00014.png",
+          "sha256": "1c95185ee21ee776e9850be6e4a44ea1ab455a7ebd15d7fb32fec672e787055c"
+        },
+        {
+          "path": "media/four19/frame-00015.png",
+          "sha256": "c16a6e24072c951efc4685952155c428fdbff601cc716c381cbcd4ef17644bfb"
+        },
+        {
+          "path": "media/four19/frame-00016.png",
+          "sha256": "6f00b75fd028f399589f3ed1fc823d44c6141f6bbe4c660b517bf0517b8ecdb8"
+        },
+        {
+          "path": "media/four19/frame-00017.png",
+          "sha256": "a5107147f4d9d1915b9ebecd1c0bc5d02c486635d6c1181e53e9fc91efddc137"
+        },
+        {
+          "path": "media/four19/frame-00018.png",
+          "sha256": "3fbe56da2f5bda338a5506d85d812881d33248b54163123738c4acb79c16e10a"
+        },
+        {
+          "path": "media/four19/frame-00019.png",
+          "sha256": "43c05d89ad0b4543aa9cd8eeae3b3663110813efc0b25278ce2a34c1155648c4"
+        },
+        {
+          "path": "media/four19/frame-00020.png",
+          "sha256": "e86c31e9a566b9157933d6c6b9663efcdb3c3bd00bca345d08f19a3b4276509a"
+        },
+        {
+          "path": "media/four19/frame-00021.png",
+          "sha256": "2d94f95c2ac69617cc6ae1d7d02e387e92856b1ea26e2fb4ed2181189b3ff9b6"
+        },
+        {
+          "path": "media/four19/frame-00022.png",
+          "sha256": "6467450edf422712177040a72da08a6ecdd159ca7685f682b59036d5b5c4abfe"
+        },
+        {
+          "path": "media/four19/frame-00023.png",
+          "sha256": "77bea8ae5940a06f36e487d3162c718ddbe468c9f9f3ec73a95eada680c39a0b"
+        },
+        {
+          "path": "media/four19/frame-00024.png",
+          "sha256": "a21e6c73a8de4a997039b3535796f5dcf80608d642e8640137a22caeefe7fe8b"
+        },
+        {
+          "path": "media/four19/frame-00025.png",
+          "sha256": "e2458e74df872e7466b81fa4e7184a994b3a0a6b6357cb243f57c6208a8ce9d3"
+        },
+        {
+          "path": "media/four19/frame-00026.png",
+          "sha256": "0ef8f61a5b9a82db5c94ce8d196e1494ac883bfd0358a3f15751b2f40281dce9"
+        },
+        {
+          "path": "media/four19/frame-00027.png",
+          "sha256": "a6efe6bfe8a741c682249cb316ed1b9f1780cfff138ac7e5784ba06e6589a703"
+        },
+        {
+          "path": "media/four19/frame-00028.png",
+          "sha256": "71e8e810f25d6a85d043569931eada5db5f94f7a45f527274cf09ad555bf4e9b"
+        },
+        {
+          "path": "media/four19/frame-00029.png",
+          "sha256": "e8f1ed0276ecba6ab6ee3690fa477988c644cbc3a5560d2c7cd35eb13f2a544e"
+        },
+        {
+          "path": "media/four19/frame-00030.png",
+          "sha256": "70ead626b5648331afcecd5de55d8d7d30c66f6cde05418f92c0485224bf3ec8"
+        },
+        {
+          "path": "media/four19/frame-00031.png",
+          "sha256": "79abeb8f16d328e3e1158e0b62dea2b8ae5348f5d48ee7988764f7bdde94ef96"
+        },
+        {
+          "path": "media/four19/frame-00032.png",
+          "sha256": "9e841f6a28269e3d7980e4badf2a1dca5c60ab63180bc57d2fd2ef6b431be606"
+        },
+        {
+          "path": "media/four19/frame-00033.png",
+          "sha256": "04692e5945fdfa2d4ae01ac2a61398331fb4570debb0b42fdc0c881d0bc560f9"
+        },
+        {
+          "path": "media/four19/frame-00034.png",
+          "sha256": "a0eb08b38a332e165eed2d59cae720b4d8a5e553c28a44e96bbd844880cd1872"
+        },
+        {
+          "path": "media/four19/frame-00035.png",
+          "sha256": "faf000879b3028d961358c62a7cab78bdabdfd5a4a3b09d5f34194ea3c32b3e3"
+        },
+        {
+          "path": "media/four19/frame-00036.png",
+          "sha256": "08d1381dba4bc7856127487625065b64eea8edc3fe8d2f68087dafc3abfab64a"
+        },
+        {
+          "path": "media/four19/frame-00037.png",
+          "sha256": "b999ac87a0524c3babb7f4024b41164ecdcc5256d11ad7e45e7876646be71d37"
+        },
+        {
+          "path": "media/four19/frame-00038.png",
+          "sha256": "24e6aa8da39bd023c3ce74370e299973ba8e406fb577168a03eebb5611b1de87"
+        },
+        {
+          "path": "media/four19/frame-00039.png",
+          "sha256": "64ed89beb594e4565f09521627b19a20a12cd53820ae64f05ccb471850ee4057"
+        }
+      ]
+    },
+    {
+      "id": "four1",
+      "capture": "media/four1/capture.json",
+      "clip": "media/four1/clip.mp4",
+      "originalDirectory": "runs-captures/spell-delivery-four1",
+      "files": [
+        {
+          "path": "media/four1/capture.json",
+          "sha256": "65e7940a716a7eb8b3a4ac862657b11ac2ba1d1f816c6d8ecb87b04fd2a532ca"
+        },
+        {
+          "path": "media/four1/clip.mp4",
+          "sha256": "4ec3d5b9020889f98bed437fc794d643593bff16cb1541b324222e7eefc7cc68"
+        },
+        {
+          "path": "media/four1/frame-00000.png",
+          "sha256": "3b0935e9998d69b1d4e0deac72197a3ea4465e8f81152b7a4dcd5192abab49fa"
+        },
+        {
+          "path": "media/four1/frame-00001.png",
+          "sha256": "fefe6680a7f4715c3d4f5f377d724b0e56703e836c38d19496e68371006cbc8a"
+        },
+        {
+          "path": "media/four1/frame-00002.png",
+          "sha256": "0afbe0c3b0d6b4933c67bc8c0b689538046ae878791b0a129c22fbe1e600d7ef"
+        },
+        {
+          "path": "media/four1/frame-00003.png",
+          "sha256": "91618b551872635b90c03b3cbe82c074fa11b6d124646aaa38156f852c88be46"
+        },
+        {
+          "path": "media/four1/frame-00004.png",
+          "sha256": "f0bfdc0a9ee0004e97a84fb5df295bc7edc34e3b8d9a8ed4e8a2a5ec0078777e"
+        },
+        {
+          "path": "media/four1/frame-00005.png",
+          "sha256": "78746ec44c151679ab0aabe68d881beba9d7560f465692ad3ade8d904291d290"
+        },
+        {
+          "path": "media/four1/frame-00006.png",
+          "sha256": "6e255667f1a57942e370e5ea1b58ae9c5ad6073313bacfe4f912a414d990b172"
+        },
+        {
+          "path": "media/four1/frame-00007.png",
+          "sha256": "fb0f5bcb65dc39311b5d22ccc73dafe32143acf465ce0ad59d8f83935da1ba33"
+        },
+        {
+          "path": "media/four1/frame-00008.png",
+          "sha256": "800cfee75232cc138f43950a6dc22d1b01bebf29347f5af51ae133d7122110c7"
+        },
+        {
+          "path": "media/four1/frame-00009.png",
+          "sha256": "4bc750eabcdcfc28cd77b91c1f1edb200bfd7b476d11bd4ca2eb288022419cec"
+        },
+        {
+          "path": "media/four1/frame-00010.png",
+          "sha256": "dff0920a102a205bb88e191c998a7160f9bbca1a901c71dad1b3ff7069c6ffd7"
+        },
+        {
+          "path": "media/four1/frame-00011.png",
+          "sha256": "ab1fc8315de7138ea6851cab3943886b222883bda01812b4effe63b752cb528e"
+        },
+        {
+          "path": "media/four1/frame-00012.png",
+          "sha256": "a99e100f494c919042954b1a46f10428706d51a27f7b4fee32be63ae35d9e43c"
+        },
+        {
+          "path": "media/four1/frame-00013.png",
+          "sha256": "ff1768800c40536f3ebcafa011f72c0d71726e539190a28eefd3740049a73a54"
+        },
+        {
+          "path": "media/four1/frame-00014.png",
+          "sha256": "166ac0bf9969ca547e9445f304a653cd4c08a1eaf6e24c282f48cb0e936951ab"
+        },
+        {
+          "path": "media/four1/frame-00015.png",
+          "sha256": "3c019e5781fe571d5e91c738018873031520cdafa16ce60fb76ebab03e744814"
+        },
+        {
+          "path": "media/four1/frame-00016.png",
+          "sha256": "21808b7f67ddb4b34edcb9e7355ae0147d295335e25f4a170167e05d1896ee58"
+        },
+        {
+          "path": "media/four1/frame-00017.png",
+          "sha256": "740509e615562b0c0c9d7a27ea1ced6128555de6c011c68118e49ae6f679d856"
+        },
+        {
+          "path": "media/four1/frame-00018.png",
+          "sha256": "a5a61b68ef32671b4ac957ea5efc230bfd9f7cbb382294f871d4de7d07927104"
+        },
+        {
+          "path": "media/four1/frame-00019.png",
+          "sha256": "c01081443cb9102e9feaf37ef1de2e31e92daefd4cdf13f80ae6821ae5f8c2c1"
+        },
+        {
+          "path": "media/four1/frame-00020.png",
+          "sha256": "6ee62dd9867737a2e4671c26b5171ef4f91afd3e83b0558370477d0ffac08d8f"
+        },
+        {
+          "path": "media/four1/frame-00021.png",
+          "sha256": "570bae1ea4ac8aa193ed9038841a26254513bd8ca179b4911f2c8d450366c69c"
+        },
+        {
+          "path": "media/four1/frame-00022.png",
+          "sha256": "19edc6864063f00e9c9a3d1d3c46611b248ff72af82ffe87ca89d378b0b07bd0"
+        },
+        {
+          "path": "media/four1/frame-00023.png",
+          "sha256": "219e8a5ce161b050d44ea0f6369c37ed61ba06981857c4c80e419375bede03ab"
+        },
+        {
+          "path": "media/four1/frame-00024.png",
+          "sha256": "c639d76657ccdeefa529424d1617c5ad2c996d4eba4a974dad957ce18750fa81"
+        },
+        {
+          "path": "media/four1/frame-00025.png",
+          "sha256": "552e01a9d6d87ef60e33a394cf8d3783b928b3a3d6e528347c6c73475e4061df"
+        },
+        {
+          "path": "media/four1/frame-00026.png",
+          "sha256": "de0564675a4fe8d5652cef13ed7b53b696f73a497adc197adf958a12bd08dd94"
+        },
+        {
+          "path": "media/four1/frame-00027.png",
+          "sha256": "f95158394d1e2b2e3fad7cc26be52c526ee23ffd8ff78e790d142fac9dc36b5f"
+        },
+        {
+          "path": "media/four1/frame-00028.png",
+          "sha256": "eee0565b652cf4a99e1d332bbd873167df074a7ae89f56768969f99d871a2220"
+        },
+        {
+          "path": "media/four1/frame-00029.png",
+          "sha256": "23ed1779be8c4ab47bc678f5d03da621abdc2ace513edecffaf03583f0908502"
+        },
+        {
+          "path": "media/four1/frame-00030.png",
+          "sha256": "7462a7229f8b38af42cb40164426bda8ce1b0702c9ef9148cadf0e0bd71cf42f"
+        },
+        {
+          "path": "media/four1/frame-00031.png",
+          "sha256": "7319410c651df035710eb43fb0fbe05cce39f9ad0ab170c089009791a9eb41e8"
+        },
+        {
+          "path": "media/four1/frame-00032.png",
+          "sha256": "17f430c006435480dbdbe7279fa8dc114fd807e0d6be7ffa44c74d4293f9564d"
+        },
+        {
+          "path": "media/four1/frame-00033.png",
+          "sha256": "1c74115e286818952a046442943f23d22820858ed4dd1a03b74290fe95545c10"
+        },
+        {
+          "path": "media/four1/frame-00034.png",
+          "sha256": "f8f45eb6505f20b5c736e70664d2c52b117665bb19306bc5da9611dfb8141696"
+        },
+        {
+          "path": "media/four1/frame-00035.png",
+          "sha256": "c1a99acd688ef586a6f534a964690b3815204d44dae23d975d0deb3c9733bad1"
+        },
+        {
+          "path": "media/four1/frame-00036.png",
+          "sha256": "2f02610c64831e58c5c1eff1b3453fd22244b8e89115b3aff2244975547d7b99"
+        },
+        {
+          "path": "media/four1/frame-00037.png",
+          "sha256": "d3a4f70f81c5a33ccb25609f2491f705227d685c04946e0d209a410b0041699b"
+        }
+      ]
+    }
+  ],
+  "excerpts": [
+    {
+      "scenario": "duel",
+      "seed": 7,
+      "rotation": 0,
+      "simulationVariant": "burst",
+      "start": 8.3,
+      "end": 12.6,
+      "rawEvents": "runs-experiment/spell-readability-v1-final/duel-s7-r0-burst/events.jsonl",
+      "events": [
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 8.500000000000002,
+          "type": "cast_request",
+          "who": "blue",
+          "meta": {
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "red",
+            "accepted": true,
+            "chargeTime": 0.45,
+            "cooldown": 1.4,
+            "distToTarget": 171.43524139653644
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 8.966666666666692,
+          "type": "cast_release",
+          "who": "blue",
+          "meta": {
+            "position": {
+              "x": -55.633831649989745,
+              "y": 33,
+              "z": -122.00604511517714
+            },
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "red"
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 9.250000000000039,
+          "type": "damage",
+          "who": "blue",
+          "meta": {
+            "victim": "red",
+            "position": {
+              "x": 5.00166616109896,
+              "y": 33,
+              "z": -9.138274560531595
+            },
+            "amount": 10,
+            "spell": "fireball",
+            "hpAfter": 80
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 9.250000000000039,
+          "type": "spell_impact",
+          "who": "blue",
+          "meta": {
+            "spell": "fireball",
+            "position": {
+              "x": -5.212951892806819,
+              "y": 41,
+              "z": -29.197096836586613
+            },
+            "radius": 38,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 9.450000000000049,
+          "type": "cast_request",
+          "who": "red",
+          "meta": {
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "blue",
+            "accepted": true,
+            "chargeTime": 0.18,
+            "cooldown": 0.6,
+            "distToTarget": 52.99724931260778
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 9.633333333333391,
+          "type": "cast_release",
+          "who": "red",
+          "meta": {
+            "position": {
+              "x": -24.327907730499195,
+              "y": 33,
+              "z": -62.270951899402164
+            },
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "blue"
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 10.366666666666761,
+          "type": "cast_request",
+          "who": "blue",
+          "meta": {
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "red",
+            "accepted": true,
+            "chargeTime": 0.45,
+            "cooldown": 1.4,
+            "distToTarget": 104.02942864314164
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 10.833333333333451,
+          "type": "cast_release",
+          "who": "blue",
+          "meta": {
+            "position": {
+              "x": -186.30771094610097,
+              "y": 33,
+              "z": -161.2694799595669
+            },
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "red"
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 11.183333333333469,
+          "type": "damage",
+          "who": "blue",
+          "meta": {
+            "victim": "red",
+            "position": {
+              "x": -97.90988971171627,
+              "y": 33,
+              "z": -41.34666549370741
+            },
+            "amount": 10,
+            "spell": "fireball",
+            "hpAfter": 70
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 11.183333333333469,
+          "type": "spell_impact",
+          "who": "blue",
+          "meta": {
+            "spell": "fireball",
+            "position": {
+              "x": -107.5947074257154,
+              "y": 41,
+              "z": -66.32631672931535
+            },
+            "radius": 38,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 11.216666666666804,
+          "type": "cast_request",
+          "who": "red",
+          "meta": {
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "blue",
+            "accepted": true,
+            "chargeTime": 0.18,
+            "cooldown": 0.6,
+            "distToTarget": 44.93376077673807
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 11.400000000000146,
+          "type": "cast_release",
+          "who": "red",
+          "meta": {
+            "position": {
+              "x": -105.27169437813528,
+              "y": 33,
+              "z": -44.72717339089047
+            },
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "blue"
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 11.433333333333481,
+          "type": "damage",
+          "who": "red",
+          "meta": {
+            "victim": "blue",
+            "position": {
+              "x": -75.98145363764458,
+              "y": 33,
+              "z": -90.50850669805867
+            },
+            "amount": 22,
+            "spell": "melee",
+            "hpAfter": 12
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 12.000000000000176,
+          "type": "cast_request",
+          "who": "red",
+          "meta": {
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "blue",
+            "accepted": true,
+            "chargeTime": 0.18,
+            "cooldown": 0.6,
+            "distToTarget": 45.77457782695279
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 12.183333333333518,
+          "type": "cast_release",
+          "who": "red",
+          "meta": {
+            "position": {
+              "x": -138.92734462381438,
+              "y": 33,
+              "z": -52.132619560122144
+            },
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "blue"
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 12.216666666666853,
+          "type": "damage",
+          "who": "red",
+          "meta": {
+            "victim": "blue",
+            "position": {
+              "x": -46.04761455885829,
+              "y": 33,
+              "z": -76.66838500518091
+            },
+            "amount": 22,
+            "spell": "melee",
+            "hpAfter": -10
+          }
+        },
+        {
+          "run": "duel-s7-r0-burst",
+          "t": 12.216666666666853,
+          "type": "death",
+          "who": "blue",
+          "meta": {
+            "killer": "red",
+            "spell": "melee"
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "simulationVariant": "burst",
+      "start": 5.8,
+      "end": 9.8,
+      "rawEvents": "runs-experiment/spell-readability-v1-final/four-wizards-s19-r0-burst/events.jsonl",
+      "events": [
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 5.33333333333332,
+          "type": "spell_impact",
+          "who": "blue",
+          "meta": {
+            "spell": "fireball",
+            "position": {
+              "x": 20.26550784520994,
+              "y": 41,
+              "z": -501.5279547923549
+            },
+            "radius": 38,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 5.6833333333333185,
+          "type": "cast_request",
+          "who": "green",
+          "meta": {
+            "factory": "iceShard",
+            "modifier": null,
+            "effectiveSpellId": "iceShard",
+            "targetId": "red",
+            "accepted": true,
+            "chargeTime": 1,
+            "cooldown": 4,
+            "distToTarget": 126.71904602913915
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 5.7666666666666515,
+          "type": "cast_request",
+          "who": "blue",
+          "meta": {
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "green",
+            "accepted": true,
+            "chargeTime": 0.45,
+            "cooldown": 1.4,
+            "distToTarget": 302.78795132058565
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 5.966666666666651,
+          "type": "cast_request",
+          "who": "red",
+          "meta": {
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "green",
+            "accepted": true,
+            "chargeTime": 0.18,
+            "cooldown": 0.6,
+            "distToTarget": 51.89080551294559
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.1499999999999835,
+          "type": "cast_release",
+          "who": "red",
+          "meta": {
+            "position": {
+              "x": -100.97800794937939,
+              "y": 33,
+              "z": 11.621385986578582
+            },
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "green"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.1499999999999835,
+          "type": "cast_request",
+          "who": "yellow",
+          "meta": {
+            "factory": "fireball",
+            "modifier": "spread",
+            "effectiveSpellId": "fireball+spread",
+            "targetId": "green",
+            "accepted": true,
+            "chargeTime": 0.7200000000000001,
+            "cooldown": 3.5,
+            "distToTarget": 274.05146084701835
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.183333333333317,
+          "type": "damage",
+          "who": "red",
+          "meta": {
+            "victim": "green",
+            "position": {
+              "x": -32.64150826298019,
+              "y": 33,
+              "z": -45.58914023026522
+            },
+            "amount": 22,
+            "spell": "melee",
+            "hpAfter": 12
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.2333333333333165,
+          "type": "cast_release",
+          "who": "blue",
+          "meta": {
+            "position": {
+              "x": 164.21908026880618,
+              "y": 33,
+              "z": 247.25100386776253
+            },
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "green"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.683333333333315,
+          "type": "cast_release",
+          "who": "green",
+          "meta": {
+            "position": {
+              "x": -32.52413412425384,
+              "y": 33,
+              "z": -45.546148236147154
+            },
+            "factory": "iceShard",
+            "modifier": null,
+            "effectiveSpellId": "iceShard",
+            "targetId": "red"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.766666666666648,
+          "type": "cast_request",
+          "who": "red",
+          "meta": {
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "green",
+            "accepted": true,
+            "chargeTime": 0.18,
+            "cooldown": 0.6,
+            "distToTarget": 5.790920742799187
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.816666666666648,
+          "type": "spell_impact",
+          "who": "blue",
+          "meta": {
+            "spell": "fireball",
+            "position": {
+              "x": 501.7059168838729,
+              "y": 41,
+              "z": -378.4456864521335
+            },
+            "radius": 38,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.883333333333314,
+          "type": "cast_release",
+          "who": "yellow",
+          "meta": {
+            "position": {
+              "x": 271.0152169174869,
+              "y": 33,
+              "z": -178.0924031411918
+            },
+            "factory": "fireball",
+            "modifier": "spread",
+            "effectiveSpellId": "fireball+spread",
+            "targetId": "green"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.883333333333314,
+          "type": "projectile_emit",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+spread",
+            "position": {
+              "x": 226.87443762846542,
+              "y": 33,
+              "z": -148.96049573365983
+            },
+            "direction": {
+              "x": -0.7006503636362847,
+              "z": 0.7135047777950347
+            },
+            "childIndex": 0,
+            "childOf": "fireball+spread"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.883333333333314,
+          "type": "projectile_emit",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+spread",
+            "position": {
+              "x": 223.60532563719215,
+              "y": 33,
+              "z": -152.8708931154288
+            },
+            "direction": {
+              "x": -0.8263854402237182,
+              "z": 0.5631048784962278
+            },
+            "childIndex": 1,
+            "childOf": "fireball+spread"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.883333333333314,
+          "type": "projectile_emit",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+spread",
+            "position": {
+              "x": 221.16190940058198,
+              "y": 33,
+              "z": -157.34392541907945
+            },
+            "direction": {
+              "x": -0.9203629877856484,
+              "z": 0.3910651745096645
+            },
+            "childIndex": 2,
+            "childOf": "fireball+spread"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.883333333333314,
+          "type": "projectile_emit",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+spread",
+            "position": {
+              "x": 219.6380880343242,
+              "y": 33,
+              "z": -162.20769652168786
+            },
+            "direction": {
+              "x": -0.978971501872486,
+              "z": 0.20399705517857125
+            },
+            "childIndex": 3,
+            "childOf": "fireball+spread"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.883333333333314,
+          "type": "projectile_emit",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+spread",
+            "position": {
+              "x": 219.09242113895525,
+              "y": 33,
+              "z": -167.27529442741508
+            },
+            "direction": {
+              "x": -0.9999586901559072,
+              "z": 0.0090894434198325
+            },
+            "childIndex": 4,
+            "childOf": "fireball+spread"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.949999999999981,
+          "type": "cast_release",
+          "who": "red",
+          "meta": {
+            "position": {
+              "x": -73.26124341489991,
+              "y": 33,
+              "z": -36.70296647213108
+            },
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "green"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.983333333333314,
+          "type": "damage",
+          "who": "red",
+          "meta": {
+            "victim": "green",
+            "position": {
+              "x": -6.722180060259234,
+              "y": 33,
+              "z": -100.44031313349171
+            },
+            "amount": 22,
+            "spell": "melee",
+            "hpAfter": -10
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 6.983333333333314,
+          "type": "death",
+          "who": "green",
+          "meta": {
+            "killer": "red",
+            "spell": "melee"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 7.116666666666647,
+          "type": "spell_impact",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball",
+            "position": {
+              "x": 248.73555889443907,
+              "y": 41,
+              "z": 500.4514394806363
+            },
+            "radius": 38,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 7.233333333333313,
+          "type": "spell_impact",
+          "who": "green",
+          "meta": {
+            "spell": "iceShard",
+            "position": {
+              "x": -172.3490097524897,
+              "y": 8,
+              "z": 52.527151508966476
+            },
+            "radius": 90,
+            "visual": {
+              "shardColor": 12117247,
+              "shardEdgeColor": 15400959,
+              "portalColor": 8965375,
+              "telegraphColor": 10083839,
+              "impactCoreColor": 12640511,
+              "impactHaloColor": 4227264
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 7.566666666666645,
+          "type": "damage",
+          "who": "yellow",
+          "meta": {
+            "victim": "red",
+            "position": {
+              "x": 22.024024958069674,
+              "y": 33,
+              "z": -135.3029280697689
+            },
+            "amount": 4.5,
+            "spell": "fireball+spread",
+            "hpAfter": 95.5
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 7.566666666666645,
+          "type": "spell_impact",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+spread",
+            "position": {
+              "x": 45.70748453497888,
+              "y": 33,
+              "z": -125.96421971829503
+            },
+            "radius": 28.5,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 7.599999999999978,
+          "type": "damage",
+          "who": "yellow",
+          "meta": {
+            "victim": "red",
+            "position": {
+              "x": 31.050482197516086,
+              "y": 33,
+              "z": -137.6765685336662
+            },
+            "amount": 4.5,
+            "spell": "fireball+spread",
+            "hpAfter": 91
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 7.599999999999978,
+          "type": "spell_impact",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+spread",
+            "position": {
+              "x": 32.766785206570944,
+              "y": 33,
+              "z": -165.58162813685297
+            },
+            "radius": 28.5,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 7.649999999999978,
+          "type": "cast_request",
+          "who": "blue",
+          "meta": {
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "red",
+            "accepted": true,
+            "chargeTime": 0.45,
+            "cooldown": 1.4,
+            "distToTarget": 357.76320969206387
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 8.11666666666665,
+          "type": "cast_release",
+          "who": "blue",
+          "meta": {
+            "position": {
+              "x": 170.6123343261173,
+              "y": 33,
+              "z": 235.28404445671393
+            },
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "red"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 8.299999999999992,
+          "type": "cast_request",
+          "who": "red",
+          "meta": {
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "yellow",
+            "accepted": true,
+            "chargeTime": 0.18,
+            "cooldown": 0.6,
+            "distToTarget": 53.567786103966284
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 8.483333333333334,
+          "type": "cast_release",
+          "who": "red",
+          "meta": {
+            "position": {
+              "x": 226.4870418142143,
+              "y": 33,
+              "z": -180.06058828531303
+            },
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "yellow"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 8.51666666666667,
+          "type": "damage",
+          "who": "red",
+          "meta": {
+            "victim": "yellow",
+            "position": {
+              "x": 323.9783226758305,
+              "y": 33,
+              "z": -186.79635472307268
+            },
+            "amount": 22,
+            "spell": "melee",
+            "hpAfter": 78
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 9.083333333333364,
+          "type": "cast_request",
+          "who": "red",
+          "meta": {
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "yellow",
+            "accepted": true,
+            "chargeTime": 0.18,
+            "cooldown": 0.6,
+            "distToTarget": 28.860155516415276
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 9.266666666666707,
+          "type": "cast_release",
+          "who": "red",
+          "meta": {
+            "position": {
+              "x": 277.3214456044657,
+              "y": 33,
+              "z": -197.0699941661605
+            },
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "yellow"
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 9.300000000000042,
+          "type": "damage",
+          "who": "red",
+          "meta": {
+            "victim": "yellow",
+            "position": {
+              "x": 349.1617689475455,
+              "y": 33,
+              "z": -177.30183302293315
+            },
+            "amount": 22,
+            "spell": "melee",
+            "hpAfter": 56
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 9.516666666666719,
+          "type": "cast_request",
+          "who": "blue",
+          "meta": {
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "yellow",
+            "accepted": true,
+            "chargeTime": 0.45,
+            "cooldown": 1.4,
+            "distToTarget": 392.5680771463834
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 9.666666666666726,
+          "type": "spell_impact",
+          "who": "blue",
+          "meta": {
+            "spell": "fireball",
+            "position": {
+              "x": -377.8736511123538,
+              "y": 41,
+              "z": -502.2348194721995
+            },
+            "radius": 38,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s19-r0-burst",
+          "t": 9.866666666666736,
+          "type": "cast_request",
+          "who": "red",
+          "meta": {
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "yellow",
+            "accepted": true,
+            "chargeTime": 0.18,
+            "cooldown": 0.6,
+            "distToTarget": 11.678094117480036
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "four-wizards",
+      "seed": 1,
+      "rotation": 0,
+      "simulationVariant": "burst",
+      "start": 0.1,
+      "end": 3.9,
+      "rawEvents": "runs-experiment/spell-readability-v1-final/four-wizards-s1-r0-burst/events.jsonl",
+      "events": [
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.016666666666666666,
+          "type": "cast_request",
+          "who": "blue",
+          "meta": {
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "yellow",
+            "accepted": true,
+            "chargeTime": 0.45,
+            "cooldown": 1.4,
+            "distToTarget": 306.0687532428326
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.016666666666666666,
+          "type": "cast_request",
+          "who": "green",
+          "meta": {
+            "factory": "iceBolt",
+            "modifier": "spread",
+            "effectiveSpellId": "iceBolt+spread",
+            "targetId": "red",
+            "accepted": true,
+            "chargeTime": 0.7200000000000001,
+            "cooldown": 3.5,
+            "distToTarget": 305.8326421362774
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.016666666666666666,
+          "type": "cast_request",
+          "who": "yellow",
+          "meta": {
+            "factory": "fireball",
+            "modifier": "gatling",
+            "effectiveSpellId": "fireball+gatling",
+            "targetId": "blue",
+            "accepted": true,
+            "chargeTime": 0.675,
+            "cooldown": 4.8999999999999995,
+            "distToTarget": 306.10595246064133
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.4833333333333333,
+          "type": "cast_release",
+          "who": "blue",
+          "meta": {
+            "position": {
+              "x": 289.4959097243115,
+              "y": 33,
+              "z": 155.01087335648
+            },
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "yellow"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.7000000000000005,
+          "type": "cast_release",
+          "who": "yellow",
+          "meta": {
+            "position": {
+              "x": 288.35077108247015,
+              "y": 33,
+              "z": -208.52543448882017
+            },
+            "factory": "fireball",
+            "modifier": "gatling",
+            "effectiveSpellId": "fireball+gatling",
+            "targetId": "blue"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.7000000000000005,
+          "type": "projectile_emit",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+gatling",
+            "position": {
+              "x": 290.902586061129,
+              "y": 33,
+              "z": -182.6509636668943
+            },
+            "direction": {
+              "x": 0.09814672994841696,
+              "z": 0.995171954689456
+            },
+            "childIndex": 0,
+            "childOf": "fireball+gatling"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.7500000000000007,
+          "type": "cast_release",
+          "who": "green",
+          "meta": {
+            "position": {
+              "x": -295.6857421417323,
+              "y": 33,
+              "z": 212.00626036244512
+            },
+            "factory": "iceBolt",
+            "modifier": "spread",
+            "effectiveSpellId": "iceBolt+spread",
+            "targetId": "red"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.7500000000000007,
+          "type": "projectile_emit",
+          "who": "green",
+          "meta": {
+            "spell": "iceBolt+spread",
+            "position": {
+              "x": -321.75285790642874,
+              "y": 33,
+              "z": 169.5333980456397
+            },
+            "direction": {
+              "x": -0.8200989052444851,
+              "z": -0.5722217975722323
+            },
+            "childIndex": 0,
+            "childOf": "iceBolt+spread"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.7500000000000007,
+          "type": "projectile_emit",
+          "who": "green",
+          "meta": {
+            "spell": "iceBolt+spread",
+            "position": {
+              "x": -318.4406423696972,
+              "y": 33,
+              "z": 165.65944281447523
+            },
+            "direction": {
+              "x": -0.6927059999855802,
+              "z": -0.7212200756939433
+            },
+            "childIndex": 1,
+            "childOf": "iceBolt+spread"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.7500000000000007,
+          "type": "projectile_emit",
+          "who": "green",
+          "meta": {
+            "spell": "iceBolt+spread",
+            "position": {
+              "x": -314.4362989522241,
+              "y": 33,
+              "z": 162.50610574245576
+            },
+            "direction": {
+              "x": -0.5386927916212295,
+              "z": -0.8425022707716143
+            },
+            "childIndex": 2,
+            "childOf": "iceBolt+spread"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.7500000000000007,
+          "type": "projectile_emit",
+          "who": "green",
+          "meta": {
+            "spell": "iceBolt+spread",
+            "position": {
+              "x": -309.8937123258812,
+              "y": 33,
+              "z": 160.19456780484728
+            },
+            "direction": {
+              "x": -0.3639779213772731,
+              "z": -0.931407576064249
+            },
+            "childIndex": 3,
+            "childOf": "iceBolt+spread"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.7500000000000007,
+          "type": "projectile_emit",
+          "who": "green",
+          "meta": {
+            "spell": "iceBolt+spread",
+            "position": {
+              "x": -304.987451547207,
+              "y": 33,
+              "z": 158.81366010826662
+            },
+            "direction": {
+              "x": -0.17527558373595795,
+              "z": -0.9845194105481208
+            },
+            "childIndex": 4,
+            "childOf": "iceBolt+spread"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.7666666666666674,
+          "type": "cast_request",
+          "who": "green",
+          "meta": {
+            "factory": "iceShard",
+            "modifier": null,
+            "effectiveSpellId": "iceShard",
+            "targetId": "red",
+            "accepted": true,
+            "chargeTime": 1,
+            "cooldown": 4,
+            "distToTarget": 153.8764397850444
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.8666666666666677,
+          "type": "projectile_emit",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+gatling",
+            "position": {
+              "x": 292.42560333670224,
+              "y": 33,
+              "z": -186.98472494045896
+            },
+            "direction": {
+              "x": 0.052578489806782445,
+              "z": 0.9986167945761968
+            },
+            "childIndex": 1,
+            "childOf": "fireball+gatling"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.9833333333333347,
+          "type": "damage",
+          "who": "green",
+          "meta": {
+            "victim": "red",
+            "position": {
+              "x": -328.99723572663476,
+              "y": 33,
+              "z": 78.28291202242282
+            },
+            "amount": 4.5,
+            "spell": "iceBolt+spread",
+            "hpAfter": 95.5
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.9833333333333347,
+          "type": "spell_impact",
+          "who": "green",
+          "meta": {
+            "spell": "iceBolt+spread",
+            "position": {
+              "x": -315.6208369605216,
+              "y": 33,
+              "z": 99.08614920168066
+            },
+            "radius": 28.5,
+            "visual": {
+              "shape": {
+                "kind": "ice-shard",
+                "bodyColor": 12117247,
+                "edgeColor": 15400959,
+                "lengthScale": 2.4,
+                "widthScale": 0.55
+              },
+              "trailColor": 10079487,
+              "trailScale": 0.3,
+              "trailOpacity": 0.3,
+              "impact": {
+                "palette": {
+                  "inner": "rgba(220,240,255,1)",
+                  "mid": "rgba(120,180,240,0.85)",
+                  "outer": "rgba(60,120,200,0.3)",
+                  "edge": "rgba(20,40,80,0)"
+                },
+                "explosionCoreColor": 12640511,
+                "explosionHaloColor": 4227264
+              }
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.9833333333333347,
+          "type": "damage",
+          "who": "green",
+          "meta": {
+            "victim": "red",
+            "position": {
+              "x": -328.99723572663476,
+              "y": 33,
+              "z": 78.28291202242282
+            },
+            "amount": 4.5,
+            "spell": "iceBolt+spread",
+            "hpAfter": 91
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 0.9833333333333347,
+          "type": "spell_impact",
+          "who": "green",
+          "meta": {
+            "spell": "iceBolt+spread",
+            "position": {
+              "x": -331.97503955610284,
+              "y": 33,
+              "z": 103.68917485694953
+            },
+            "radius": 28.5,
+            "visual": {
+              "shape": {
+                "kind": "ice-shard",
+                "bodyColor": 12117247,
+                "edgeColor": 15400959,
+                "lengthScale": 2.4,
+                "widthScale": 0.55
+              },
+              "trailColor": 10079487,
+              "trailScale": 0.3,
+              "trailOpacity": 0.3,
+              "impact": {
+                "palette": {
+                  "inner": "rgba(220,240,255,1)",
+                  "mid": "rgba(120,180,240,0.85)",
+                  "outer": "rgba(60,120,200,0.3)",
+                  "edge": "rgba(20,40,80,0)"
+                },
+                "explosionCoreColor": 12640511,
+                "explosionHaloColor": 4227264
+              }
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.016666666666668,
+          "type": "damage",
+          "who": "green",
+          "meta": {
+            "victim": "red",
+            "position": {
+              "x": -328.26200350846767,
+              "y": 33,
+              "z": 87.58724137474478
+            },
+            "amount": 4.5,
+            "spell": "iceBolt+spread",
+            "hpAfter": 86.5
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.016666666666668,
+          "type": "spell_impact",
+          "who": "green",
+          "meta": {
+            "spell": "iceBolt+spread",
+            "position": {
+              "x": -351.78566583796226,
+              "y": 33,
+              "z": 104.09261496895708
+            },
+            "radius": 28.5,
+            "visual": {
+              "shape": {
+                "kind": "ice-shard",
+                "bodyColor": 12117247,
+                "edgeColor": 15400959,
+                "lengthScale": 2.4,
+                "widthScale": 0.55
+              },
+              "trailColor": 10079487,
+              "trailScale": 0.3,
+              "trailOpacity": 0.3,
+              "impact": {
+                "palette": {
+                  "inner": "rgba(220,240,255,1)",
+                  "mid": "rgba(120,180,240,0.85)",
+                  "outer": "rgba(60,120,200,0.3)",
+                  "edge": "rgba(20,40,80,0)"
+                },
+                "explosionCoreColor": 12640511,
+                "explosionHaloColor": 4227264
+              }
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.0500000000000012,
+          "type": "projectile_emit",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+gatling",
+            "position": {
+              "x": 295.56094902306506,
+              "y": 33,
+              "z": -188.28496889259804
+            },
+            "direction": {
+              "x": -0.06624734280370158,
+              "z": 0.9978032318906613
+            },
+            "childIndex": 2,
+            "childOf": "fireball+gatling"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.1500000000000008,
+          "type": "cast_request",
+          "who": "red",
+          "meta": {
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "green",
+            "accepted": true,
+            "chargeTime": 0.18,
+            "cooldown": 0.6,
+            "distToTarget": 51.82002424961769
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.2333333333333338,
+          "type": "projectile_emit",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+gatling",
+            "position": {
+              "x": 316.80475686769046,
+              "y": 33,
+              "z": -189.41213908541874
+            },
+            "direction": {
+              "x": -0.18473758144642102,
+              "z": 0.9827878845413831
+            },
+            "childIndex": 3,
+            "childOf": "fireball+gatling"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.3333333333333335,
+          "type": "cast_release",
+          "who": "red",
+          "meta": {
+            "position": {
+              "x": -327.87765973597095,
+              "y": 33,
+              "z": 128.04138352478236
+            },
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "green"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.3666666666666667,
+          "type": "damage",
+          "who": "red",
+          "meta": {
+            "victim": "green",
+            "position": {
+              "x": -295.4737360772823,
+              "y": 33,
+              "z": 212.51808827854572
+            },
+            "amount": 22,
+            "spell": "melee",
+            "hpAfter": 78
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.4166666666666665,
+          "type": "projectile_emit",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+gatling",
+            "position": {
+              "x": 380.11613383461406,
+              "y": 33,
+              "z": -193.43295307564546
+            },
+            "direction": {
+              "x": -0.37604479579320177,
+              "z": 0.9266014847586038
+            },
+            "childIndex": 4,
+            "childOf": "fireball+gatling"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.5999999999999992,
+          "type": "spell_impact",
+          "who": "green",
+          "meta": {
+            "spell": "iceBolt+spread",
+            "position": {
+              "x": -502.99471596545965,
+              "y": 33,
+              "z": 43.07238078217615
+            },
+            "radius": 28.5,
+            "visual": {
+              "shape": {
+                "kind": "ice-shard",
+                "bodyColor": 12117247,
+                "edgeColor": 15400959,
+                "lengthScale": 2.4,
+                "widthScale": 0.55
+              },
+              "trailColor": 10079487,
+              "trailScale": 0.3,
+              "trailOpacity": 0.3,
+              "impact": {
+                "palette": {
+                  "inner": "rgba(220,240,255,1)",
+                  "mid": "rgba(120,180,240,0.85)",
+                  "outer": "rgba(60,120,200,0.3)",
+                  "edge": "rgba(20,40,80,0)"
+                },
+                "explosionCoreColor": 12640511,
+                "explosionHaloColor": 4227264
+              }
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.5999999999999992,
+          "type": "projectile_emit",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+gatling",
+            "position": {
+              "x": 378.9626449776846,
+              "y": 33,
+              "z": -193.93389832323032
+            },
+            "direction": {
+              "x": -0.4204097518289512,
+              "z": 0.9073343598514936
+            },
+            "childIndex": 5,
+            "childOf": "fireball+gatling"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.7666666666666653,
+          "type": "cast_release",
+          "who": "green",
+          "meta": {
+            "position": {
+              "x": -295.38534772963396,
+              "y": 33,
+              "z": 212.60647662619402
+            },
+            "factory": "iceShard",
+            "modifier": null,
+            "effectiveSpellId": "iceShard",
+            "targetId": "red"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.7666666666666653,
+          "type": "spell_impact",
+          "who": "green",
+          "meta": {
+            "spell": "iceBolt+spread",
+            "position": {
+              "x": -501.54592836588415,
+              "y": 33,
+              "z": -24.98306386062392
+            },
+            "radius": 28.5,
+            "visual": {
+              "shape": {
+                "kind": "ice-shard",
+                "bodyColor": 12117247,
+                "edgeColor": 15400959,
+                "lengthScale": 2.4,
+                "widthScale": 0.55
+              },
+              "trailColor": 10079487,
+              "trailScale": 0.3,
+              "trailOpacity": 0.3,
+              "impact": {
+                "palette": {
+                  "inner": "rgba(220,240,255,1)",
+                  "mid": "rgba(120,180,240,0.85)",
+                  "outer": "rgba(60,120,200,0.3)",
+                  "edge": "rgba(20,40,80,0)"
+                },
+                "explosionCoreColor": 12640511,
+                "explosionHaloColor": 4227264
+              }
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 1.949999999999998,
+          "type": "cast_request",
+          "who": "red",
+          "meta": {
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "green",
+            "accepted": true,
+            "chargeTime": 0.18,
+            "cooldown": 0.6,
+            "distToTarget": 24.52373428316956
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 2.1333333333333306,
+          "type": "cast_release",
+          "who": "red",
+          "meta": {
+            "position": {
+              "x": -342.33420131291695,
+              "y": 33,
+              "z": 176.4097303108804
+            },
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "green"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 2.166666666666664,
+          "type": "damage",
+          "who": "red",
+          "meta": {
+            "victim": "green",
+            "position": {
+              "x": -283.59829777922755,
+              "y": 33,
+              "z": 218.6133923644346
+            },
+            "amount": 22,
+            "spell": "melee",
+            "hpAfter": 56
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 2.3166666666666633,
+          "type": "spell_impact",
+          "who": "green",
+          "meta": {
+            "spell": "iceShard",
+            "position": {
+              "x": -330.62373118294255,
+              "y": 8,
+              "z": 17.788626547465185
+            },
+            "radius": 90,
+            "visual": {
+              "shardColor": 12117247,
+              "shardEdgeColor": 15400959,
+              "portalColor": 8965375,
+              "telegraphColor": 10083839,
+              "impactCoreColor": 12640511,
+              "impactHaloColor": 4227264
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 2.3833333333333298,
+          "type": "cast_request",
+          "who": "blue",
+          "meta": {
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "yellow",
+            "accepted": true,
+            "chargeTime": 0.45,
+            "cooldown": 1.4,
+            "distToTarget": 376.3897717516769
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 2.749999999999995,
+          "type": "cast_request",
+          "who": "red",
+          "meta": {
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "green",
+            "accepted": true,
+            "chargeTime": 0.18,
+            "cooldown": 0.6,
+            "distToTarget": 22.85313265735968
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 2.8499999999999948,
+          "type": "cast_release",
+          "who": "blue",
+          "meta": {
+            "position": {
+              "x": 148.6641375607095,
+              "y": 33,
+              "z": 138.04713409197458
+            },
+            "factory": "fireball",
+            "modifier": null,
+            "effectiveSpellId": "fireball",
+            "targetId": "yellow"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 2.883333333333328,
+          "type": "spell_impact",
+          "who": "blue",
+          "meta": {
+            "spell": "fireball",
+            "position": {
+              "x": 266.0490754451641,
+              "y": 41,
+              "z": -500.881228677472
+            },
+            "radius": 38,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 2.933333333333328,
+          "type": "cast_release",
+          "who": "red",
+          "meta": {
+            "position": {
+              "x": -327.5749369084371,
+              "y": 33,
+              "z": 223.3031324781781
+            },
+            "factory": "melee",
+            "modifier": null,
+            "effectiveSpellId": "melee",
+            "targetId": "green"
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 2.966666666666661,
+          "type": "damage",
+          "who": "red",
+          "meta": {
+            "victim": "green",
+            "position": {
+              "x": -256.66377643180783,
+              "y": 33,
+              "z": 221.5769143126973
+            },
+            "amount": 22,
+            "spell": "melee",
+            "hpAfter": 34
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 3.349999999999993,
+          "type": "spell_impact",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+gatling",
+            "position": {
+              "x": 358.5256829955856,
+              "y": 33,
+              "z": 503.0225131141401
+            },
+            "radius": 26.599999999999998,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 3.516666666666659,
+          "type": "spell_impact",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+gatling",
+            "position": {
+              "x": 328.6521828135738,
+              "y": 33,
+              "z": 501.0622465225398
+            },
+            "radius": 26.599999999999998,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 3.7166666666666583,
+          "type": "spell_impact",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+gatling",
+            "position": {
+              "x": 249.6294580124962,
+              "y": 33,
+              "z": 503.52527188492644
+            },
+            "radius": 26.599999999999998,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        },
+        {
+          "run": "four-wizards-s1-r0-burst",
+          "t": 3.9333333333333242,
+          "type": "spell_impact",
+          "who": "yellow",
+          "meta": {
+            "spell": "fireball+gatling",
+            "position": {
+              "x": 187.11897469230107,
+              "y": 33,
+              "z": 500.5049558626313
+            },
+            "radius": 26.599999999999998,
+            "visual": {
+              "shape": {
+                "kind": "fire-spheres",
+                "layers": [
+                  {
+                    "scale": 0.55,
+                    "color": 16756800,
+                    "opacity": 1
+                  },
+                  {
+                    "scale": 0.85,
+                    "color": 16732168,
+                    "opacity": 0.55
+                  },
+                  {
+                    "scale": 1.1,
+                    "color": 12591104,
+                    "opacity": 0.35
+                  },
+                  {
+                    "scale": 1.35,
+                    "color": 6292480,
+                    "opacity": 0.18
+                  }
+                ]
+              },
+              "trailColor": 16737826
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Matched moments deliberately isolate presentation. Each card has independent controls.",
+    "Selected clips illustrate the argument and clutter risk; they are not representative estimates.",
+    "No unique cast/projectile lineage; no individual dodge attribution."
+  ],
+  "sourceFollowup": "source-followup.json"
+}

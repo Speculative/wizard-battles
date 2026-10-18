@@ -1,0 +1,13 @@
+{
+  "source": "sha256:3eab2014d6c60f477cec56e5c2dcd020401aee2aa4c66082121e8664fd219c60",
+  "method": "Root inspected live page and sampled images; reviewers inspected named stills and logs. No continuous video evaluation claimed.",
+  "checks": [
+    "30 tests passed after content selections and event assertions",
+    "Build passed after UI scoping fix",
+    "Production spell browser check passed: 3 pairs, independent controls, durable comments/recovery, active-experiment note scoping, 24 complete browser/headless setups × 2 visuals",
+    "Final live room: exact source match, 24-setup report, 3 independent persona summaries and triage loaded, old movement preference not shown as spell feedback, no page errors",
+    "Final media/source follow-up: 121 images byte-identical to both reviewed rounds; 24 gameplay event streams equal excluding wallMs"
+  ],
+  "feedback": "runs-feedback/ append-only workspace snapshots; evidence IDs/revisions and experiment scope preserved",
+  "ownerAction": "Compare A then B in each preset and decide whether clearer hit confirmation outweighs extra visual markers."
+}

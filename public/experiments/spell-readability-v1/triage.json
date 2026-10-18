@@ -1,0 +1,40 @@
+{
+  "source": "sha256:3eab2014d6c60f477cec56e5c2dcd020401aee2aa4c66082121e8664fd219c60",
+  "findings": [
+    {
+      "status": "accepted",
+      "finding": "The report header retained default seeds while the effective CLI batch used six.",
+      "action": "Fixed the generator to serialize effective seeds/maxSeconds. Regenerated report and captures; independent systems follow-up verified provenance. Original reviewer source labels are retained."
+    },
+    {
+      "status": "accepted",
+      "finding": "White effects were hard to see against the pale arena in initial prototype inspection.",
+      "action": "Added dark backing before the reviewed round; reviewed evidence uses that correction."
+    },
+    {
+      "status": "accepted",
+      "finding": "Actual damage must remain distinct from release or harmless impact.",
+      "action": "Hit crosses are driven only by damage events. Selected evidence includes a missed melee release and two empty ice impacts; captions and tests retain those distinctions."
+    },
+    {
+      "status": "deferred",
+      "finding": "Victim markers do not identify the attacker or uniquely attribute a projectile in a crowd.",
+      "action": "Retained as a visible limit and contrary case. Keep existing projectile trails and intersecting fights; attribution requires a separately scoped experiment."
+    },
+    {
+      "status": "deferred",
+      "finding": "Preparation detail is small and several symbols can overlap at arena scale.",
+      "action": "Present the crowded opening and enlargement/full-fight controls. Judge actual playback before enlarging or adding effects; sampled stills do not settle distraction or pacing."
+    },
+    {
+      "status": "deferred",
+      "finding": "The cues add little magical identity and do not establish improved initiative, emotional payoff or pacing.",
+      "action": "Recommend advancing B cautiously for consequence readability only. Preserve these independent qualifications; no further rating round or combat change."
+    },
+    {
+      "status": "accepted",
+      "finding": "General notes from the movement experiment appeared in the spell comparison, making the old A/B/C preference ambiguous.",
+      "action": "Scoped general notes to the active experiment, retaining all feedback in storage. Production browser regression verifies other-experiment notes stay stored but do not appear as spell feedback."
+    }
+  ]
+}

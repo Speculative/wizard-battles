@@ -84,7 +84,7 @@ $('#retry-save').onclick = async () => {
 };
 function renderNotes() {
   $('#notes-list').replaceChildren();
-  for (const n of feedback.notes.filter(n => !n.evidence)) {
+  for (const n of feedback.notes.filter(n => !n.evidence && n.experiment === EXPERIMENT.id)) {
     const li = document.createElement('li');
     const context = n.viewing?.mode === 'evidence'
       ? `evidence ${n.viewing.briefId} · ${n.viewing.clips.map(c => `${c.variant} at ${(n.panelTimes[n.variants.indexOf(c.variant)] ?? 0).toFixed(1)}s`).join(' / ')} · focused ${n.viewing.focusedVariant ?? 'none'}`

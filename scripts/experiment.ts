@@ -2,7 +2,8 @@ import { mkdirSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { runMatch } from '../src/harness';
-import { EXPERIMENT, VARIANTS } from '../src/experiment';
+import { EXPERIMENT as MOVEMENT_EXPERIMENT, VARIANTS as MOVEMENT_VARIANTS, variantDefinition } from '../src/experiment';
+import { SPELL_EXPERIMENT, SPELL_VARIANTS } from '../src/spellReadabilityExperiment';
 import { sourceIdentity } from './source-id';
 import { summarizeRun, aggregate } from './experiment-report';
 
@@ -11,9 +12,15 @@ const flags = new Map<string, string>();
 let publish = false;
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--publish') { publish = true; continue; }
-  if (!['--out', '--seeds', '--max'].includes(args[i]) || !args[i + 1]) throw new Error(`Unknown/incomplete option ${args[i]}`);
+  if (!['--out', '--seeds', '--max', '--experiment'].includes(args[i]) || !args[i + 1]) throw new Error(`Unknown/incomplete option ${args[i]}`);
   flags.set(args[i].slice(2), args[++i]);
 }
+const experimentId = flags.get('experiment') ?? MOVEMENT_EXPERIMENT.id;
+if (![MOVEMENT_EXPERIMENT.id, SPELL_EXPERIMENT.id].includes(experimentId)) throw new Error(`Unknown experiment: ${experimentId}`);
+const isSpell = experimentId === SPELL_EXPERIMENT.id;
+const EXPERIMENT = isSpell ? SPELL_EXPERIMENT : MOVEMENT_EXPERIMENT;
+// Presentation alternatives share one simulation trace per starting setup.
+const VARIANTS = isSpell ? [variantDefinition('burst')] : MOVEMENT_VARIANTS;
 const seeds = flags.has('seeds') ? flags.get('seeds')!.split(',').map(Number) : [...EXPERIMENT.seeds];
 const maxSeconds = Number(flags.get('max') ?? EXPERIMENT.maxSeconds);
 if (!seeds.length || !seeds.every(n => Number.isSafeInteger(n) && n >= 0 && n <= 0xffffffff) || new Set(seeds).size !== seeds.length) throw new Error('seeds must be distinct uint32 integers');
@@ -36,9 +43,9 @@ for (const scenario of EXPERIMENT.scenarios) for (const seed of seeds) for (cons
   runs.push(run);
   console.log(`${runId}: ${result.reason}, ${result.simulatedSeconds.toFixed(1)}s, ${run.damageEvents} damage events`);
 }
-const report = { schema: 'wizard-battles-experiment-v1', experiment: EXPERIMENT, variants: VARIANTS, provenance, summary: aggregate(runs), runs,
-  evidenceLimits: ['Screening evidence; no owner preference or balance validation yet.', 'Damage gaps are descriptive, not a score for entertainment or tension.', 'Rotations test layout sensitivity, not swapping asymmetric fighter kits.', 'Current telemetry has spell-type IDs, not unique cast/projectile causal IDs. Do not attribute a dodge to a specific incoming attack.', 'Raw rejected-cast diagnostics are retained in JSONL and omitted from the curated event excerpts.'],
+const report = { schema: 'wizard-battles-experiment-v1', experiment: { ...EXPERIMENT, seeds, maxSeconds }, variants: isSpell ? SPELL_VARIANTS : VARIANTS, simulationVariants: VARIANTS, provenance, summary: aggregate(runs), runs,
+  evidenceLimits: [...(isSpell ? ['Each setup runs once with C/burst gameplay. Both visual alternatives use that same trace; these are not independent combat treatments.', 'Gameplay logs locate evidence; they cannot establish visual readability or experienced pacing.'] : []), 'Screening evidence; no owner preference or balance validation yet.', 'Damage gaps are descriptive, not a score for entertainment or tension.', 'Rotations test layout sensitivity, not swapping asymmetric fighter kits.', 'Current telemetry has spell-type IDs, not unique cast/projectile causal IDs. Do not attribute a dodge to a specific incoming attack.', 'Raw rejected-cast diagnostics are retained in JSONL and omitted from the curated event excerpts.'],
 };
 writeFileSync(join(output, 'report.json'), JSON.stringify(report, null, 2));
-if (publish) { const dest = 'public/experiments/movement-pacing-v1'; mkdirSync(dest, { recursive: true }); writeFileSync(join(dest, 'report.json'), JSON.stringify(report, null, 2)); }
+if (publish) { const dest = `public/experiments/${EXPERIMENT.id}`; mkdirSync(dest, { recursive: true }); writeFileSync(join(dest, 'report.json'), JSON.stringify(report, null, 2)); }
 console.log(`Preserved batch/source: ${output}\nSummary: ${JSON.stringify(report.summary, null, 2)}`);

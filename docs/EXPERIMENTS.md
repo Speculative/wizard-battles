@@ -83,7 +83,7 @@ Initial review excerpts and the full spectacle review preserve pre-fix source la
 
 The next useful hypothesis is stronger spell commitment/payoff communication, including framing at comparison scale. Measured movement is not adopted: it offers some clearer spacing but can create prolonged non-progress. Fresh validation also finds baseline/burst stalls, so no profile is a general solution. The owner’s first exported viewing note (2026-10-18) strongly prefers C/burst, especially in duels and for intersecting fights in the four-way scene, and dislikes B/measured’s strafing duels. This is owner feedback on the viewed examples, rather than a general calibration of the persona judges.
 
-## Spell readability prototype
+## Spell readability comparison
 
 `compare.html?experiment=spell-readability-v1` selects the presentation-only
 experiment. Both panels construct the exact `burst` scenario; A retains current
@@ -94,9 +94,44 @@ reconstructed markers stay at the event location. Explosions retain their old
 particles and do not imply damage. The directional pointer describes current
 preparation, not a guaranteed future projectile path.
 
-This prototype has no curated excerpts yet. Evidence selection, source-matched
-batch/captures, independent persona review and owner-path self-review remain
-required before presenting a recommendation. `SPELL_BRIEFS` in
-`src/spellReadabilityExperiment.ts` is the selection location. Comparison capture
-accepts `--experiment spell-readability-v1`; existing captures default to the
-movement experiment.
+The room now contains three content-selected pairs in `SPELL_BRIEFS` in
+`src/spellReadabilityExperiment.ts`:
+
+- Duel 7, 8.3–12.6s: blue lands fireballs, red releases a melee swing that
+  misses, then red connects and finishes.
+- Four-wizards 19, 5.8–9.8s: green falls, yellow hits red, red reaches yellow;
+  an ice shard also lands without damage.
+- Four-wizards 1, 0.1–3.9s: the contrary case with spread shots, rapid fire,
+  melee and falling ice competing for attention.
+
+Matched times are intentional because gameplay is identical; each card still
+plays, seeks and replays independently. The proposal is to advance B cautiously
+for clearer damage confirmation, with small preparation detail, overlap and
+attacker attribution retained as limitations. All three independent persona
+lenses tentatively prefer B for local consequences, with no demonstrated gain
+in experienced pacing, magical identity or readable initiative. They inspected
+sampled images and logs, not continuous footage.
+
+The [packet](../public/experiments/spell-readability-v1/README.md) links the
+24-setup report, three captures, exact state/provenance manifests, retained
+reviews and triage. Original review source labels remain intact. A batch-header
+metadata fix and a fix scoping general notes to their experiment changed no
+gameplay or spell rendering; `source-followup.json` verifies that
+all 121 recaptured PNGs are byte-identical and all 24 gameplay event streams
+match (excluding execution-time diagnostics).
+
+Reproduce or check with:
+
+```
+npm run experiment -- --experiment spell-readability-v1 --seeds 1,7,19,42,101,211 --publish
+npm run capture:comparison -- --experiment spell-readability-v1 --scenario duel --seed 7 --time 8.3 --duration 4.3 --fps 10
+npm run check:spell-comparison -- --production
+```
+
+The batch runs C once per scenario/seed/rotation; the visual alternatives are
+not separate combat trials. CLI seed/max overrides appear in the report's
+effective experiment configuration. Production browser checks cover all 24
+complete setups against headless C results, independent excerpt controls,
+durable comments/recovery and two-panel enlargement. Existing captures and
+experiments default to movement pacing. Feedback continues to save under
+`runs-feedback/`, with the new experiment and exact evidence identities.
