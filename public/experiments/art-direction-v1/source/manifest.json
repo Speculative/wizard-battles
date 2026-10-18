@@ -1,0 +1,16 @@
+{
+  "archives": [
+    {
+      "path": "captured-b40b952.tar.gz",
+      "commit": "b40b952c1af31becd9d15a758b7270c3af6363e1",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "archiveSha256": "7e064fab42f9470b3052c861cf405d739c6d1088570e95ab59bfcd19c12d9339"
+    },
+    {
+      "path": "viewer.tar.gz",
+      "commit": "1ba35d01a502065e1f22f350f3ec6b9e2a54be1b",
+      "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "archiveSha256": "332f6e57ec5035d103a98218d1715000046f1381da3ff2a3f47d9229c623e6c2"
+    }
+  ]
+}

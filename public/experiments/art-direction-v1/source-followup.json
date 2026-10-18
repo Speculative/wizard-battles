@@ -1,0 +1,113 @@
+{
+  "capturedSource": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+  "viewerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+  "change": "Direction links reveal their card when another direction is enlarged; an automated check covers this path. No rendering, gameplay or captions changed.",
+  "method": "Byte comparison of one rendered full-panel frame from each of all 15 clips, at matching viewport, time and focused direction. Other frames are not recaptured.",
+  "comparisons": [
+    {
+      "clip": "crowd-foundry",
+      "frame": 55,
+      "time": 1.9333333333333333,
+      "pngSha256": "2d6732deca226fea9dd0a6b7f0941655495200d20fc1a26e56a705bc1700bf3a",
+      "identical": true
+    },
+    {
+      "clip": "crowd-observatory",
+      "frame": 55,
+      "time": 1.9333333333333333,
+      "pngSha256": "addd3058bbdc58a3bd9e78a0b59eb6e26d71d9c00d07588ea0a8b046858ed7c9",
+      "identical": true
+    },
+    {
+      "clip": "crowd-paper",
+      "frame": 55,
+      "time": 1.9333333333333333,
+      "pngSha256": "32a01cf2d7df9b3d6ac73b413a6c663cb99131895133d7377fc3a1a6f4c656e3",
+      "identical": true
+    },
+    {
+      "clip": "crowd-photon",
+      "frame": 55,
+      "time": 1.9333333333333333,
+      "pngSha256": "620a9b4db85de9bdf9f80ba6e853e1d12c5db5de61d169accdd1361ee3a4a31f",
+      "identical": true
+    },
+    {
+      "clip": "crowd-porcelain",
+      "frame": 55,
+      "time": 1.9333333333333333,
+      "pngSha256": "89ff5c154b791eade666bbf8fe64d16b12c65acf8dd0f588042eb58078af424d",
+      "identical": true
+    },
+    {
+      "clip": "duel-foundry",
+      "frame": 90,
+      "time": 11.3,
+      "pngSha256": "95e1c4ce4603533f002b51bc69cefcdccd6414daccc4fcb27c616dc5664438a8",
+      "identical": true
+    },
+    {
+      "clip": "duel-observatory",
+      "frame": 90,
+      "time": 11.3,
+      "pngSha256": "001d1274c7cc8f29e580084ad4ed6d107628fcefaaa64afeb27f126c131ae542",
+      "identical": true
+    },
+    {
+      "clip": "duel-paper",
+      "frame": 90,
+      "time": 11.3,
+      "pngSha256": "62d947739e95302f78c5cc4337d9daa44b6dbae075cbde676c47bbf5453c2738",
+      "identical": true
+    },
+    {
+      "clip": "duel-photon",
+      "frame": 90,
+      "time": 11.3,
+      "pngSha256": "b79b7c8be74d1eab22d6d1177911e57e58f2abf030a136f67194f073186d60b5",
+      "identical": true
+    },
+    {
+      "clip": "duel-porcelain",
+      "frame": 90,
+      "time": 11.3,
+      "pngSha256": "9123d0ad589f5ea84427f9b05f1b150c3d8fc0dfd14f36fe2df8b482d15140b8",
+      "identical": true
+    },
+    {
+      "clip": "intersection-foundry",
+      "frame": 40,
+      "time": 7.133333333333333,
+      "pngSha256": "4104f35009eef2b3748cceb2686619b65847863d79e889114c5954071eadb1af",
+      "identical": true
+    },
+    {
+      "clip": "intersection-observatory",
+      "frame": 40,
+      "time": 7.133333333333333,
+      "pngSha256": "88c42ec8eaa42f4b3266cf64d15b16a622b2220b4a62890b67c76f2be149512a",
+      "identical": true
+    },
+    {
+      "clip": "intersection-paper",
+      "frame": 40,
+      "time": 7.133333333333333,
+      "pngSha256": "359d4b91e84422d562e4e0adb0ab8a6b7cbf864c91af3fa891f15238b28242c2",
+      "identical": true
+    },
+    {
+      "clip": "intersection-photon",
+      "frame": 40,
+      "time": 7.133333333333333,
+      "pngSha256": "d13ea7da0510215c634420f35278fb3e4e40e0dd3434ad24d2cb9e7bbcf6db16",
+      "identical": true
+    },
+    {
+      "clip": "intersection-porcelain",
+      "frame": 40,
+      "time": 7.133333333333333,
+      "pngSha256": "4079616e876eacb9d48db9f92c7a0cd6724b83b8eb2f1db04fb3ef2372077c54",
+      "identical": true
+    }
+  ]
+}

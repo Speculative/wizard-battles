@@ -1,0 +1,323 @@
+{
+  "method": "Six sampled rendered frames per direction, viewed as contact sheets (duel hits, empty ice descent / spread consequence, crowded hit / rapid-fire with falling ice). Actual browser controls exercised separately. No continuous human viewing or persona review.",
+  "frames": [
+    {
+      "path": "media/crowd-foundry/frame-00027.png",
+      "time": 1,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "e3605a99a516f90d5db53e38224f65390e38e8d27939ef3a44f8988741087f08"
+    },
+    {
+      "path": "media/crowd-foundry/frame-00055.png",
+      "time": 1.9333333333333333,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "2d6732deca226fea9dd0a6b7f0941655495200d20fc1a26e56a705bc1700bf3a"
+    },
+    {
+      "path": "media/crowd-observatory/frame-00027.png",
+      "time": 1,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "f8bbbec2600ec478cd4d6f619fc2f222cafe667a00b4f68d3a77a5a4807db801"
+    },
+    {
+      "path": "media/crowd-observatory/frame-00055.png",
+      "time": 1.9333333333333333,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "addd3058bbdc58a3bd9e78a0b59eb6e26d71d9c00d07588ea0a8b046858ed7c9"
+    },
+    {
+      "path": "media/crowd-paper/frame-00027.png",
+      "time": 1,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "34e1b322923be1333c55af61ea628038db3a50c1168a53a4cef2d2b58e6c493b"
+    },
+    {
+      "path": "media/crowd-paper/frame-00055.png",
+      "time": 1.9333333333333333,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "32a01cf2d7df9b3d6ac73b413a6c663cb99131895133d7377fc3a1a6f4c656e3"
+    },
+    {
+      "path": "media/crowd-photon/frame-00027.png",
+      "time": 1,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "498542d7c77cea4e7f11e8279e5b4739a4daa4e1d4433b664cb57fe7470bbde1"
+    },
+    {
+      "path": "media/crowd-photon/frame-00055.png",
+      "time": 1.9333333333333333,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "620a9b4db85de9bdf9f80ba6e853e1d12c5db5de61d169accdd1361ee3a4a31f"
+    },
+    {
+      "path": "media/crowd-porcelain/frame-00027.png",
+      "time": 1,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "a02dda0f04c8ccc2cc284711c31c79453ac18ec3c8ab0673ef1984f8b7d81a1c"
+    },
+    {
+      "path": "media/crowd-porcelain/frame-00055.png",
+      "time": 1.9333333333333333,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "89ff5c154b791eade666bbf8fe64d16b12c65acf8dd0f588042eb58078af424d"
+    },
+    {
+      "path": "media/duel-foundry/frame-00087.png",
+      "time": 11.200000000000001,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "51f0c73fa619e5135989bb14094d02ebfe3d4457b638a0cb948e559f74885f65"
+    },
+    {
+      "path": "media/duel-foundry/frame-00029.png",
+      "time": 9.266666666666667,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "0c2e92c7b051d7329717ab5d8c875ba0f6867dbf8bee95b4139e50fff747bb03"
+    },
+    {
+      "path": "media/duel-observatory/frame-00087.png",
+      "time": 11.200000000000001,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "8498d567c617f9633e84a68f0a866135990f30324832380b6b1efde78338d3e9"
+    },
+    {
+      "path": "media/duel-observatory/frame-00029.png",
+      "time": 9.266666666666667,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "c36f896e5578ed92e437d449896e69cabb8d52df34c9aacfdcaaeb2ccb5558ee"
+    },
+    {
+      "path": "media/duel-paper/frame-00087.png",
+      "time": 11.200000000000001,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "c669ec2e99de7aab0691ec5b0856b956e75b57aaa39ee916e5e0a725c78c9c86"
+    },
+    {
+      "path": "media/duel-paper/frame-00029.png",
+      "time": 9.266666666666667,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "b3642276e5a0f1c585ba48897055e65a88e4a107124834e127a1a9b2603f6bc4"
+    },
+    {
+      "path": "media/duel-photon/frame-00087.png",
+      "time": 11.200000000000001,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "e98ae763649bd976c7f0c4638a4e28d84410a1c081a8c6a4e330085bc709435f"
+    },
+    {
+      "path": "media/duel-photon/frame-00029.png",
+      "time": 9.266666666666667,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "bb43e788eb7a43c50ca84b5052a1beb3584f96882df734b5a603c083043934bc"
+    },
+    {
+      "path": "media/duel-porcelain/frame-00087.png",
+      "time": 11.200000000000001,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "54252fa3bc4e65ad491b5127062ee39bf1da4911a9b5457c45705ec13fe76488"
+    },
+    {
+      "path": "media/duel-porcelain/frame-00029.png",
+      "time": 9.266666666666667,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "45ff72b7322a7dc9999f93edc979243b1c9dc353253dff8cfeef1a2238c92a01"
+    },
+    {
+      "path": "media/intersection-foundry/frame-00040.png",
+      "time": 7.133333333333333,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "4104f35009eef2b3748cceb2686619b65847863d79e889114c5954071eadb1af"
+    },
+    {
+      "path": "media/intersection-foundry/frame-00054.png",
+      "time": 7.6,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "d37946471e4537769b613c61e67bba7b4ebd98871b7056e7f0f37eb572f1c291"
+    },
+    {
+      "path": "media/intersection-observatory/frame-00040.png",
+      "time": 7.133333333333333,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "88c42ec8eaa42f4b3266cf64d15b16a622b2220b4a62890b67c76f2be149512a"
+    },
+    {
+      "path": "media/intersection-observatory/frame-00054.png",
+      "time": 7.6,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "d6b479ca879608dba7d315cd91758ef6de1fcc27d7eab5f6ab84aefb166c7ee2"
+    },
+    {
+      "path": "media/intersection-paper/frame-00040.png",
+      "time": 7.133333333333333,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "359d4b91e84422d562e4e0adb0ab8a6b7cbf864c91af3fa891f15238b28242c2"
+    },
+    {
+      "path": "media/intersection-paper/frame-00054.png",
+      "time": 7.6,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "397d232bc6d137781680542a094743f04fb67e9d290b1a00ec5fc45fb767874b"
+    },
+    {
+      "path": "media/intersection-photon/frame-00040.png",
+      "time": 7.133333333333333,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "d13ea7da0510215c634420f35278fb3e4e40e0dd3434ad24d2cb9e7bbcf6db16"
+    },
+    {
+      "path": "media/intersection-photon/frame-00054.png",
+      "time": 7.6,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "68cd387b1f27f155398b7cd8dc244b1a695d36244d1fb3e5200c591ec1b8bcbb"
+    },
+    {
+      "path": "media/intersection-porcelain/frame-00040.png",
+      "time": 7.133333333333333,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "4079616e876eacb9d48db9f92c7a0cd6724b83b8eb2f1db04fb3ef2372077c54"
+    },
+    {
+      "path": "media/intersection-porcelain/frame-00054.png",
+      "time": 7.6,
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "sha256": "af1e2f4dda426a254486a63c9d652a520d8d2d5445f8a2aaf85a281381106bd4"
+    }
+  ],
+  "clips": [
+    {
+      "id": "crowd-foundry",
+      "manifest": "media/crowd-foundry/capture.json",
+      "video": "media/crowd-foundry/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 114,
+      "fps": 30,
+      "duration": 3.8
+    },
+    {
+      "id": "crowd-observatory",
+      "manifest": "media/crowd-observatory/capture.json",
+      "video": "media/crowd-observatory/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 114,
+      "fps": 30,
+      "duration": 3.8
+    },
+    {
+      "id": "crowd-paper",
+      "manifest": "media/crowd-paper/capture.json",
+      "video": "media/crowd-paper/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 114,
+      "fps": 30,
+      "duration": 3.8
+    },
+    {
+      "id": "crowd-photon",
+      "manifest": "media/crowd-photon/capture.json",
+      "video": "media/crowd-photon/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 114,
+      "fps": 30,
+      "duration": 3.8
+    },
+    {
+      "id": "crowd-porcelain",
+      "manifest": "media/crowd-porcelain/capture.json",
+      "video": "media/crowd-porcelain/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 114,
+      "fps": 30,
+      "duration": 3.8
+    },
+    {
+      "id": "duel-foundry",
+      "manifest": "media/duel-foundry/capture.json",
+      "video": "media/duel-foundry/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 129,
+      "fps": 30,
+      "duration": 4.3
+    },
+    {
+      "id": "duel-observatory",
+      "manifest": "media/duel-observatory/capture.json",
+      "video": "media/duel-observatory/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 129,
+      "fps": 30,
+      "duration": 4.3
+    },
+    {
+      "id": "duel-paper",
+      "manifest": "media/duel-paper/capture.json",
+      "video": "media/duel-paper/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 129,
+      "fps": 30,
+      "duration": 4.3
+    },
+    {
+      "id": "duel-photon",
+      "manifest": "media/duel-photon/capture.json",
+      "video": "media/duel-photon/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 129,
+      "fps": 30,
+      "duration": 4.3
+    },
+    {
+      "id": "duel-porcelain",
+      "manifest": "media/duel-porcelain/capture.json",
+      "video": "media/duel-porcelain/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 129,
+      "fps": 30,
+      "duration": 4.3
+    },
+    {
+      "id": "intersection-foundry",
+      "manifest": "media/intersection-foundry/capture.json",
+      "video": "media/intersection-foundry/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 120,
+      "fps": 30,
+      "duration": 4.0
+    },
+    {
+      "id": "intersection-observatory",
+      "manifest": "media/intersection-observatory/capture.json",
+      "video": "media/intersection-observatory/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 120,
+      "fps": 30,
+      "duration": 4.0
+    },
+    {
+      "id": "intersection-paper",
+      "manifest": "media/intersection-paper/capture.json",
+      "video": "media/intersection-paper/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 120,
+      "fps": 30,
+      "duration": 4.0
+    },
+    {
+      "id": "intersection-photon",
+      "manifest": "media/intersection-photon/capture.json",
+      "video": "media/intersection-photon/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 120,
+      "fps": 30,
+      "duration": 4.0
+    },
+    {
+      "id": "intersection-porcelain",
+      "manifest": "media/intersection-porcelain/capture.json",
+      "video": "media/intersection-porcelain/clip.mp4",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "frameCount": 120,
+      "fps": 30,
+      "duration": 4.0
+    }
+  ],
+  "rawFrames": "Complete numbered PNG sequences retained in ignored runs-captures/art-direction-v1; public packet retains inspected frames, poster/end frames, 30 FPS video and all frame states."
+}

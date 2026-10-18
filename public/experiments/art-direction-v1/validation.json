@@ -1,0 +1,19 @@
+{
+  "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+  "passed": true,
+  "checks": [
+    "15 evidence identities",
+    "exclusive playback",
+    "fifth-panel scrub/replay independence",
+    "workspace comment recovery",
+    "wide/narrow enlargement",
+    "25 complete browser/headless fights"
+  ],
+  "browser": "156.0.8078.4",
+  "unitTests": 35,
+  "movementUI": "passed",
+  "priorSpellRevision": "passed: 28 complete setups \u00d7 3 visuals, independent controls, comments/recovery, enlargement",
+  "initialPriorSpellAttempt": "Timed 150 ms advancement assertion failed while captures were running; unchanged rerun in isolation passed. No production change was needed.",
+  "build": "passed; existing bundle-size advisory remains",
+  "pixelFollowup": "source-followup.json"
+}

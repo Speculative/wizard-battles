@@ -164,3 +164,26 @@ The next owner decision is whether either revision preserves the impact gain
 with acceptable style and phase clarity. The agent should then recommend
 adoption, keeping the earlier approach, or parking the direction rather than
 starting another round without a concrete unresolved question.
+
+## Five art directions
+
+`compare.html?experiment=art-direction-v1` contains five procedural visual
+packages: Porcelain Lab, Photon Chamber, Arcane Observatory, Paper Theater and
+Obsidian Foundry. All construct the same burst world and retain the chosen
+fighter flash / impact sparks. Arena/background, fighter finishes, spell shapes,
+trails and preparation/release palettes vary. Ordinary battle defaults and older
+experiments are preserved.
+
+The three owner-relevant duel/intersection/crowd moments have five independent
+cards each, with their own stable art evidence identities and durable comments.
+Direction summaries discuss fit with the simulation/training-room idea and
+state a provisional proposal. None is owner-approved. The
+[retained packet](../public/experiments/art-direction-v1/README.md) includes
+30 FPS clips, manifests, material-history investigation and inspection limits.
+
+Run `npx tsx scripts/check-art-comparison.ts` after `npm run build` to check
+controls, fifth-direction comment recovery, responsive enlargement and complete
+browser/headless fights. Focus a retained capture on one direction with
+`npm run capture:comparison -- --experiment art-direction-v1 --variant porcelain`
+plus the usual scenario, seed, time/duration and output flags. The selected
+direction is recorded in the manifest; its full panel fills the capture.
