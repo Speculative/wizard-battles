@@ -121,7 +121,9 @@ for a comparison it prevents. No owner acceptance gate is added by this skill.
 
 When persona review is part of the experiment, follow the [persona procedure](../../../docs/PERSONA_REVIEW.md).
 Keep independent opinions and uncertainty in traceable reports; summarize what
-they noticed, where, and what it means for the choice. Do not rewrite their
+they noticed, where, and what it means for the choice. Show the persona name
+alongside each visible judgment headline so the owner can identify the reviewing
+perspective without opening the raw report. Do not rewrite their
 judgments to match the designer or owner. Do not loop until a desired rating.
 
 Deliver a short packet on the active item:

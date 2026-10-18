@@ -28,6 +28,11 @@ try {
   const url = new URL(`compare.html?experiment=${SPELL_EXPERIMENT.id}`, server.resolvedUrls!.local[0]);
   await page.goto(url.href); await page.waitForFunction(() => !!window.comparison);
   await page.evaluate(() => window.comparison.ready());
+  await page.waitForFunction(() => document.querySelectorAll('#reviews > details > summary').length >= 3);
+  const reviewHeadings = await page.locator('#reviews > details > summary').allTextContents();
+  for (const persona of ['Fighting-game spectator', 'mage-fight fan', 'Systems-curious spectator']) {
+    assert.ok(reviewHeadings.some(text => text.startsWith(`${persona}: `)), `visible persona attribution: ${persona}`);
+  }
   assert.equal(await page.locator('.panel:visible').count(), 2);
   assert.doesNotMatch(await page.locator('#notes-list').innerText(), /Movement-only feedback/);
   assert.ok((await page.evaluate(() => window.comparison.feedback())).notes.some(n => n.experiment === 'movement-pacing-v1'), 'other experiment feedback stays stored');

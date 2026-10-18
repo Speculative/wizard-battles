@@ -449,7 +449,7 @@ void fetch(`./experiments/${EXPERIMENT.id}/reviews.json`).then(async response =>
   const reviews = await response.json();
   for (const review of reviews.reviews) {
     const plain = review.displaySummary;
-    const details = document.createElement('details'); const summary = document.createElement('summary'); summary.textContent = plain?.title ?? review.persona;
+    const details = document.createElement('details'); const summary = document.createElement('summary'); summary.textContent = plain?.title ? `${review.persona}: ${plain.title}` : review.persona;
     details.append(summary);
     const verdict = document.createElement('p'); verdict.textContent = plain?.text ?? review.overallVerdict; details.append(verdict);
     const limits = document.createElement('p'); limits.className = 'muted'; limits.textContent = 'Agent perspective; sampled frames and logs, not owner feedback. Original reports retain their evidence source identities.'; details.append(limits);
