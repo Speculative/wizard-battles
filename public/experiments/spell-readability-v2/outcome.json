@@ -1,0 +1,296 @@
+{
+  "experiment": "spell-readability-v2",
+  "feedbackSnapshot": "runs-feedback/2026-10-18T20-59-17.686Z-ea97e8f1-a5e1-4b54-a134-001e68013fe0.json",
+  "ownerObservations": [
+    {
+      "at": "2026-10-18T20:52:58.018Z",
+      "experiment": "spell-readability-v2",
+      "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+      "scenario": "duel",
+      "seed": 7,
+      "rotation": 0,
+      "time": 12.216666666666853,
+      "viewing": {
+        "mode": "evidence",
+        "briefId": "revision-spell-duel-hit-miss",
+        "focusedVariant": "rings",
+        "clips": [
+          {
+            "variant": "cues",
+            "start": 8.3,
+            "end": 12.6
+          },
+          {
+            "variant": "rings",
+            "start": 8.3,
+            "end": 12.6
+          },
+          {
+            "variant": "reaction",
+            "start": 8.3,
+            "end": 12.6
+          }
+        ]
+      },
+      "panelTimes": [
+        12.216666666666853,
+        12.216666666666853,
+        12.216666666666853
+      ],
+      "variants": [
+        "cues",
+        "rings",
+        "reaction"
+      ],
+      "preference": "unsure",
+      "text": "I think the circle for hit damage makes things a little too visually busy, and obscures the meaning of the circle when casting",
+      "evidence": {
+        "id": "v2-duel-7-rings",
+        "revision": 1,
+        "briefId": "revision-spell-duel-hit-miss",
+        "variant": "rings",
+        "start": 8.3,
+        "end": 12.6
+      }
+    },
+    {
+      "at": "2026-10-18T20:53:15.194Z",
+      "experiment": "spell-readability-v2",
+      "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+      "scenario": "duel",
+      "seed": 7,
+      "rotation": 0,
+      "time": 12.216666666666853,
+      "viewing": {
+        "mode": "evidence",
+        "briefId": "revision-spell-duel-hit-miss",
+        "focusedVariant": "reaction",
+        "clips": [
+          {
+            "variant": "cues",
+            "start": 8.3,
+            "end": 12.6
+          },
+          {
+            "variant": "rings",
+            "start": 8.3,
+            "end": 12.6
+          },
+          {
+            "variant": "reaction",
+            "start": 8.3,
+            "end": 12.6
+          }
+        ]
+      },
+      "panelTimes": [
+        12.216666666666853,
+        12.216666666666853,
+        12.216666666666853
+      ],
+      "variants": [
+        "cues",
+        "rings",
+        "reaction"
+      ],
+      "preference": "unsure",
+      "text": "The flash is maybe a little *too* busy, but this one is definitely the most legible of the 3",
+      "evidence": {
+        "id": "v2-duel-7-reaction",
+        "revision": 1,
+        "briefId": "revision-spell-duel-hit-miss",
+        "variant": "reaction",
+        "start": 8.3,
+        "end": 12.6
+      }
+    },
+    {
+      "at": "2026-10-18T20:54:38.714Z",
+      "experiment": "spell-readability-v2",
+      "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "time": 9.800000000000066,
+      "viewing": {
+        "mode": "evidence",
+        "briefId": "revision-spell-intersection",
+        "focusedVariant": "reaction",
+        "clips": [
+          {
+            "variant": "cues",
+            "start": 5.8,
+            "end": 9.8
+          },
+          {
+            "variant": "rings",
+            "start": 5.8,
+            "end": 9.8
+          },
+          {
+            "variant": "reaction",
+            "start": 5.8,
+            "end": 9.8
+          }
+        ]
+      },
+      "panelTimes": [
+        8.85000000000002,
+        9.800000000000066,
+        9.800000000000066
+      ],
+      "variants": [
+        "cues",
+        "rings",
+        "reaction"
+      ],
+      "preference": "unsure",
+      "text": "This is both easily legible and less busy than the rings",
+      "evidence": {
+        "id": "v2-four-wizards-19-reaction",
+        "revision": 1,
+        "briefId": "revision-spell-intersection",
+        "variant": "reaction",
+        "start": 5.8,
+        "end": 9.8
+      }
+    },
+    {
+      "at": "2026-10-18T20:56:35.373Z",
+      "experiment": "spell-readability-v2",
+      "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+      "scenario": "four-wizards",
+      "seed": 1,
+      "rotation": 0,
+      "time": 3.899999999999991,
+      "viewing": {
+        "mode": "evidence",
+        "briefId": "revision-spell-crowded-opening",
+        "focusedVariant": "reaction",
+        "clips": [
+          {
+            "variant": "cues",
+            "start": 0.1,
+            "end": 3.9
+          },
+          {
+            "variant": "rings",
+            "start": 0.1,
+            "end": 3.9
+          },
+          {
+            "variant": "reaction",
+            "start": 0.1,
+            "end": 3.9
+          }
+        ]
+      },
+      "panelTimes": [
+        3.899999999999991,
+        3.899999999999991,
+        3.899999999999991
+      ],
+      "variants": [
+        "cues",
+        "rings",
+        "reaction"
+      ],
+      "preference": "unsure",
+      "text": "We added outlines to make blue's ice attacks read more easily. The fireballs are also dark in color, or have outlines? This works for legibility but everything looks dirty and unappealing"
+    },
+    {
+      "at": "2026-10-18T20:57:28.760Z",
+      "experiment": "spell-readability-v2",
+      "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+      "scenario": "four-wizards",
+      "seed": 1,
+      "rotation": 0,
+      "time": 3.899999999999991,
+      "viewing": {
+        "mode": "evidence",
+        "briefId": "revision-spell-crowded-opening",
+        "focusedVariant": "reaction",
+        "clips": [
+          {
+            "variant": "cues",
+            "start": 0.1,
+            "end": 3.9
+          },
+          {
+            "variant": "rings",
+            "start": 0.1,
+            "end": 3.9
+          },
+          {
+            "variant": "reaction",
+            "start": 0.1,
+            "end": 3.9
+          }
+        ]
+      },
+      "panelTimes": [
+        3.899999999999991,
+        3.899999999999991,
+        3.899999999999991
+      ],
+      "variants": [
+        "cues",
+        "rings",
+        "reaction"
+      ],
+      "preference": "unsure",
+      "text": "Yeah I think flash/sparks on hit is the winner. It's both less noisy and more legible",
+      "evidence": {
+        "id": "v2-four-wizards-1-reaction",
+        "revision": 1,
+        "briefId": "revision-spell-crowded-opening",
+        "variant": "reaction",
+        "start": 0.1,
+        "end": 3.9
+      }
+    }
+  ],
+  "ownerApprovedArtGoal": {
+    "id": "WB-Pb288bfb5-7381-4b05-a57e-1add82e61844",
+    "text": "The battle is a visually appealing spectacle with beautiful, coherent, intentional art direction",
+    "target": "",
+    "notes": "",
+    "decision": "approved",
+    "provenance": "Proposed in the comparison interface; owner decision pending.",
+    "history": [
+      {
+        "at": "2026-10-18T20:59:04.171Z",
+        "decision": "unreviewed",
+        "text": "The battle is a visually appealing spectacle with beautiful, coherent, intentional art direction",
+        "target": "",
+        "notes": ""
+      },
+      {
+        "at": "2026-10-18T20:59:17.677Z",
+        "decision": "approved",
+        "text": "The battle is a visually appealing spectacle with beautiful, coherent, intentional art direction",
+        "target": "",
+        "notes": ""
+      }
+    ]
+  },
+  "disposition": {
+    "chosenTechnique": "C: fighter flash and impact sparks for actual damage, rather than damage rings.",
+    "acceptanceScope": "Owner explicitly prefers the hit-feedback technique. The complete visual package and ordinary-battle default are not approved by that preference.",
+    "designerRecommendation": "Close the hit-versus-cast comparison; carry C-style reactions into a separate coherent art-direction experiment.",
+    "remainingConcerns": [
+      "The duel flash may still be too busy.",
+      "Dark/outlined spell styling reads clearly but looks dirty and unappealing.",
+      "Attacker attribution, targeting and fighter identity remain limited."
+    ],
+    "implementationStatus": "No rendering or gameplay changes in this disposition. Ordinary battle defaults remain as before.",
+    "nextSuggestedItem": "09n7-p3qk",
+    "stoppingCondition": "No third ring-versus-flash comparison is needed: the owner chose a technique across the viewed cases. Broader visual appeal needs a coherent art direction rather than indefinite local cue tuning."
+  },
+  "factualFollowup": {
+    "ice": "Revised ice uses darker blue material and dark edge lines.",
+    "fireballs": "Fire-sphere projectiles use layered colored spheres and trails; the revised ice edge-line branch is not applied to fireballs.",
+    "inspection": "Source inspection of BattleView.projectile; no new continuous viewing or visual assessment is claimed."
+  },
+  "validation": "Documentation-only disposition. Exact feedback copied from retained workspace snapshot; existing rendering/gameplay checks were not repeated against unchanged code."
+}

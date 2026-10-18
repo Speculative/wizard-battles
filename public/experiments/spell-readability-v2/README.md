@@ -18,6 +18,29 @@ stronger melee sweep. Their comparison isolates how damage is shown. Comparing
 A with either revision tests the combined package. All three run identical
 C/burst gameplay. Ordinary battles and round one retain their presentation.
 
+## Outcome after owner feedback — 18 October 2026
+
+The owner chose **C’s fighter flash / impact sparks** as the most legible hit
+feedback and less noisy than damage rings, including the crowded opening.
+The duel flash may still be a little too busy. This establishes a preferred
+hit-feedback technique, not acceptance of the whole visual package: the owner
+also found the dark/outlined spell styling “dirty and unappealing” and approved
+a goal of beautiful, coherent, intentional art direction.
+
+**Disposition:** close the ring-versus-flash comparison and carry C-style hit
+reactions into a separate art-direction experiment. Do not start a third local
+cue-polish round. Suggested follow-up `09n7-p3qk`, linked to this experiment and
+the overhaul plan, awaits the owner’s decision to start. Ordinary battle defaults
+have not changed. The recommendation above and persona reports retain their
+original pre-feedback context.
+
+[Exact owner comments and disposition](outcome.json) retain the feedback snapshot,
+acceptance scope, outstanding concerns and factual follow-up. Source inspection
+confirms revised ice has dark edge lines; fireballs use layered colored spheres
+and trails rather than that ice-outline treatment. This does not invalidate the
+owner’s broader appearance concern. No new gameplay or visual changes were made;
+the existing validation remains the evidence for the compared build.
+
 ## Watch one clip at a time
 
 | Preset | Exact setup | What to follow |
