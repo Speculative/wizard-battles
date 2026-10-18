@@ -6,7 +6,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createScenario, SIMULATION_DT } from '../src/scenario';
 import { initialExpectations } from '../src/expectations';
-import { SPELL_BRIEFS, SPELL_EXPERIMENT } from '../src/spellReadabilityExperiment';
+import { SPELL_BRIEFS as ORIGINAL_BRIEFS, SPELL_EXPERIMENT as ORIGINAL_EXPERIMENT } from '../src/spellReadabilityExperiment';
+import { REVISION_BRIEFS, REVISION_EXPERIMENT } from '../src/spellReadabilityRevision';
+const revision = process.argv.includes('--revision');
+const SPELL_BRIEFS = revision ? REVISION_BRIEFS : ORIGINAL_BRIEFS;
+const SPELL_EXPERIMENT = revision ? REVISION_EXPERIMENT : ORIGINAL_EXPERIMENT;
+const variants = revision ? ['cues', 'rings', 'reaction'] : ['current', 'cues'];
 
 const feedbackDirectory = mkdtempSync(join(tmpdir(), 'spell-feedback-check-'));
 process.env.WIZARD_FEEDBACK_DIR = feedbackDirectory;
@@ -33,7 +38,7 @@ try {
   for (const persona of ['Fighting-game spectator', 'mage-fight fan', 'Systems-curious spectator']) {
     assert.ok(reviewHeadings.some(text => text.startsWith(`${persona}: `)), `visible persona attribution: ${persona}`);
   }
-  assert.equal(await page.locator('.panel:visible').count(), 2);
+  assert.equal(await page.locator('.panel:visible').count(), variants.length);
   assert.doesNotMatch(await page.locator('#notes-list').innerText(), /Movement-only feedback/);
   assert.ok((await page.evaluate(() => window.comparison.feedback())).notes.some(n => n.experiment === 'movement-pacing-v1'), 'other experiment feedback stays stored');
   for (const brief of SPELL_BRIEFS) {
@@ -59,6 +64,15 @@ try {
     await page.getByRole('button', { name: 'Replay excerpt B', exact: true }).click();
     await page.evaluate(() => window.comparison.pause());
     assert.deepEqual((await page.evaluate(() => window.comparison.states()))[0], before[0]);
+    if (revision) {
+      const beforeC = await page.evaluate(() => window.comparison.states());
+      await page.getByRole('button', { name: 'Play excerpt C', exact: true }).click();
+      await page.waitForTimeout(150);
+      await page.evaluate(() => window.comparison.pause());
+      const afterC = await page.evaluate(() => window.comparison.states());
+      assert.deepEqual(afterC.slice(0, 2), beforeC.slice(0, 2));
+      assert.ok(afterC[2].time > beforeC[2].time);
+    }
     await page.screenshot({ path: `runs-comparison-check/${brief.id}.png`, fullPage: true });
   }
   await page.getByRole('button', { name: SPELL_BRIEFS[0].title, exact: true }).click();
@@ -67,7 +81,7 @@ try {
   await page.waitForFunction(() => document.querySelector('.panel:nth-child(2) .comment-save')!.textContent!.startsWith('Saved to workspace'));
   const note = (await page.evaluate(() => window.comparison.feedback())).notes.at(-1)!;
   assert.equal(note.experiment, SPELL_EXPERIMENT.id); assert.equal(note.evidence!.id, SPELL_BRIEFS[0].clips[1].id);
-  assert.deepEqual(note.variants, ['current', 'cues']);
+  assert.deepEqual(note.variants, variants);
   const fresh = await browser.newPage(); await fresh.goto(url.href); await fresh.waitForFunction(() => !!window.comparison);
   await fresh.evaluate(() => window.comparison.ready());
   assert.ok((await fresh.evaluate(() => window.comparison.feedback())).notes.some(n => n.evidence?.id === note.evidence!.id));
@@ -78,7 +92,7 @@ try {
   assert.equal(sizes.length, 1); assert.equal(sizes[0].width, sizes[0].css); assert.ok(sizes[0].width > 1200);
   await page.getByRole('button', { name: 'Enlarge panel B', exact: true }).click();
   // Complete browser fights, including fresh seeds and the awkward four-way timeout.
-  for (const scenario of ['duel', 'four-wizards']) for (const seed of [1, 7, 19, 42, 101, 211]) for (const rotation of [0, Math.PI / 2]) {
+  for (const scenario of ['duel', 'four-wizards']) for (const seed of [1, 7, 19, 42, 101, 211, 307]) for (const rotation of [0, Math.PI / 2]) {
     await page.evaluate(setup => window.comparison.loadExample(setup), { scenario, seed, rotation });
     const states = await page.evaluate(() => window.comparison.seek(120));
     const world = createScenario({ scenario, seed, rotation, variant: 'burst' });
@@ -87,7 +101,7 @@ try {
     for (const state of states) assert.deepEqual(round(state.contestants), round(expected), `${scenario}/${seed}/${rotation}/${state.variant}`);
   }
   assert.deepEqual(errors, []);
-  console.log(`Spell comparison passed (${production ? 'production' : 'development'}): 3 evidence pairs, independent controls, durable comments/recovery, enlargement, and 24 complete browser/headless setups × 2 visuals.`);
+  console.log(`Spell comparison passed (${production ? 'production' : 'development'}): 3 evidence sets (${variants.length} alternatives), independent controls, durable comments/recovery, enlargement, and 28 complete browser/headless setups × ${variants.length} visuals.`);
 } finally {
   await browser.close();
   if ('httpServer' in server) await server.close(); else await new Promise<void>((resolve, reject) => server.httpServer.close(e => e ? reject(e) : resolve()));

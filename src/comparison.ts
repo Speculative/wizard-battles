@@ -6,6 +6,7 @@ import { createScenario, SIMULATION_DT } from './scenario';
 import { COMPARISON_BRIEFS as MOVEMENT_BRIEFS, type EvidenceClip } from './comparisonEvidence';
 import { EXPERIMENT as MOVEMENT_EXPERIMENT, VARIANTS as MOVEMENT_VARIANTS } from './experiment';
 import { SPELL_EXPERIMENT, SPELL_VARIANTS, SPELL_BRIEFS } from './spellReadabilityExperiment';
+import { REVISION_EXPERIMENT, REVISION_VARIANTS, REVISION_BRIEFS } from './spellReadabilityRevision';
 import { initialExpectations, type Decision } from './expectations';
 
 import { evidenceReference, evidenceKey, notesForEvidence } from './evidenceFeedback';
@@ -13,10 +14,11 @@ import { validateFeedback, mergeFeedback, type Feedback, type EvidenceReference 
 
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 const params = new URLSearchParams(location.search);
-const spellExperiment = params.get('experiment') === SPELL_EXPERIMENT.id;
-const EXPERIMENT = spellExperiment ? SPELL_EXPERIMENT : MOVEMENT_EXPERIMENT;
-const VARIANTS = spellExperiment ? SPELL_VARIANTS : MOVEMENT_VARIANTS.map(v => ({ ...v, scenarioVariant: v.id, spellReadability: false }));
-const COMPARISON_BRIEFS = spellExperiment ? SPELL_BRIEFS : MOVEMENT_BRIEFS;
+const revisionExperiment = params.get('experiment') === REVISION_EXPERIMENT.id;
+const spellExperiment = revisionExperiment || params.get('experiment') === SPELL_EXPERIMENT.id;
+const EXPERIMENT = revisionExperiment ? REVISION_EXPERIMENT : spellExperiment ? SPELL_EXPERIMENT : MOVEMENT_EXPERIMENT;
+const VARIANTS = revisionExperiment ? REVISION_VARIANTS : spellExperiment ? SPELL_VARIANTS : MOVEMENT_VARIANTS.map(v => ({ ...v, scenarioVariant: v.id, spellReadability: false }));
+const COMPARISON_BRIEFS = revisionExperiment ? REVISION_BRIEFS : spellExperiment ? SPELL_BRIEFS : MOVEMENT_BRIEFS;
 function comparisonBrief(scene: string, matchSeed: number, layout: number) {
   return layout === 0 ? COMPARISON_BRIEFS.find(b => b.scenario === scene && b.seed === matchSeed) : undefined;
 }
@@ -26,6 +28,7 @@ app.innerHTML = `
 <header><div><div class="eyebrow">Wizard Battles / Experiment room</div><h1>${EXPERIMENT.title}</h1></div><div id="build" class="muted"></div></header>
 <nav class="controls" role="tablist" aria-label="Experiment room"><button id="comparison-tab" role="tab" aria-selected="true" aria-controls="comparison-page">Comparison</button><button id="goals-tab" role="tab" aria-selected="false" aria-controls="goals-page" tabindex="-1">Goals</button></nav>
 <div id="comparison-page" role="tabpanel" aria-labelledby="comparison-tab">
+${revisionExperiment ? '<p>Round 2 · A is the previous B; B and C are new alternatives. Play them one at a time. <a href="?experiment=spell-readability-v1">Previous round and comments</a>. After your feedback, the next decision is to adopt one approach, keep the previous cues, or park this direction.</p>' : ''}
 <div id="presets" class="controls" aria-label="Recommended matches"></div>
 <div class="example-heading"><h2 id="example-title"></h2><p id="example-description"></p><p id="active-match" class="muted" role="status"></p></div>
 <div class="controls" aria-label="Comparison mode"><button id="show-evidence" aria-pressed="true">Selected evidence</button><button id="full-fight" aria-pressed="false">Full fights / context</button></div>
@@ -41,13 +44,13 @@ app.innerHTML = `
 <p class="muted">Full fights are available for context. Evidence excerpts are deliberately chosen, not a representative sample or a ranking score. Names and designer commentary stay visible so you can assess the proposal.</p>
 <div class="cards"><section class="card"><h2>General comparison notes</h2><p class="muted">For an overall comparison or a full fight. Use the comment form on an evidence card to record your response to that specific piece.</p>
 <div class="stack"><div class="feedback-row"><select id="preference" aria-label="Preference"><option value="unsure">Unsure</option><option>A</option><option>B</option><option>C</option><option value="no-difference">No meaningful difference</option><option value="none">None works</option></select><textarea id="note" aria-label="Viewing note" placeholder="What caught your attention, or lost it?"></textarea></div><button id="save-note">Save timestamped note</button><ol id="notes-list"></ol></div></section>
-<section class="card"><h2>Evidence, after watching</h2><details><summary>Reveal approaches and experiment identity</summary><div id="variants"></div><small id="identity"></small></details><details><summary>Batch results and persona judgments</summary><div id="evidence">No saved report loaded. Run npm run experiment to generate evidence.</div><div id="reviews"></div></details><p class="muted">Descriptive evidence, no fun score. Expectation approval and build satisfaction are separate. ${spellExperiment ? 'Both panels use your preferred C movement. Whether the new spell cues help is the open question.' : 'Your recorded viewing preference favors C; the agent reviews retain their original uncertainty.'}</p></section></div>
+<section class="card"><h2>Evidence, after watching</h2><details><summary>Reveal approaches and experiment identity</summary><div id="variants"></div><small id="identity"></small></details><details><summary>Batch results and persona judgments</summary><div id="evidence">No saved report loaded. Run npm run experiment to generate evidence.</div><div id="reviews"></div></details><p class="muted">Descriptive evidence, no fun score. Expectation approval and build satisfaction are separate. ${spellExperiment ? 'All alternatives use your preferred C movement. Whether the new spell cues help is the open question.' : 'Your recorded viewing preference favors C; the agent reviews retain their original uncertainty.'}</p></section></div>
 </div><section id="goals-page" role="tabpanel" aria-labelledby="goals-tab" hidden class="card"><h2>What you want from battles</h2><p>These are goals for future experiments. Approving a goal means “I care about this,” not “the current fights achieve this.” The seven starting goals were already approved in our discussion; you do not need to approve them again.</p>
 <p>Edit a goal and <strong>Save edits</strong> to refine it. For a new proposal, <strong>Approve</strong> keeps it as a goal; <strong>Decline</strong> says it is not something you want. <strong>Remove</strong> retires a goal and <strong>Reopen</strong> asks to review it again. History is kept.</p>
 <p class="muted">Targets are optional and can be plain language. For example: “Separate duels should sometimes collide in four-way battles.” Use comments and viewing notes on the Comparison tab for reactions to specific fights; use this list for qualities you want us to preserve or improve across experiments. Changes use the same workspace save and browser backup as your notes.</p><p id="expectation-counts" role="status"></p>
 <div class="controls"><label>Show <select id="filter"><option value="all">All goals / history</option><option value="unreviewed">Needs your review</option><option value="approved">Approved goals</option><option value="declined">Declined proposals</option><option value="removed">Removed goals</option></select></label><button id="add-expectation">Propose expectation</button></div><div id="expectations"></div></section><details id="feedback-tools"><summary>Feedback saves and backups</summary><p id="save-status" role="status">Checking workspace saves…</p><div class="controls"><button id="retry-save">Retry workspace save</button><button id="export">Export feedback JSON</button><label>Import JSON <input id="import" type="file" accept="application/json"></label></div></details><p id="notice" class="notice" role="status"></p>`;
 $('#panels').classList.toggle('two-panels', VARIANTS.length === 2);
-if (spellExperiment) $('#preference option:nth-child(4)').remove();
+if (VARIANTS.length === 2) $('#preference option:nth-child(4)').remove();
 $('#build').textContent = `${EXPERIMENT.id} · ${source.slice(0, 23)}`;
 $('#build').title = source;
 $('#identity').textContent = `${EXPERIMENT.id}; fixed dt ${SIMULATION_DT}; source ${source}`;

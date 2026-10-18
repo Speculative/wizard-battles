@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { createScenario, SIMULATION_DT } from '../src/scenario';
 import { BattleView } from '../src/presentation/battleView';
 import { World } from '../src/world';
-import { semanticCue } from '../src/presentation/spellCues';
+import { semanticCue, revisedSemanticCue, type SpellReadability } from '../src/presentation/spellCues';
 
 function state(world: World) {
   return { tick: world.tick, time: world.time, events: world.events,
@@ -80,17 +80,19 @@ test('particles reconstruct from event time and seed, then expire and dispose', 
 
 test('spell cues preserve complete C fights and reconstruct after seeking', () => {
   const camera = new THREE.OrthographicCamera();
-  for (const scenario of ['duel', 'four-wizards']) for (const seed of [1, 19, 101]) {
-    const worlds = [false, true].map(() => createScenario({ seed, scenario, variant: 'burst' }));
-    const views = worlds.map((world, i) => new BattleView(world, camera, { spellReadability: !!i }));
+  for (const scenario of ['duel', 'four-wizards']) for (const seed of [1, 19, 101, 307]) {
+    const modes: SpellReadability[] = [false, true, 'rings', 'reaction'];
+    const worlds = modes.map(() => createScenario({ seed, scenario, variant: 'burst' }));
+    const views = worlds.map((world, i) => new BattleView(world, camera, { spellReadability: modes[i] }));
     for (let tick = 0; tick < 7200; tick++) {
-      for (let i = 0; i < 2; i++) { worlds[i].update(SIMULATION_DT); views[i].recordTick(); }
+      for (let i = 0; i < worlds.length; i++) { worlds[i].update(SIMULATION_DT); views[i].recordTick(); }
       if (tick % 13 === 0) views.forEach(view => view.render());
-      if (tick % 60 === 0) assert.deepEqual(state(worlds[0]), state(worlds[1]));
+      if (tick % 60 === 0) worlds.slice(1).forEach(world => assert.deepEqual(state(worlds[0]), state(world)));
       if (worlds[0].contestants.filter(c => c.alive).length <= 1) break;
     }
-    assert.deepEqual(state(worlds[0]), state(worlds[1]));
-    assert.equal(worlds[0].random(), worlds[1].random());
+    worlds.slice(1).forEach(world => assert.deepEqual(state(worlds[0]), state(world)));
+    const nextRandom = worlds[0].random();
+    worlds.slice(1).forEach(world => assert.equal(world.random(), nextRandom));
     views.forEach(view => view.render());
     const restored = new BattleView(worlds[1], camera, { spellReadability: true });
     // Trail history is supplied by per-tick sampling, unlike event-based cues.
@@ -120,5 +122,52 @@ test('damage markers require damage and remain at the recorded hit location', ()
   world.emit('spell_impact', 'red', { position: { x: 0, y: 0, z: 0 } });
   view.render();
   assert.ok(!view.group.children.some(c => c.name.startsWith('cue:damage:')));
+  view.dispose();
+});
+
+
+test('revised releases cannot produce damage rings and sparks face the camera', () => {
+  const world = new World();
+  const camera = new THREE.OrthographicCamera(); camera.rotation.set(-0.7, 0.4, 0.2);
+  for (const type of ['cast_release', 'projectile_emit', 'damage']) {
+    world.emit(type, 'red', { victim: 'blue', position: { x: 10, y: 33, z: 30 } });
+    for (const mode of ['rings', 'reaction'] as const) {
+      const cue = revisedSemanticCue(world.events.at(-1)!, mode, camera);
+      cue.update(0.05);
+      const hitRing = cue.group.getObjectByName('confirmed-hit');
+      assert.equal(!!hitRing, type === 'damage' && mode === 'rings');
+      if (hitRing) assert.equal(cue.group.position.y, 2, 'hit ring stays below the body');
+      else assert.ok(cue.group.quaternion.equals(camera.quaternion));
+      cue.update(0.4); assert.equal(cue.group.visible, false);
+    }
+  }
+});
+
+test('fighter reaction requires victim damage, restores from events and expires', () => {
+  const world = createScenario({ seed: 7, scenario: 'duel', variant: 'burst' });
+  const view = new BattleView(world, new THREE.OrthographicCamera(), { spellReadability: 'reaction' });
+  world.emit('cast_release', 'red', { position: { ...world.contestants[0].position } });
+  view.render();
+  const figure = view.group.getObjectByName('fighter:red')!;
+  assert.equal(figure.scale.y, 1);
+  world.emit('damage', 'blue', { victim: 'red', amount: 10, position: { ...world.contestants[0].position } });
+  view.render();
+  assert.ok(figure.scale.y < 1);
+  const restored = new BattleView(world, new THREE.OrthographicCamera(), { spellReadability: 'reaction' });
+  restored.render(); assert.deepEqual(visuals(view), visuals(restored));
+  for (let i = 0; i < 20; i++) world.update(SIMULATION_DT);
+  view.render(); assert.equal(figure.scale.y, 1);
+  view.dispose(); restored.dispose();
+});
+
+
+test('revised emitted shots replace their parent release pulse', () => {
+  const world = new World();
+  world.emit('cast_release', 'yellow', { position: { x: 0, y: 33, z: 0 } });
+  world.emit('projectile_emit', 'yellow', { position: { x: 40, y: 33, z: 0 } });
+  const view = new BattleView(world, new THREE.OrthographicCamera(), { spellReadability: 'rings' });
+  view.render();
+  assert.ok(!view.group.children.some(c => c.name.startsWith('cue:cast_release:')));
+  assert.ok(view.group.children.some(c => c.name.startsWith('cue:projectile_emit:')));
   view.dispose();
 });

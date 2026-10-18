@@ -11,11 +11,11 @@ import { seededRandom } from '../random';
 import { StatusDisplay } from '../statusDisplay';
 import { createTelegraph } from './telegraph';
 import { glow, ring, disposeObject } from './primitives';
-import { preparationPointer, semanticCue } from './spellCues';
+import { preparationPointer, semanticCue, revisedSemanticCue, type SpellReadability } from './spellCues';
 
 interface View { group: THREE.Group; update(): void; dispose(): void }
 interface TrailSample { t: number; x: number; y: number; z: number }
-export interface VisualOptions { effects?: boolean; trails?: boolean; visualSeed?: number; spellReadability?: boolean }
+export interface VisualOptions { effects?: boolean; trails?: boolean; visualSeed?: number; spellReadability?: SpellReadability }
 const EFFECT_LIFETIME = 0.65;
 const TRAIL_HISTORY = 0.2;
 
@@ -70,11 +70,14 @@ export class BattleView {
     }
     if (this.options.effects) for (const event of this.world.events) {
       if (this.world.time - event.t > EFFECT_LIFETIME) continue;
-      const cue = this.options.spellReadability && ['damage', 'cast_release', 'projectile_emit'].includes(event.type);
+      const duplicateRelease = typeof this.options.spellReadability === 'string' && event.type === 'cast_release' &&
+        this.world.events.some(e => e.type === 'projectile_emit' && e.who === event.who && e.t === event.t);
+      const cue = this.options.spellReadability && !duplicateRelease && ['damage', 'cast_release', 'projectile_emit'].includes(event.type);
       if (event.type !== 'spell_impact' && event.type !== 'blink' && !cue) continue;
       if (!this.effects.has(event.seq)) {
         if (cue) {
-          const effect = semanticCue(event);
+          const mode = this.options.spellReadability;
+          const effect = typeof mode === 'string' ? revisedSemanticCue(event, mode, this.camera) : semanticCue(event);
           this.effects.set(event.seq, this.view(effect.group, () => effect.update(this.world.time - event.t)));
         } else this.effects.set(event.seq, this.makeEffect(event));
       }
@@ -102,6 +105,7 @@ export class BattleView {
 
   private makeContestant(c: Contestant): View {
     const group = new THREE.Group();
+    const revised = typeof this.options.spellReadability === 'string';
     const body = new THREE.Mesh(new THREE.SphereGeometry(c.radius, 24, 16), new THREE.MeshToonMaterial({ color: c.color }));
     body.castShadow = true;
     const hat = new THREE.Mesh(new THREE.ConeGeometry(c.radius * 1.05, c.radius * 1.7, 16), new THREE.MeshToonMaterial({ color: c.color }));
@@ -112,6 +116,7 @@ export class BattleView {
     nose.rotation.z = -Math.PI / 2;
     nose.position.x = c.radius;
     const figure = new THREE.Group();
+    figure.name = `fighter:${c.id}`;
     figure.add(body, hat, brim, nose);
     const charge = ring(c.radius * 1.4, c.color);
     const timer = ring(c.radius * 1.65, 0xffffff);
@@ -124,6 +129,13 @@ export class BattleView {
     return this.view(group, () => {
       group.visible = c.alive;
       figure.position.set(c.position.x, c.position.y + Math.sin(this.world.time * 3 + c.color) * 2, c.position.z);
+      const hit = this.options.spellReadability === 'reaction' && this.options.effects
+        ? this.world.events.findLast(e => e.type === 'damage' && e.meta.victim === c.id && this.world.time - e.t < 0.2) : undefined;
+      const reaction = hit ? Math.max(0, 1 - (this.world.time - hit.t) / 0.2) : 0;
+      for (const mesh of [body, hat, brim]) {
+        mesh.material.emissive.setHex(0xffd6a0); mesh.material.emissiveIntensity = reaction * 0.85;
+      }
+      figure.scale.set(1 + reaction * 0.12, 1 - reaction * 0.16, 1 + reaction * 0.12);
       figure.rotation.y = -Math.atan2(c.facing.z, c.facing.x);
       const charging = c.getComponent(Charging) ?? c.getComponent(Channeling);
       charge.visible = !!charging;
@@ -136,6 +148,12 @@ export class BattleView {
         const progress = Math.max(0, Math.min(1, 1 - charging.remaining / Math.max(0.001, charging.totalDuration)));
         charge.scale.setScalar(0.7 + progress * 0.3);
         (charge.material as THREE.MeshBasicMaterial).opacity = 0.3 + progress * 0.6;
+        if (revised) {
+          const fade = Math.min(1, (charging.totalDuration - charging.remaining) / 0.14);
+          (track.material as THREE.MeshBasicMaterial).opacity = 0.35 * fade;
+          (timer.material as THREE.MeshBasicMaterial).opacity = 0.8 * fade;
+          (charge.material as THREE.MeshBasicMaterial).opacity *= fade;
+        }
         timer.geometry.setDrawRange(0, Math.floor(progress * 48) * 6);
       }
       const stamina = 'stamina01' in c ? (c as Contestant & { stamina01(): number }).stamina01() : 1;
@@ -160,10 +178,10 @@ export class BattleView {
     if (shape.kind === 'fire-spheres') for (const layer of shape.layers) {
       head.add(new THREE.Mesh(new THREE.SphereGeometry(s.spec.radius * layer.scale, 12, 8), glow(layer.color, layer.opacity)));
     } else {
-      const body = new THREE.Mesh(new THREE.OctahedronGeometry(s.spec.radius), glow(shape.bodyColor, 0.65));
+      const body = new THREE.Mesh(new THREE.OctahedronGeometry(s.spec.radius), glow(typeof this.options.spellReadability === 'string' ? 0x2388c7 : shape.bodyColor, typeof this.options.spellReadability === 'string' ? 0.8 : 0.65));
       body.scale.set(shape.lengthScale ?? 2.4, shape.widthScale ?? 0.55, shape.widthScale ?? 0.55);
       head.add(body);
-      const edge = new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry), new THREE.LineBasicMaterial({ color: shape.edgeColor }));
+      const edge = new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry), new THREE.LineBasicMaterial({ color: typeof this.options.spellReadability === 'string' ? 0x123958 : shape.edgeColor }));
       edge.scale.copy(body.scale);
       head.add(edge);
     }
@@ -217,12 +235,19 @@ export class BattleView {
     const portal = ring(s.spec.aoe.radius * 0.4, s.spec.visual.portalColor);
     const shard = new THREE.Mesh(new THREE.OctahedronGeometry(22), glow(s.spec.visual.shardColor, 0.7));
     shard.scale.set(0.7, 3, 0.7);
-    group.add(area, portal, shard);
+    const revised = typeof this.options.spellReadability === 'string';
+    const edge = new THREE.LineSegments(new THREE.EdgesGeometry(shard.geometry), new THREE.LineBasicMaterial({ color: 0x174b79 }));
+    edge.scale.copy(shard.scale); edge.visible = revised;
+    shard.add(edge); edge.scale.setScalar(1);
+    const areaBacking = ring(s.spec.aoe.radius * 1.025, 0x174b79, 0.45);
+    areaBacking.visible = revised;
+    group.add(areaBacking, area, portal, shard);
     return this.view(group, () => {
       group.position.set(s.impactPos.x, 0, s.impactPos.z);
       const progress = s.frozen ? Math.min(1, s.chargeAge / s.spec.chargeTime) : 1;
       // Outline always shows the full authoritative damage area; opacity encodes readiness.
       (area.material as THREE.MeshBasicMaterial).opacity = s.state === 'impacted' ? 0.4 * (1 - s.fadeAge / 0.6) : 0.25 + progress * 0.5;
+      (areaBacking.material as THREE.MeshBasicMaterial).opacity = (area.material as THREE.MeshBasicMaterial).opacity * 0.65;
       portal.position.y = s.spec.portalHeight;
       portal.scale.setScalar(progress);
       portal.rotation.z = this.world.time * 0.6;
@@ -257,14 +282,22 @@ export class BattleView {
     const geometry = new THREE.RingGeometry(s.caster.radius, s.reach + s.caster.radius, 28, 1, -s.coneHalfAngle, s.coneHalfAngle * 2);
     geometry.rotateX(-Math.PI / 2);
     const arc = new THREE.Mesh(geometry, glow(0xb9e5ff, 0.5));
+    const revised = typeof this.options.spellReadability === 'string';
+    const rimGeometry = new THREE.RingGeometry(s.reach + s.caster.radius - 4, s.reach + s.caster.radius, 28, 1, -s.coneHalfAngle, s.coneHalfAngle * 2);
+    rimGeometry.rotateX(-Math.PI / 2);
+    const rim = new THREE.Mesh(rimGeometry, glow(0x8c341b));
+    rim.position.y = 1;
     const pointer = preparationPointer(s.caster.color);
-    group.add(pointer);
+    group.add(pointer, rim);
     group.add(arc);
     return this.view(group, () => {
       group.position.set(s.caster.position.x, s.caster.position.y * 0.6, s.caster.position.z);
       group.rotation.y = -Math.atan2(s.aim.z, s.aim.x);
       arc.visible = !s.frozen && s.age < s.swingDuration;
       pointer.visible = this.options.spellReadability && this.options.effects && s.frozen;
+      rim.visible = revised && arc.visible;
+      (rim.material as THREE.MeshBasicMaterial).opacity = 0.9 * Math.sin(Math.PI * s.age / s.swingDuration);
+      if (revised) (arc.material as THREE.MeshBasicMaterial).color.setHex(0xffbc79);
       (arc.material as THREE.MeshBasicMaterial).opacity = 0.65 * Math.sin(Math.PI * s.age / s.swingDuration);
     });
   }

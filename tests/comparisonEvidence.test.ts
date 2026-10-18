@@ -53,6 +53,7 @@ test('curation applies only to its documented setups', () => {
   assert.equal(comparisonBrief('duel', 211, 0), undefined);
 });
 
+import { REVISION_BRIEFS } from '../src/spellReadabilityRevision';
 import { SPELL_BRIEFS } from '../src/spellReadabilityExperiment';
 test('spell readability clips retain their hit, miss and crowd evidence', () => {
   for (const brief of SPELL_BRIEFS) {
@@ -82,6 +83,22 @@ test('spell readability clips retain their hit, miss and crowd evidence', () => 
       assert.equal(during.filter(e => e.type === 'damage' && e.who === 'red').length,3);
       assert.ok(near('spell_impact','green',2.32));
       assert.equal(during.filter(e => e.type === 'damage' && e.meta.spell === 'iceShard').length,0);
+    }
+  }
+});
+
+
+test('revision keeps the reviewed moments with fresh feedback identities', () => {
+  for (const [i, brief] of REVISION_BRIEFS.entries()) {
+    const previous = SPELL_BRIEFS[i];
+    assert.notEqual(brief.id, previous.id);
+    assert.equal(brief.seed, previous.seed);
+    assert.equal(brief.scenario, previous.scenario);
+    assert.deepEqual(brief.clips.map(c => c.variant), ['cues', 'rings', 'reaction']);
+    for (const clip of brief.clips) {
+      assert.equal(clip.start, previous.clips[0].start);
+      assert.equal(clip.end, previous.clips[0].end);
+      assert.ok(!previous.clips.some(c => c.id === clip.id));
     }
   }
 });
