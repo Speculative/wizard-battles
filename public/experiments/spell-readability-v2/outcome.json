@@ -277,20 +277,27 @@
   "disposition": {
     "chosenTechnique": "C: fighter flash and impact sparks for actual damage, rather than damage rings.",
     "acceptanceScope": "Owner explicitly prefers the hit-feedback technique. The complete visual package and ordinary-battle default are not approved by that preference.",
-    "designerRecommendation": "Close the hit-versus-cast comparison; carry C-style reactions into a separate coherent art-direction experiment.",
+    "designerRecommendation": "Close the hit-versus-cast comparison with C preferred. Scope the proposed follow-up first to the post-engine-refactor appearance of fireballs and ice shards; a whole-scene art redesign was an agent proposal, not the scope of the owner complaint.",
     "remainingConcerns": [
       "The duel flash may still be too busy.",
-      "Dark/outlined spell styling reads clearly but looks dirty and unappealing.",
+      "The owner finds the post-engine-refactor appearance of fireballs and ice shards dirty and unappealing. This appearance complaint does not concern damage flashes.",
       "Attacker attribution, targeting and fighter identity remain limited."
     ],
     "implementationStatus": "No rendering or gameplay changes in this disposition. Ordinary battle defaults remain as before.",
     "nextSuggestedItem": "09n7-p3qk",
-    "stoppingCondition": "No third ring-versus-flash comparison is needed: the owner chose a technique across the viewed cases. Broader visual appeal needs a coherent art direction rather than indefinite local cue tuning."
+    "stoppingCondition": "No third ring-versus-flash comparison is needed: the owner chose a technique across the viewed cases. Investigate projectile appearance separately, preserving C hit feedback; broader art direction remains an approved goal rather than an automatically authorized redesign."
   },
   "factualFollowup": {
     "ice": "Revised ice uses darker blue material and dark edge lines.",
     "fireballs": "Fire-sphere projectiles use layered colored spheres and trails; the revised ice edge-line branch is not applied to fireballs.",
-    "inspection": "Source inspection of BattleView.projectile; no new continuous viewing or visual assessment is claimed."
+    "inspection": "Source inspection of BattleView.projectile; no new continuous viewing or visual assessment is claimed.",
+    "causalityLimit": "The material/geometry observations describe current code only. They do not establish when or why the post-engine-refactor appearance changed; that requires comparison with pre-refactor rendering."
   },
-  "validation": "Documentation-only disposition. Exact feedback copied from retained workspace snapshot; existing rendering/gameplay checks were not repeated against unchanged code."
+  "validation": "Documentation-only disposition. Exact feedback copied from retained workspace snapshot; existing rendering/gameplay checks were not repeated against unchanged code.",
+  "ownerClarifications": [
+    {
+      "source": "Ostraka ekpb-1k5y, owner clarification following the round-2 disposition",
+      "text": "To clarify, the comment on visual direction was not about the appearance of damage flashes, but rather the post-engine-refactor look of fireballs and ice shards"
+    }
+  ]
 }

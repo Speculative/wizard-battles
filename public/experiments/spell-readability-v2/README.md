@@ -24,13 +24,17 @@ The owner chose **C’s fighter flash / impact sparks** as the most legible hit
 feedback and less noisy than damage rings, including the crowded opening.
 The duel flash may still be a little too busy. This establishes a preferred
 hit-feedback technique, not acceptance of the whole visual package: the owner
-also found the dark/outlined spell styling “dirty and unappealing” and approved
-a goal of beautiful, coherent, intentional art direction.
+also found the post-engine-refactor appearance of fireballs and ice shards
+“dirty and unappealing.” The owner explicitly clarified that this appearance
+criticism applies to those spell visuals, not damage flashes. The separately approved
+goal is beautiful, coherent, intentional art direction.
 
 **Disposition:** close the ring-versus-flash comparison and carry C-style hit
-reactions into a separate art-direction experiment. Do not start a third local
-cue-polish round. Suggested follow-up `09n7-p3qk`, linked to this experiment and
-the overhaul plan, awaits the owner’s decision to start. Ordinary battle defaults
+reactions forward. Scope suggested follow-up `09n7-p3qk` first to the
+post-engine-refactor appearance of fireballs and ice shards. A whole-scene art
+redesign was an agent proposal, not the scope of the owner complaint. Do not
+start a third local cue-polish round. The follow-up, linked to this experiment
+and the overhaul plan, awaits the owner’s decision to start. Ordinary battle defaults
 have not changed. The recommendation above and persona reports retain their
 original pre-feedback context.
 
@@ -38,7 +42,9 @@ original pre-feedback context.
 acceptance scope, outstanding concerns and factual follow-up. Source inspection
 confirms revised ice has dark edge lines; fireballs use layered colored spheres
 and trails rather than that ice-outline treatment. This does not invalidate the
-owner’s broader appearance concern. No new gameplay or visual changes were made;
+owner’s projectile-appearance concern or establish its cause. Compare with
+pre-refactor rendering before attributing the change. No new gameplay or visual
+changes were made;
 the existing validation remains the evidence for the compared build.
 
 ## Watch one clip at a time
