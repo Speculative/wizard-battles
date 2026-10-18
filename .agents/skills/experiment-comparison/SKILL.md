@@ -141,3 +141,39 @@ next hypothesis. Update this skill when the owner corrects the comparison
 process; put experiment-specific tastes, seeds and results on their items.
 Keep presentation work proportional: prepare enough to make the decision easy,
 then return to the creative experiment instead of polishing the dashboard.
+
+
+## 6. Make feedback lead to a decision
+
+Explain the actual handoff when presenting a round: saving comments retains
+feedback; do not imply that it starts an agent dispatch unless that trigger
+exists. State what work is already authorized, what starts the next work, and
+whether the item awaits owner judgment or agent execution.
+
+After owner feedback, give a concise disposition on the active item:
+
+- What the owner found better, worse or unclear, separately from interpretation.
+- Which observations warrant fixes, factual investigation or a design choice.
+- Whether to revise, adopt, revert or park the direction, and why.
+- For another round, its bounded question and the evidence that would resolve it.
+
+Within existing authorization, incorporate actionable feedback and complete
+routine fixes without asking the owner to repeat it or approve each step. A new
+round is warranted when it can resolve a material uncertainty or test a concrete
+improvement. Do not turn every comment into another experiment or interpret
+positive feedback as blanket acceptance.
+
+Set a stopping condition for the line of work. Recommend closure when the
+original question has a useful answer, material defects have been addressed,
+and remaining tradeoffs are explicit for owner judgment. Closure can mean
+adopting an improvement, retaining the baseline, or parking an unpromising
+approach. Perfect visuals, unanimous personas and exhausting every idea are not
+requirements. When another round has low expected value compared with the next
+project priority, say so and recommend moving on.
+
+At closure, record the chosen behavior, actual owner acceptance or unresolved
+decision, validation and remaining limitations on the item. Do not claim owner
+acceptance from persona opinions. Reconcile the outcome and next priority on
+the linked plan when authorized; retain narrower follow-ups on linked items
+rather than leaving the whole experiment implicitly open. Respect the item
+workflow for creating or suggesting follow-ups.
