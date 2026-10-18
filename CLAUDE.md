@@ -2,6 +2,13 @@
 
 This file is auto-loaded by Claude Code at session start. Read [DESIGN.md](DESIGN.md) for the architectural overview; this file is for the working rules that aren't obvious from the code.
 
+## Experiment comparisons
+
+When planning, evaluating, or presenting experiments, read and follow
+[the experiment-comparison skill](.agents/skills/experiment-comparison/SKILL.md).
+Apply it proactively to new experiments and revisions. Prepare evidence and
+self-review the presentation before asking the owner to spend attention.
+
 ## Headless harness
 
 There's a node-runnable harness that runs matches without a renderer, advancing a virtual clock so simulated time decouples from wall-clock time. Use it to verify the behavioral impact of any simulator change, especially anything affecting tactics, kinematics, spell mechanics, or AI decisions.

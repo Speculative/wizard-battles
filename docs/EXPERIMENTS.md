@@ -1,5 +1,9 @@
 # Experiment room
 
+For the repeatable preparation and handoff process, follow the
+[experiment-comparison skill](../.agents/skills/experiment-comparison/SKILL.md).
+This document covers the current tools, formats and delivered examples.
+
 Run `npm run dev` and open **http://localhost:5173/compare.html**. The ordinary single-battle page remains at `/`.
 
 The first experiment, `movement-pacing-v1`, compares baseline (A), measured commitments (B), and bursts/resets (C). These are configuration packages applied to every fighter; abilities and tactics stay the same. The hypothesis concerns anticipating pressure/commitment/escape, not maximizing activity. All three can fail. The two scenes use the existing asymmetric kits, so a red win is not a general balance result.
