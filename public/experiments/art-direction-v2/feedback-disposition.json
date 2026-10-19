@@ -1,0 +1,276 @@
+{
+  "ownerExport": "../art-direction-v1/owner-feedback/2026-10-19.json",
+  "comments": [
+    {
+      "at": "2026-10-19T03:17:02.596Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-porcelain",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "porcelain",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "The big ice crystal probably looks the worst in this one",
+      "revisionAction": "Revise directional warm/cool lighting and ceramic alcoves; give cobalt ice a bright faceted edge and front core. Keep the light-floor readability risk visible.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 6.899999999999981
+    },
+    {
+      "at": "2026-10-19T03:18:33.507Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-observatory",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "observatory",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "Compared to Porcelain Lab, the slight glow at the edge of the crystal and the contrast vs. the darker background makes this ice crystal look a lot better",
+      "revisionAction": "Retain hats, colors, crystal edge light and geometric magic; replace spherical bodies with robed scholars and add vaulted astronomy-room architecture. Keep unchanged baseline as an equal option.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 7.016666666666647
+    },
+    {
+      "at": "2026-10-19T03:19:06.710Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-observatory",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "observatory",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "I'm a big fan of the geometric, explicitly magic aesthetic of this version overall",
+      "revisionAction": "Retain hats, colors, crystal edge light and geometric magic; replace spherical bodies with robed scholars and add vaulted astronomy-room architecture. Keep unchanged baseline as an equal option.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 7.999999999999977
+    },
+    {
+      "at": "2026-10-19T03:20:23.919Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-paper",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "paper",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "This one is probably my least favorite overall. I do like the low-poly spheres for the players, but this one doesn't really read like \"paper\" to me, more like \"flatly lit basic blender donut\". There's something that feels \"3D game tutorial\" in a bad way about it.",
+      "revisionAction": "Retain low-poly fighters; make card thickness, folded hats/spells, mounting tabs and folded scenery explicit, with directional theatrical lighting.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 9.800000000000066
+    },
+    {
+      "at": "2026-10-19T03:21:24.572Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-photon",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "photon",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "This one is easily my favorite of the batch. I like how high contrast the players and spells are vs. the background. I like the explicitly TRON-like arena & light-based spells.",
+      "revisionAction": "Preserve light-made translucency, color contrast, needle silhouettes and the original light rig; quiet room markings, reduce wire density and simplify projectile brackets. Keep unchanged baseline as an equal option.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 8.683333333333344
+    },
+    {
+      "at": "2026-10-19T03:22:02.189Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-photon",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "photon",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "Spell projectile shapes feel more interesting here, probably owing to how different they are from all of the others",
+      "revisionAction": "Preserve light-made translucency, color contrast, needle silhouettes and the original light rig; quiet room markings, reduce wire density and simplify projectile brackets. Keep unchanged baseline as an equal option.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 7.333333333333313
+    },
+    {
+      "at": "2026-10-19T03:23:37.135Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-photon",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "photon",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "I also like how the TRON aesthetic legitimizes the spectator aid visuals (targeting cones, facing arrows) and makes them plausibly diagetic",
+      "revisionAction": "Preserve light-made translucency, color contrast, needle silhouettes and the original light rig; quiet room markings, reduce wire density and simplify projectile brackets. Keep unchanged baseline as an equal option.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 6.049999999999984
+    },
+    {
+      "at": "2026-10-19T03:24:40.276Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-foundry",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "foundry",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "These are probably the second best spell projectiles after Photon Chamber",
+      "revisionAction": "Keep dense molten projectiles and mineral shards; remove bolts, vents, safety stripes and copper busbar cues, substituting carved stone bays and jade specimens.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 9.800000000000066
+    },
+    {
+      "at": "2026-10-19T03:25:13.532Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-foundry",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "foundry",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "This one is visually coherent and quite interesting, probably the second best executed overall, but probably not the direction I want to go. Too industrial for me.",
+      "revisionAction": "Keep dense molten projectiles and mineral shards; remove bolts, vents, safety stripes and copper busbar cues, substituting carved stone bays and jade specimens.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 9.800000000000066
+    },
+    {
+      "at": "2026-10-19T03:25:49.885Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-observatory",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "observatory",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "I would love to figure out what we can do to make me like this one more.",
+      "revisionAction": "Retain hats, colors, crystal edge light and geometric magic; replace spherical bodies with robed scholars and add vaulted astronomy-room architecture. Keep unchanged baseline as an equal option.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 9.800000000000066
+    },
+    {
+      "at": "2026-10-19T03:27:21.573Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-photon",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "photon",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "I also *love* the translucency of the players in this one! Justified by the TRON aesthetic and really sells the \"everything is made of light\" concept.",
+      "revisionAction": "Preserve light-made translucency, color contrast, needle silhouettes and the original light rig; quiet room markings, reduce wire density and simplify projectile brackets. Keep unchanged baseline as an equal option.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 6.26666666666665
+    },
+    {
+      "at": "2026-10-19T03:27:58.872Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-porcelain",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "porcelain",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "This one follows my original design the best. I can't put my finger on why it doesn't work well. I think the uniform lighting might have something to do with it. This one is and Paper Theater have the same problem, whatever that problem is. A \"beginner's 3D\" feeling.",
+      "revisionAction": "Revise directional warm/cool lighting and ceramic alcoves; give cobalt ice a bright faceted edge and front core. Keep the light-floor readability risk visible.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 5.799999999999985
+    },
+    {
+      "at": "2026-10-19T03:30:44.744Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-observatory",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "observatory",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "The players being spheres probably clashes the most in this one?",
+      "revisionAction": "Retain hats, colors, crystal edge light and geometric magic; replace spherical bodies with robed scholars and add vaulted astronomy-room architecture. Keep unchanged baseline as an equal option.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 5.799999999999985
+    },
+    {
+      "at": "2026-10-19T03:31:43.065Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-observatory",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "observatory",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "I do really like how the player colors look and how the hats are rendered",
+      "revisionAction": "Retain hats, colors, crystal edge light and geometric magic; replace spherical bodies with robed scholars and add vaulted astronomy-room architecture. Keep unchanged baseline as an equal option.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 5.799999999999985
+    },
+    {
+      "at": "2026-10-19T03:32:47.977Z",
+      "evidence": {
+        "id": "art-v1-four-wizards-19-paper",
+        "revision": 1,
+        "briefId": "art-spell-intersection",
+        "variant": "paper",
+        "start": 5.8,
+        "end": 9.8
+      },
+      "ownerText": "In a second iteration I'd want to see either more explicitly paper or a different non-paper take on what this concept values.",
+      "revisionAction": "Retain low-poly fighters; make card thickness, folded hats/spells, mounting tabs and folded scenery explicit, with directional theatrical lighting.",
+      "ownerSource": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "viewedTime": 9.800000000000066
+    }
+  ],
+  "decision": "Revise all five; retain original Photon and Observatory for direct comparison. No adoption or cuts."
+}

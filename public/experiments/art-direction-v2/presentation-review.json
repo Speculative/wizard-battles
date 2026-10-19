@@ -1,0 +1,18 @@
+{
+  "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+  "entry": "scenario 2 / seed 19",
+  "oldOwnerNotes": 15,
+  "newOwnerNotes": 0,
+  "passed": true,
+  "checks": [
+    "main room links to both old/new views",
+    "explicit round labels",
+    "paired states identical at default excerpt start",
+    "fresh evidence reviewed status",
+    "preserved fifteen old owner comments",
+    "served ZIP byte identity",
+    "final Photon material contrast inspected",
+    "responsive/full-context controls and comment linkage covered by browser-check.json"
+  ],
+  "inspection": "Sampled capture frames and actual browser controls; not continuous video viewing."
+}

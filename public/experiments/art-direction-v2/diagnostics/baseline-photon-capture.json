@@ -1,0 +1,397 @@
+{
+  "metadata": {
+    "experiment": "art-direction-v1",
+    "source": "sha256:375f550dc0f8e6ae95caea777cd526d3df3555a1979e5b7561c519df7ed2b003",
+    "alternatives": [
+      {
+        "id": "porcelain",
+        "scenarioVariant": "burst",
+        "spellReadability": "reaction",
+        "artDirection": "porcelain"
+      },
+      {
+        "id": "photon",
+        "scenarioVariant": "burst",
+        "spellReadability": "reaction",
+        "artDirection": "photon"
+      },
+      {
+        "id": "observatory",
+        "scenarioVariant": "burst",
+        "spellReadability": "reaction",
+        "artDirection": "observatory"
+      },
+      {
+        "id": "paper",
+        "scenarioVariant": "burst",
+        "spellReadability": "reaction",
+        "artDirection": "paper"
+      },
+      {
+        "id": "foundry",
+        "scenarioVariant": "burst",
+        "spellReadability": "reaction",
+        "artDirection": "foundry"
+      }
+    ],
+    "dt": 0.016666666666666666,
+    "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+  },
+  "url": "http://127.0.0.1:5175/compare.html?capture=1&experiment=art-direction-v1&scenario=four-wizards&seed=19",
+  "viewport": {
+    "width": 1440,
+    "height": 1050
+  },
+  "focusedVariant": "photon",
+  "fps": 30,
+  "start": 5.8,
+  "duration": 0,
+  "frames": [
+    {
+      "frame": 0,
+      "requestedTime": 5.8,
+      "panels": [
+        {
+          "variant": "porcelain",
+          "time": 5.799999999999985,
+          "tick": 348,
+          "finished": false,
+          "contestants": [
+            {
+              "id": "red",
+              "hp": 100,
+              "alive": true,
+              "position": {
+                "x": -143.4144429961196,
+                "y": 33,
+                "z": 37.36463332324714
+              },
+              "velocity": {
+                "x": 248.01057219745857,
+                "y": 0,
+                "z": -129.96444159188007
+              }
+            },
+            {
+              "id": "blue",
+              "hp": 95.5,
+              "alive": true,
+              "position": {
+                "x": 167.40076758989025,
+                "y": 33,
+                "z": 238.16974719970062
+              },
+              "velocity": {
+                "x": -8.493811484485363,
+                "y": 0,
+                "z": 20.505874882084928
+              }
+            },
+            {
+              "id": "green",
+              "hp": 34,
+              "alive": true,
+              "position": {
+                "x": -32.64150826298019,
+                "y": 33,
+                "z": -45.58914023026522
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            },
+            {
+              "id": "yellow",
+              "hp": 100,
+              "alive": true,
+              "position": {
+                "x": 248.83587181158026,
+                "y": 33,
+                "z": -166.3280663253679
+              },
+              "velocity": {
+                "x": 20.196908697680815,
+                "y": 0,
+                "z": -29.036352068683854
+              }
+            }
+          ]
+        },
+        {
+          "variant": "photon",
+          "time": 5.799999999999985,
+          "tick": 348,
+          "finished": false,
+          "contestants": [
+            {
+              "id": "red",
+              "hp": 100,
+              "alive": true,
+              "position": {
+                "x": -143.4144429961196,
+                "y": 33,
+                "z": 37.36463332324714
+              },
+              "velocity": {
+                "x": 248.01057219745857,
+                "y": 0,
+                "z": -129.96444159188007
+              }
+            },
+            {
+              "id": "blue",
+              "hp": 95.5,
+              "alive": true,
+              "position": {
+                "x": 167.40076758989025,
+                "y": 33,
+                "z": 238.16974719970062
+              },
+              "velocity": {
+                "x": -8.493811484485363,
+                "y": 0,
+                "z": 20.505874882084928
+              }
+            },
+            {
+              "id": "green",
+              "hp": 34,
+              "alive": true,
+              "position": {
+                "x": -32.64150826298019,
+                "y": 33,
+                "z": -45.58914023026522
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            },
+            {
+              "id": "yellow",
+              "hp": 100,
+              "alive": true,
+              "position": {
+                "x": 248.83587181158026,
+                "y": 33,
+                "z": -166.3280663253679
+              },
+              "velocity": {
+                "x": 20.196908697680815,
+                "y": 0,
+                "z": -29.036352068683854
+              }
+            }
+          ]
+        },
+        {
+          "variant": "observatory",
+          "time": 5.799999999999985,
+          "tick": 348,
+          "finished": false,
+          "contestants": [
+            {
+              "id": "red",
+              "hp": 100,
+              "alive": true,
+              "position": {
+                "x": -143.4144429961196,
+                "y": 33,
+                "z": 37.36463332324714
+              },
+              "velocity": {
+                "x": 248.01057219745857,
+                "y": 0,
+                "z": -129.96444159188007
+              }
+            },
+            {
+              "id": "blue",
+              "hp": 95.5,
+              "alive": true,
+              "position": {
+                "x": 167.40076758989025,
+                "y": 33,
+                "z": 238.16974719970062
+              },
+              "velocity": {
+                "x": -8.493811484485363,
+                "y": 0,
+                "z": 20.505874882084928
+              }
+            },
+            {
+              "id": "green",
+              "hp": 34,
+              "alive": true,
+              "position": {
+                "x": -32.64150826298019,
+                "y": 33,
+                "z": -45.58914023026522
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            },
+            {
+              "id": "yellow",
+              "hp": 100,
+              "alive": true,
+              "position": {
+                "x": 248.83587181158026,
+                "y": 33,
+                "z": -166.3280663253679
+              },
+              "velocity": {
+                "x": 20.196908697680815,
+                "y": 0,
+                "z": -29.036352068683854
+              }
+            }
+          ]
+        },
+        {
+          "variant": "paper",
+          "time": 5.799999999999985,
+          "tick": 348,
+          "finished": false,
+          "contestants": [
+            {
+              "id": "red",
+              "hp": 100,
+              "alive": true,
+              "position": {
+                "x": -143.4144429961196,
+                "y": 33,
+                "z": 37.36463332324714
+              },
+              "velocity": {
+                "x": 248.01057219745857,
+                "y": 0,
+                "z": -129.96444159188007
+              }
+            },
+            {
+              "id": "blue",
+              "hp": 95.5,
+              "alive": true,
+              "position": {
+                "x": 167.40076758989025,
+                "y": 33,
+                "z": 238.16974719970062
+              },
+              "velocity": {
+                "x": -8.493811484485363,
+                "y": 0,
+                "z": 20.505874882084928
+              }
+            },
+            {
+              "id": "green",
+              "hp": 34,
+              "alive": true,
+              "position": {
+                "x": -32.64150826298019,
+                "y": 33,
+                "z": -45.58914023026522
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            },
+            {
+              "id": "yellow",
+              "hp": 100,
+              "alive": true,
+              "position": {
+                "x": 248.83587181158026,
+                "y": 33,
+                "z": -166.3280663253679
+              },
+              "velocity": {
+                "x": 20.196908697680815,
+                "y": 0,
+                "z": -29.036352068683854
+              }
+            }
+          ]
+        },
+        {
+          "variant": "foundry",
+          "time": 5.799999999999985,
+          "tick": 348,
+          "finished": false,
+          "contestants": [
+            {
+              "id": "red",
+              "hp": 100,
+              "alive": true,
+              "position": {
+                "x": -143.4144429961196,
+                "y": 33,
+                "z": 37.36463332324714
+              },
+              "velocity": {
+                "x": 248.01057219745857,
+                "y": 0,
+                "z": -129.96444159188007
+              }
+            },
+            {
+              "id": "blue",
+              "hp": 95.5,
+              "alive": true,
+              "position": {
+                "x": 167.40076758989025,
+                "y": 33,
+                "z": 238.16974719970062
+              },
+              "velocity": {
+                "x": -8.493811484485363,
+                "y": 0,
+                "z": 20.505874882084928
+              }
+            },
+            {
+              "id": "green",
+              "hp": 34,
+              "alive": true,
+              "position": {
+                "x": -32.64150826298019,
+                "y": 33,
+                "z": -45.58914023026522
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            },
+            {
+              "id": "yellow",
+              "hp": 100,
+              "alive": true,
+              "position": {
+                "x": 248.83587181158026,
+                "y": 33,
+                "z": -166.3280663253679
+              },
+              "velocity": {
+                "x": 20.196908697680815,
+                "y": 0,
+                "z": -29.036352068683854
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

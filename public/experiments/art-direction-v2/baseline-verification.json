@@ -1,0 +1,26 @@
+{
+  "source": "sha256:375f550dc0f8e6ae95caea777cd526d3df3555a1979e5b7561c519df7ed2b003",
+  "checks": [
+    {
+      "style": "photon",
+      "time": 5.8,
+      "scenario": "four-wizards",
+      "seed": 19,
+      "sha256": "325ab8f0cd5ef56d115855313caae0afb48ae71426f38aa8378a54ca3779f52e",
+      "retainedFrame": "public/experiments/art-direction-v1/media/intersection-photon/frame-00000.png",
+      "currentManifest": "diagnostics/baseline-photon-capture.json",
+      "result": "byte-identical"
+    },
+    {
+      "style": "observatory",
+      "time": 5.8,
+      "scenario": "four-wizards",
+      "seed": 19,
+      "sha256": "2b3cfcbcdf6c5990dfe164fb52ef6a6957e05ff6fddd42bed51189f90a3b2199",
+      "retainedFrame": "public/experiments/art-direction-v1/media/intersection-observatory/frame-00000.png",
+      "currentManifest": "diagnostics/baseline-observatory-capture.json",
+      "result": "byte-identical"
+    }
+  ],
+  "limit": "One full rendered frame per retained style was compared; no continuous old-fight recapture is claimed."
+}

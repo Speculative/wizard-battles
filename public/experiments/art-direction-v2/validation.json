@@ -1,0 +1,37 @@
+{
+  "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+  "initialCaptureSource": "sha256:375f550dc0f8e6ae95caea777cd526d3df3555a1979e5b7561c519df7ed2b003",
+  "codeCommit": "f005518df0ef96efc2d842ba86fe15b7ff6ebbf9",
+  "build": {
+    "command": "npm run build",
+    "passed": true
+  },
+  "unit": {
+    "command": "npm test",
+    "passed": true,
+    "tests": 35,
+    "scope": "Both art rounds: simulation invariance, deterministic reconstruction and geometry disposal; existing suite included."
+  },
+  "browser": {
+    "command": "npx tsx scripts/check-art-comparison.ts --revision",
+    "passed": true,
+    "report": "browser-check.json",
+    "additionalChecks": [
+      "paired/main revised comment linkage",
+      "unchanged original identities in pairs",
+      "fresh round-two evidence IDs"
+    ]
+  },
+  "media": {
+    "videos": 15,
+    "fps": 30,
+    "completeDecode": true,
+    "sharingMP4s": 7,
+    "zipIntegrity": true,
+    "allFocusedGameplayFramesIdenticalAcrossStyles": true,
+    "note": "Twelve captures retain the initial source; three Photon captures use the final material correction. Both exact archives are retained."
+  },
+  "baseline": "baseline-verification.json",
+  "inspection": "inspection.json",
+  "presentation": "presentation-review.json"
+}

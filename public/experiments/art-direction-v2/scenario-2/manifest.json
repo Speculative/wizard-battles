@@ -1,0 +1,60 @@
+{
+  "scenario": "four-wizards",
+  "seed": 19,
+  "rotation": 0,
+  "variant": "burst",
+  "start": 5.8,
+  "end": 9.8,
+  "fps": 30,
+  "files": [
+    {
+      "file": "A-Porcelain-Lab-Round-2.mp4",
+      "round": 2,
+      "style": "porcelain",
+      "capture": "../media/intersection-porcelain/capture.json",
+      "sha256": "1951c1fd7dd2f1602b0afedbc7983885b3a450f7cad6979a8d3f6c07f92b847c"
+    },
+    {
+      "file": "B-Photon-Chamber-Round-2.mp4",
+      "round": 2,
+      "style": "photon",
+      "capture": "../media/intersection-photon/capture.json",
+      "sha256": "0f6aaa328459e6a2828d1248647e799dc732a484fc75402b1b4b9150c7cc20f9"
+    },
+    {
+      "file": "C-Arcane-Observatory-Round-2.mp4",
+      "round": 2,
+      "style": "observatory",
+      "capture": "../media/intersection-observatory/capture.json",
+      "sha256": "1c2c675db8b1232cc53eeac9421821d8a7d332ae2202026aa079f01aee7ebb26"
+    },
+    {
+      "file": "D-Paper-Theater-Round-2.mp4",
+      "round": 2,
+      "style": "paper",
+      "capture": "../media/intersection-paper/capture.json",
+      "sha256": "038289ed880de641954b893fd585f778776d8d1cc162ba1caa2be3692eb6bacb"
+    },
+    {
+      "file": "E-Obsidian-Atelier-Round-2.mp4",
+      "round": 2,
+      "style": "foundry",
+      "capture": "../media/intersection-foundry/capture.json",
+      "sha256": "2e3a53cdd4921185bf1cc516b9efd06d8475dd7f779840260b4ad65265adb97f"
+    },
+    {
+      "file": "BASELINE-Photon-Chamber-Round-1-Unchanged.mp4",
+      "round": 1,
+      "style": "photon",
+      "capture": "../../art-direction-v1/media/intersection-photon/capture.json",
+      "sha256": "282103f4d836a54c59bc217f858b942b3ca6f6c86cb87ccfbe05ab2be3a81f6d"
+    },
+    {
+      "file": "BASELINE-Arcane-Observatory-Round-1-Unchanged.mp4",
+      "round": 1,
+      "style": "observatory",
+      "capture": "../../art-direction-v1/media/intersection-observatory/capture.json",
+      "sha256": "8a29ecbca431e056ca0d37a3bdac8a5317624329bda46f9e165186dd2ce24421"
+    }
+  ]
+}

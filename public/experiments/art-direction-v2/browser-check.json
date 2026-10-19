@@ -1,0 +1,13 @@
+{
+  "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+  "passed": true,
+  "checks": [
+    "15 evidence identities",
+    "exclusive playback",
+    "fifth-panel scrub/replay independence",
+    "workspace comment recovery",
+    "wide/narrow enlargement",
+    "25 complete browser/headless fights"
+  ],
+  "browser": "156.0.8078.4"
+}
