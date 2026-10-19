@@ -249,3 +249,30 @@ controls, responsive enlargement, paired/main feedback linkage and complete
 browser/headless fights. `scripts/inspect-art-revision.ts` captures the sampled
 intersection, crowd and duel images used in the presentation review. The retained
 packet and shareable MP4s live under `public/experiments/art-direction-v2/`.
+
+## Divergent art families (round three)
+
+`compare.html?experiment=art-direction-v3&family=photon|observatory|foundry`
+selects three branches within a surviving family. Porcelain and Paper are no
+longer active candidates; earlier pages, comments and clips remain available.
+Add `&baselines=1` for the unchanged round-two parent and, for Photon, round one
+as well. New branch comments follow the same evidence identity in either view.
+
+This round reads the thirteen round-two workspace comments retained in
+`public/experiments/art-direction-v3/owner-feedback/2026-10-19.json`. Its packet
+records dispositions and training-room tradeoffs. All branches share burst
+combat, camera and selected hurt reactions; room architecture never collides.
+
+The existing comparison capture command now accepts `--family` and
+`--baselines`. For example:
+
+```
+npm run capture:comparison -- --experiment art-direction-v3 --family photon --variant photon-vector --scenario four-wizards --seed 19 --time 5.8 --duration 4 --fps 30 --out runs-captures/vector
+```
+
+After building, `npx tsx scripts/check-art-explorations.ts` uses isolated feedback
+storage to exercise the 27 cards, durable comments, baseline linkage,
+independent controls, narrow/wide enlargement and 45 complete browser/headless
+fights. `npx tsx scripts/inspect-art-explorations.ts` captures enlarged inspection
+samples against the managed owner server. Neither writes test feedback into
+the owner's workspace snapshots.

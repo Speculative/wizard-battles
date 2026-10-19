@@ -1,0 +1,10 @@
+{
+  "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+  "passed": true,
+  "checks": [
+    "managed server source identity",
+    "three family routes and default scenario 2",
+    "13 owner comments still accessible",
+    "sharing download matches file bytes"
+  ]
+}

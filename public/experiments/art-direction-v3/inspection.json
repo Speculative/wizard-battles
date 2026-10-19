@@ -1,0 +1,206 @@
+{
+  "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+  "method": "Sampled stills and real browser controls; not continuous human footage viewing",
+  "liveSamples": [
+    {
+      "file": "inspection/foundry-crowd-0.png",
+      "setup": "crowd",
+      "fightTime": 1.1
+    },
+    {
+      "file": "inspection/foundry-crowd-1.png",
+      "setup": "crowd",
+      "fightTime": 1.1
+    },
+    {
+      "file": "inspection/foundry-crowd-2.png",
+      "setup": "crowd",
+      "fightTime": 1.1
+    },
+    {
+      "file": "inspection/foundry-duel-0.png",
+      "setup": "duel",
+      "fightTime": 10
+    },
+    {
+      "file": "inspection/foundry-duel-1.png",
+      "setup": "duel",
+      "fightTime": 10
+    },
+    {
+      "file": "inspection/foundry-duel-2.png",
+      "setup": "duel",
+      "fightTime": 10
+    },
+    {
+      "file": "inspection/foundry-intersection-0.png",
+      "setup": "intersection",
+      "fightTime": 7.1
+    },
+    {
+      "file": "inspection/foundry-intersection-1.png",
+      "setup": "intersection",
+      "fightTime": 7.1
+    },
+    {
+      "file": "inspection/foundry-intersection-2.png",
+      "setup": "intersection",
+      "fightTime": 7.1
+    },
+    {
+      "file": "inspection/observatory-crowd-0.png",
+      "setup": "crowd",
+      "fightTime": 1.1
+    },
+    {
+      "file": "inspection/observatory-crowd-1.png",
+      "setup": "crowd",
+      "fightTime": 1.1
+    },
+    {
+      "file": "inspection/observatory-crowd-2.png",
+      "setup": "crowd",
+      "fightTime": 1.1
+    },
+    {
+      "file": "inspection/observatory-duel-0.png",
+      "setup": "duel",
+      "fightTime": 10
+    },
+    {
+      "file": "inspection/observatory-duel-1.png",
+      "setup": "duel",
+      "fightTime": 10
+    },
+    {
+      "file": "inspection/observatory-duel-2.png",
+      "setup": "duel",
+      "fightTime": 10
+    },
+    {
+      "file": "inspection/observatory-intersection-0.png",
+      "setup": "intersection",
+      "fightTime": 7.1
+    },
+    {
+      "file": "inspection/observatory-intersection-1.png",
+      "setup": "intersection",
+      "fightTime": 7.1
+    },
+    {
+      "file": "inspection/observatory-intersection-2.png",
+      "setup": "intersection",
+      "fightTime": 7.1
+    },
+    {
+      "file": "inspection/photon-crowd-0.png",
+      "setup": "crowd",
+      "fightTime": 1.1
+    },
+    {
+      "file": "inspection/photon-crowd-1.png",
+      "setup": "crowd",
+      "fightTime": 1.1
+    },
+    {
+      "file": "inspection/photon-crowd-2.png",
+      "setup": "crowd",
+      "fightTime": 1.1
+    },
+    {
+      "file": "inspection/photon-duel-0.png",
+      "setup": "duel",
+      "fightTime": 10
+    },
+    {
+      "file": "inspection/photon-duel-1.png",
+      "setup": "duel",
+      "fightTime": 10
+    },
+    {
+      "file": "inspection/photon-duel-2.png",
+      "setup": "duel",
+      "fightTime": 10
+    },
+    {
+      "file": "inspection/photon-intersection-0.png",
+      "setup": "intersection",
+      "fightTime": 7.1
+    },
+    {
+      "file": "inspection/photon-intersection-1.png",
+      "setup": "intersection",
+      "fightTime": 7.1
+    },
+    {
+      "file": "inspection/photon-intersection-2.png",
+      "setup": "intersection",
+      "fightTime": 7.1
+    }
+  ],
+  "captureSamples": [
+    {
+      "file": "media/photon-calibration/frame-00039.png",
+      "fightTime": 7.1,
+      "frame": 39,
+      "contact": "inspection/photon-capture-contact.jpg"
+    },
+    {
+      "file": "media/photon-vector/frame-00039.png",
+      "fightTime": 7.1,
+      "frame": 39,
+      "contact": "inspection/photon-capture-contact.jpg"
+    },
+    {
+      "file": "media/photon-wave/frame-00039.png",
+      "fightTime": 7.1,
+      "frame": 39,
+      "contact": "inspection/photon-capture-contact.jpg"
+    },
+    {
+      "file": "media/observatory-armillary/frame-00039.png",
+      "fightTime": 7.1,
+      "frame": 39,
+      "contact": "inspection/observatory-capture-contact.jpg"
+    },
+    {
+      "file": "media/observatory-astral/frame-00039.png",
+      "fightTime": 7.1,
+      "frame": 39,
+      "contact": "inspection/observatory-capture-contact.jpg"
+    },
+    {
+      "file": "media/observatory-archive/frame-00039.png",
+      "fightTime": 7.1,
+      "frame": 39,
+      "contact": "inspection/observatory-capture-contact.jpg"
+    },
+    {
+      "file": "media/foundry-cloister/frame-00039.png",
+      "fightTime": 7.1,
+      "frame": 39,
+      "contact": "inspection/foundry-capture-contact.jpg"
+    },
+    {
+      "file": "media/foundry-geode/frame-00039.png",
+      "fightTime": 7.1,
+      "frame": 39,
+      "contact": "inspection/foundry-capture-contact.jpg"
+    },
+    {
+      "file": "media/foundry-ember/frame-00039.png",
+      "fightTime": 7.1,
+      "frame": 39,
+      "contact": "inspection/foundry-capture-contact.jpg"
+    }
+  ],
+  "selfReviewFixes": [
+    "Moved Astral Terrace moon into the camera frame",
+    "Broke regular geode pickets into uneven broad clusters"
+  ],
+  "limits": [
+    "Room and fighter appeal based on stills; animation-feel judgments provisional",
+    "Only scenario 2 exported as MP4; other curated clips available live",
+    "No persona reviews or owner adoption inferred"
+  ]
+}

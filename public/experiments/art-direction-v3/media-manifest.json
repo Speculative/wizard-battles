@@ -1,0 +1,213 @@
+{
+  "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+  "focusedGameplayIdenticalAtEveryFrame": true,
+  "videos": [
+    {
+      "family": "photon",
+      "variant": "photon-calibration",
+      "name": "Calibration Hall",
+      "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "gameplay": "burst",
+      "range": [
+        5.8,
+        9.8
+      ],
+      "fps": 30,
+      "frames": 120,
+      "audio": false,
+      "video": "media/photon-calibration/clip.mp4",
+      "sharingFile": "1A-Calibration-Hall-Scenario-2.mp4",
+      "capture": "media/photon-calibration/capture.json",
+      "bytes": 164497,
+      "sha256": "ea45a62a6b913d2b6b70c311abc015df8adaf85309e6a0c10d39df78efc36d8b",
+      "decoded": true
+    },
+    {
+      "family": "photon",
+      "variant": "photon-vector",
+      "name": "Vector Deck",
+      "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "gameplay": "burst",
+      "range": [
+        5.8,
+        9.8
+      ],
+      "fps": 30,
+      "frames": 120,
+      "audio": false,
+      "video": "media/photon-vector/clip.mp4",
+      "sharingFile": "1B-Vector-Deck-Scenario-2.mp4",
+      "capture": "media/photon-vector/capture.json",
+      "bytes": 150840,
+      "sha256": "eee1d7f763c4c3742bb15395d268acc818cb079bd6d81651859ca2fd82269a30",
+      "decoded": true
+    },
+    {
+      "family": "photon",
+      "variant": "photon-wave",
+      "name": "Wave Chamber",
+      "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "gameplay": "burst",
+      "range": [
+        5.8,
+        9.8
+      ],
+      "fps": 30,
+      "frames": 120,
+      "audio": false,
+      "video": "media/photon-wave/clip.mp4",
+      "sharingFile": "1C-Wave-Chamber-Scenario-2.mp4",
+      "capture": "media/photon-wave/capture.json",
+      "bytes": 148783,
+      "sha256": "78e9486d7d6a1d0c4befacb18e0658629c5d5d9bba409571cbd01617f26e2ad7",
+      "decoded": true
+    },
+    {
+      "family": "observatory",
+      "variant": "observatory-armillary",
+      "name": "Armillary Hall",
+      "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "gameplay": "burst",
+      "range": [
+        5.8,
+        9.8
+      ],
+      "fps": 30,
+      "frames": 120,
+      "audio": false,
+      "video": "media/observatory-armillary/clip.mp4",
+      "sharingFile": "2A-Armillary-Hall-Scenario-2.mp4",
+      "capture": "media/observatory-armillary/capture.json",
+      "bytes": 146262,
+      "sha256": "a7c598086b26512eaca66944aa582c6933eaf2c3ed38d211ed62209dcbb0f2b8",
+      "decoded": true
+    },
+    {
+      "family": "observatory",
+      "variant": "observatory-astral",
+      "name": "Astral Terrace",
+      "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "gameplay": "burst",
+      "range": [
+        5.8,
+        9.8
+      ],
+      "fps": 30,
+      "frames": 120,
+      "audio": false,
+      "video": "media/observatory-astral/clip.mp4",
+      "sharingFile": "2B-Astral-Terrace-Scenario-2.mp4",
+      "capture": "media/observatory-astral/capture.json",
+      "bytes": 151553,
+      "sha256": "d6fa85420d9dac1e5d88c73100ff5472b71c0790ba01ef3a12e71e5da499f5a4",
+      "decoded": true
+    },
+    {
+      "family": "observatory",
+      "variant": "observatory-archive",
+      "name": "Constellation Archive",
+      "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "gameplay": "burst",
+      "range": [
+        5.8,
+        9.8
+      ],
+      "fps": 30,
+      "frames": 120,
+      "audio": false,
+      "video": "media/observatory-archive/clip.mp4",
+      "sharingFile": "2C-Constellation-Archive-Scenario-2.mp4",
+      "capture": "media/observatory-archive/capture.json",
+      "bytes": 147179,
+      "sha256": "24e8ef892a04f079e4d1fc7cb69654cb4a63f23cf364acfe3e45d87bb680eae2",
+      "decoded": true
+    },
+    {
+      "family": "foundry",
+      "variant": "foundry-cloister",
+      "name": "Jade Cloister",
+      "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "gameplay": "burst",
+      "range": [
+        5.8,
+        9.8
+      ],
+      "fps": 30,
+      "frames": 120,
+      "audio": false,
+      "video": "media/foundry-cloister/clip.mp4",
+      "sharingFile": "3A-Jade-Cloister-Scenario-2.mp4",
+      "capture": "media/foundry-cloister/capture.json",
+      "bytes": 126116,
+      "sha256": "bd5fe261ea093e61c99f630e829064234b8805ad86b079afd5fc6884e85f1b19",
+      "decoded": true
+    },
+    {
+      "family": "foundry",
+      "variant": "foundry-geode",
+      "name": "Geode Vault",
+      "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "gameplay": "burst",
+      "range": [
+        5.8,
+        9.8
+      ],
+      "fps": 30,
+      "frames": 120,
+      "audio": false,
+      "video": "media/foundry-geode/clip.mp4",
+      "sharingFile": "3B-Geode-Vault-Scenario-2.mp4",
+      "capture": "media/foundry-geode/capture.json",
+      "bytes": 138507,
+      "sha256": "d528299058a1044b2cb23e8a744895ebfe91da2f54aefba7c19d2407b77586ae",
+      "decoded": true
+    },
+    {
+      "family": "foundry",
+      "variant": "foundry-ember",
+      "name": "Ember Sanctum",
+      "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+      "scenario": "four-wizards",
+      "seed": 19,
+      "rotation": 0,
+      "gameplay": "burst",
+      "range": [
+        5.8,
+        9.8
+      ],
+      "fps": 30,
+      "frames": 120,
+      "audio": false,
+      "video": "media/foundry-ember/clip.mp4",
+      "sharingFile": "3C-Ember-Sanctum-Scenario-2.mp4",
+      "capture": "media/foundry-ember/capture.json",
+      "bytes": 124539,
+      "sha256": "bb04d3ca9402ac56e2d00952cdfb09de22f82f09eaf80e31d85af8092aea09ee",
+      "decoded": true
+    }
+  ]
+}

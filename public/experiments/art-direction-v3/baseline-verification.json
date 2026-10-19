@@ -1,0 +1,68 @@
+[
+  {
+    "experiment": "art-direction-v1",
+    "family": "photon",
+    "variant": "photon",
+    "reference": "/workspace/public/experiments/art-direction-v1/media/intersection-photon/frame-00000.png",
+    "same": false,
+    "sha256": "a54845e0a2f8d2bbf3f070eb68323526afd0947f152002ac01171c4c14114af2",
+    "pixelComparison": {
+      "differingPixels": 266,
+      "differenceBounds": {
+        "xMin": 1286,
+        "xMax": 1368,
+        "yMin": 14,
+        "yMax": 49
+      },
+      "battleCanvasEqual": true
+    },
+    "note": "Only 266 pixels in Restore-button hover styling differ. Entire rendered battle canvas is pixel-identical."
+  },
+  {
+    "experiment": "art-direction-v2",
+    "family": "photon",
+    "variant": "photon-v2",
+    "reference": "/workspace/public/experiments/art-direction-v2/media/intersection-photon/frame-00000.png",
+    "same": false,
+    "sha256": "08f816283d2498a69183a4b0801f75aa6604bf83bc55fc92fc6aacbaca6a1ca1",
+    "pixelComparison": {
+      "differingPixels": 266,
+      "differenceBounds": {
+        "xMin": 1286,
+        "xMax": 1368,
+        "yMin": 14,
+        "yMax": 49
+      },
+      "battleCanvasEqual": true
+    },
+    "note": "Only 266 pixels in Restore-button hover styling differ. Entire rendered battle canvas is pixel-identical."
+  },
+  {
+    "experiment": "art-direction-v2",
+    "family": "observatory",
+    "variant": "observatory-v2",
+    "reference": "/workspace/public/experiments/art-direction-v2/media/intersection-observatory/frame-00000.png",
+    "same": true,
+    "sha256": "4d6c7bc302a88271ccd1ec770d3c45e459b4a00f6562435599026b7b1c3d5e67",
+    "pixelComparison": {
+      "differingPixels": 0,
+      "differenceBounds": null,
+      "battleCanvasEqual": true
+    },
+    "note": "Full panel byte match"
+  },
+  {
+    "experiment": "art-direction-v2",
+    "family": "foundry",
+    "variant": "foundry-v2",
+    "reference": "/workspace/public/experiments/art-direction-v2/media/intersection-foundry/frame-00000.png",
+    "same": true,
+    "sha256": "16b3439f43d05b8c41f01be6a0e6c5ec798d5a03680d1c382547e066bf10ba4d",
+    "pixelComparison": {
+      "differingPixels": 0,
+      "differenceBounds": null,
+      "battleCanvasEqual": true
+    },
+    "note": "Full panel byte match"
+  }
+]

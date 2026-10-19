@@ -1,0 +1,23 @@
+{
+  "build": "passed",
+  "unitSuite": "35/35 passed; final geometry verified with 8/8 presentation tests",
+  "browser": {
+    "source": "sha256:f8237ba9f15294085497d7c7978dae4e602055efcd8ba087ce924c09b1d49021",
+    "passed": true,
+    "browser": "156.0.8078.4",
+    "checks": [
+      "27 excerpt identities",
+      "three family routes",
+      "independent play/scrub/replay",
+      "durable comments and baseline-view linkage",
+      "45 complete browser/headless fights",
+      "wide/narrow enlargement",
+      "retained baseline identities"
+    ]
+  },
+  "videoDecodes": "9/9 passed",
+  "focusedGameplayAtEveryCapturedFrame": "identical across all nine branches, 120 frames each",
+  "sharingZip": "integrity passed; 9 videos plus viewing notes",
+  "sourceArchive": "filename/NUL/bytes/NUL hash verified",
+  "inspection": "27 enlarged live samples across all branches and 3 setups, plus a scenario-2 frame from each new MP4; browser controls and retained baseline samples. No continuous human video viewing or persona review."
+}

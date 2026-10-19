@@ -75,12 +75,53 @@ never changes collision. The active style families exclude the two cut direction
 
 ## Retention, validation and limits
 
-The live comparison is the primary review surface. Scenario-2 MP4s, source
-archives and validation records will be added when capture completes. This
-packet is under preparation until the item reports the round ready.
+The live comparison is the primary review surface: 27 independently playable
+cards across nine branches, including the duel and crowded contrary cases.
+[Download all nine scenario-2 MP4s](scenario-2/Wizard-Battles-Round-3-Scenario-2.zip)
+for sharing. These are silent four-second clips, 30 FPS, fight time 5.8–9.8s.
+The ZIP includes viewing notes and family labels; send the downloaded files to
+others, since localhost links require access to the server machine.
+
+The [media manifest](media-manifest.json) identifies each H.264 clip, exact source,
+focused variant, time range, hash and frame count. Each media directory retains
+`capture.json` with all 120 frame states, the Chromium identity, 1440×1050 browser
+viewport and 1/60s simulation step. Visual seed is seed XOR 0x5f3759df. The
+focused gameplay states match exactly at every captured frame across all nine.
+Only scenario 2 is exported as MP4 in this packet; the duel and crowded opening
+remain playable in the live room and have enlarged retained inspection samples.
+
+The [source identity](source/identity.json) and [exact archive](source/source.tar.gz)
+retain the bytes used by every new clip. The archive reproduces its recorded
+content hash; generated media and reports do not enter that hash. Earlier clips
+keep their original source labels.
+
+[Baseline verification](baseline-verification.json) checks a retained 5.8s frame
+for Photon v1, Photon v2, Observatory v2 and Atelier v2. Every battle canvas is
+pixel-identical to its old sample. Observatory/Atelier panels also match as whole
+PNG files; Photon has 266 differing pixels confined to the Restore button hover
+styling, outside the battle canvas. This is a single-frame regression check per
+baseline, not recapture of every old clip.
+
+[Validation](validation.json) records build, 35 unit tests, the final presentation
+checks, 27 browser cards, durable comment recovery/baseline linkage, responsive
+views and 45 complete browser/headless fights including fresh seeds. All nine
+videos decode fully and the ZIP passes integrity checking. [Inspection](inspection.json)
+identifies enlarged stills actually examined from every branch in all three
+setups, plus one frame from each new MP4 and real browser controls. No continuous
+human video viewing or persona review is claimed; animation-feel judgments stay
+provisional.
 
 All art is procedural. No sound or external art assets are introduced. Feedback
 saves to append-only `runs-feedback/` snapshots with a disk receipt; the room
 locks on storage loss. Saving feedback does not start an agent dispatch. The
 bounded goal ends when this round is ready for owner review; further revisions
 require the next owner instruction.
+
+
+## Individual scenario-2 downloads
+
+| Photon Chamber | Arcane Observatory | Obsidian Atelier |
+| --- | --- | --- |
+| [Calibration Hall](scenario-2/1A-Calibration-Hall-Scenario-2.mp4) | [Armillary Hall](scenario-2/2A-Armillary-Hall-Scenario-2.mp4) | [Jade Cloister](scenario-2/3A-Jade-Cloister-Scenario-2.mp4) |
+| [Vector Deck](scenario-2/1B-Vector-Deck-Scenario-2.mp4) | [Astral Terrace](scenario-2/2B-Astral-Terrace-Scenario-2.mp4) | [Geode Vault](scenario-2/3B-Geode-Vault-Scenario-2.mp4) |
+| [Wave Chamber](scenario-2/1C-Wave-Chamber-Scenario-2.mp4) | [Constellation Archive](scenario-2/2C-Constellation-Archive-Scenario-2.mp4) | [Ember Sanctum](scenario-2/3C-Ember-Sanctum-Scenario-2.mp4) |
