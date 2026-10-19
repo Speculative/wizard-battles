@@ -14,7 +14,7 @@ export const ART_REVISION_CHANGES = [
 ];
 export function revisionStyles(family:string|null):ArtStyle[] {
   if(family==='photon'||family==='observatory') return [ART_STYLES.find(s=>s.id===family)!,ART_REVISION_STYLES.find(s=>s.family===family)!];
-  return ART_REVISION_STYLES;
+  return ART_REVISION_STYLES.flatMap(s => s.family === 'photon' || s.family === 'observatory' ? [ART_STYLES.find(old => old.id === s.family)!, s] : [s]);
 }
 export function revisionVariants(family:string|null) {
   return revisionStyles(family).map(s=>({...variantDefinition('burst'), id:s.id, name:`${s.name} · ${s.revision===2?'round 2':'round 1 unchanged'}`, scenarioVariant:'burst',spellReadability:'reaction' as const,artDirection:s.id,description:`${s.vision} Training-room fit: ${s.fit}`}));
@@ -28,6 +28,6 @@ export function revisionBriefs(family:string|null):ComparisonBrief[] {
   const variants=revisionVariants(family);
   return SPELL_BRIEFS.map((b,i)=>({...b,id:`art-v2-${b.id}`,description: family==='photon'||family==='observatory'
     ? `A is the unchanged first-round ${family==='photon'?'Photon':'Observatory'}; B is its revision. Same gameplay and fight times. Your existing first-round comments remain on the earlier page. New comments on B also appear in the five-direction round-two view. ${cues[i]}`
-    : `All five are retained. Photon is the benchmark, with Observatory the strongest thematic challenger; neither revision is automatically an improvement. Use the dedicated old/new links to check regressions. ${cues[i]}`,
+    : `All five are retained. Photon is the benchmark, with Observatory the strongest thematic challenger; neither revision is automatically an improvement. Unchanged Photon and Observatory are included alongside their revisions to check regressions. ${cues[i]}`,
     clips:variants.map((v,j)=>({id:`art-v2-${b.scenario}-${b.seed}-${v.id}`,revision:1,variant:v.id,start:b.clips[0].start,end:b.clips[0].end,title:`${String.fromCharCode(65+j)} · ${v.name}`,watchFor:`${cues[i]} ${v.id.endsWith('-v2')?ART_REVISION_CHANGES[ART_REVISION_STYLES.findIndex(s=>s.id===v.id)]:'This is the retained round-one renderer, not a reconstruction.'}`,why:`${b.clips[0].why} Matched times isolate visual changes. This excerpt illustrates local material/readability differences, not whole-match pacing or a final choice.`}))}));
 }

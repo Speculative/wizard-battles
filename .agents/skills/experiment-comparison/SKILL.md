@@ -65,11 +65,15 @@ Give the owner a concrete interpretation and a clear cue for each clip. Use
 ordinary language: name actors, actions and consequences. Put technical detail
 and full reviewer reports behind the concise explanation.
 
-Make each clip independently playable, seekable and replayable. Playing one
-should pause the other; offer optional looping. Keep each fight time visible.
-Do not require the owner to attend to simultaneous fights or synchronize clips
-to a global timestamp. Full fights provide optional context, including a way to
-focus on one alternative. Shared-time playback can remain an inspection tool.
+Make each clip independently playable, seekable and replayable. Start all
+excerpts playing with looping enabled; an explicit pause or scrub stops only
+that card and disables its automatic restart on setup changes for the current
+page visit. Playing another card must leave it alone. Keep each fight time
+visible. Enlarged cards need previous/next controls and the documented keyboard
+shortcuts. Include retained baselines on the same page as new candidates,
+not behind a branches-only/baselines toggle. Independent clocks and enlargement
+let the owner focus without requiring synchronized viewing. Full fights provide
+optional context, including a way to focus on one alternative. Shared-time playback can remain an inspection tool.
 
 Recommended setups are complete one-click presets with visible active identity.
 Avoid seed-entry instructions, unapplied inputs and a separate “Load example”

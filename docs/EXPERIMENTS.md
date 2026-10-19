@@ -28,7 +28,7 @@ The seven initial expectations come from `nezw-rsmt` and `sfmb-mnnj`. E004–E00
 
 ## Viewing and feedback
 
-The **Comparison** tab opens a designer's evidence brief: two labeled excerpts, a concrete interpretation, and captions saying what to watch and why that moment was chosen. **Play excerpt** plays only that card and pauses the other; each has its own time, scrubber, replay and optional loop. Nothing auto-plays on load. Names and commentary remain visible. This supports assessing a proposal, rather than asking the owner to follow three simultaneous fights or perform a blind trial.
+The **Comparison** tab opens a designer's evidence brief: two labeled excerpts, a concrete interpretation, and captions saying what to watch and why that moment was chosen. **All excerpts start playing with Loop enabled** after workspace storage connects. Each has its own time, scrubber and replay. Pause or scrub stops only that card; it stays out of automatic playback on setup changes for this page visit. Playing another card leaves it alone. Capture/time URLs remain paused for reproducible inspection. Storage outages suspend playback and recovery resumes only the cards that were running. Names and commentary remain visible. This supports assessing a proposal, rather than asking the owner to follow three simultaneous fights or perform a blind trial.
 
 `src/comparisonEvidence.ts` owns the editorial selection, separately from playback. Selection is manual and based on inspected fight content, never generic “short”/“late” offsets. Current briefs:
 
@@ -88,6 +88,20 @@ Comparison capture starts its own local Vite server, captures the three synchron
 
 `window.comparison` exposes `metadata`, `seek(seconds)`, `step(ticks)`, `states()`, `play()`, `pause()`, `loadExample({seed, scenario, rotation})`, `viewing()` (mode, focused variant and per-panel playback/ranges), `ready()` (workspace feedback loaded) and a copied `feedback()` for automation. Query parameters `capture=1`, `scenario`, `seed`, `rotation`, and `time` make an exact paused example addressable. Automation `seek`, `step` and `play` use full-fight mode; evidence controls are independent.
 
+Enlarged cards have **Previous variant / Next variant** buttons (wrapping at
+both ends). Their keyboard shortcuts are:
+
+- Left / Right: seek 0.5 seconds; Space: play/pause.
+- `,` / `.`: pause and move one simulation tick backward/forward.
+- Ctrl+Left / Right: previous/next variant without resetting its playback.
+- Tab: focus the comment box; normal Tab order continues within the comment form.
+- Ctrl+Enter: submit the selected card's comment through durable workspace saving.
+
+Typing in fields keeps ordinary cursor, space and punctuation behavior. Shortcuts
+are inactive while storage is locked or Goals is open. Full-fight context keeps
+its shared clock. Run `npx tsx scripts/check-comparison-controls.ts` for focused
+production-browser coverage using isolated feedback storage.
+
 ## Checks and review loop
 
 ```
@@ -101,7 +115,7 @@ npm run check:comparison -- --ui-only
 npx tsx scripts/check-feedback-connection.ts
 ```
 
-The comparison browser check verifies content-selected evidence, independent seek/replay/loop, exclusive clip playback, evidence note context, per-piece comments/progress and recovery, Comparison/Goals tabs, preset changes, fresh-browser workspace recovery, save failure/retry, headless agreement (unless `--ui-only`), resize/enlargement independence, synchronized live ticks, finished holds, feedback persistence/export/import, invalid imports, and expectation decisions. The existing `check:browser` checks the single-battle view.
+The comparison browser check verifies content-selected evidence, independent seek/replay/loop, independent simultaneous playback, evidence note context, per-piece comments/progress and recovery, Comparison/Goals tabs, preset changes, fresh-browser workspace recovery, save failure/retry, headless agreement (unless `--ui-only`), resize/enlargement independence, synchronized live ticks, finished holds, feedback persistence/export/import, invalid imports, and expectation decisions. The existing `check:browser` checks the single-battle view.
 
 For a persona round, use `docs/PERSONA_REVIEW.md`. Publish actual reviews and triage in `public/experiments/movement-pacing-v1/reviews.json` so they appear below the viewing panels. Give each review a `displaySummary: {title, text}` in plain language: what the reviewer noticed, where, and what it means for the choice. Keep source/evidence detail in the original report; summaries restate that review and do not imply a new evaluation. Never describe a log review or sampled stills as watching a clip, never fabricate owner preferences, and retain disagreement. A working loop is delivered before the owner chooses any approach.
 
@@ -255,8 +269,9 @@ packet and shareable MP4s live under `public/experiments/art-direction-v2/`.
 `compare.html?experiment=art-direction-v3&family=photon|observatory|foundry`
 selects three branches within a surviving family. Porcelain and Paper are no
 longer active candidates; earlier pages, comments and clips remain available.
-Add `&baselines=1` for the unchanged round-two parent and, for Photon, round one
-as well. New branch comments follow the same evidence identity in either view.
+The unchanged round-two parent and, for Photon, round one appear alongside
+the branches automatically. Legacy `baselines` query parameters do not hide
+references. Retained evidence and comments keep their existing identities.
 
 This round reads the thirteen round-two workspace comments retained in
 `public/experiments/art-direction-v3/owner-feedback/2026-10-19.json`. Its packet
@@ -271,8 +286,9 @@ npm run capture:comparison -- --experiment art-direction-v3 --family photon --va
 ```
 
 After building, `npx tsx scripts/check-art-explorations.ts` uses isolated feedback
-storage to exercise the 27 cards, durable comments, baseline linkage,
-independent controls, narrow/wide enlargement and 45 complete browser/headless
-fights. `npx tsx scripts/inspect-art-explorations.ts` captures enlarged inspection
-samples against the managed owner server. Neither writes test feedback into
+storage to exercise the 39 cards (including retained references), durable
+comments, inline baseline linkage, independent controls, narrow/wide enlargement
+and 65 complete browser/headless fights. Use `--ui-only` when simulation inputs
+have not changed. `npx tsx scripts/inspect-art-explorations.ts` captures enlarged
+inspection samples against the managed owner server. Neither writes test feedback into
 the owner's workspace snapshots.

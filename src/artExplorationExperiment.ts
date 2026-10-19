@@ -13,7 +13,7 @@ import { ART_EXPLORATION_STYLES } from './presentation/artExplorationStyles';
 export function explorationFamily(family: string | null) {
   return family === 'observatory' || family === 'foundry' ? family : 'photon';
 }
-export function explorationStyles(family: string | null, baselines = false): ArtStyle[] {
+export function explorationStyles(family: string | null, baselines = true): ArtStyle[] {
   const f = explorationFamily(family);
   const branches = ART_EXPLORATION_STYLES.filter(s => s.family === f);
   if (!baselines) return branches;
@@ -21,7 +21,7 @@ export function explorationStyles(family: string | null, baselines = false): Art
   // families retain their v2 starting point; their older rooms stay linked.
   return [...(f === 'photon' ? [ART_STYLES.find(s => s.id === f)!] : []), ART_REVISION_STYLES.find(s => s.family === f)!, ...branches];
 }
-export function explorationVariants(family: string | null, baselines = false) {
+export function explorationVariants(family: string | null, baselines = true) {
   return explorationStyles(family, baselines).map(s => ({ ...variantDefinition('burst'), id: s.id,
     name: s.revision === 3 ? s.name : `${s.name} · ${s.revision === 2 ? 'round 2 unchanged' : 'round 1 unchanged'}`,
     scenarioVariant: 'burst', spellReadability: 'reaction' as const, artDirection: s.id, description: `${s.vision} Training-room fit: ${s.fit}` }));
@@ -38,11 +38,11 @@ export const BRANCH_QUESTIONS: Record<ArtBranch, string> = {
   ember: 'Ember sanctum: carved basalt bays, amber seams and stone-mantled trainees with glowing chest seals. Does the ceremonial warmth advance the dungeon idea without returning to factory imagery?',
 };
 const recommendations: Record<string, string> = {
-  photon: 'My provisional lead is Calibration Hall for everyday training; Vector Deck is the boldest departure, following your wallless-stage suggestion. Wave Chamber tests a softer alternative. Use “Include retained baselines” to compare Photon v1 and v2 directly.',
+  photon: 'My provisional lead is Calibration Hall for everyday training; Vector Deck is the boldest departure, following your wallless-stage suggestion. Wave Chamber tests a softer alternative. Unchanged Photon v1 and v2 are included alongside the branches for direct comparison.',
   observatory: 'My provisional lead is Armillary Hall: it develops the promising robes and keeps the liked palette, hats and large crystal. Astral Terrace and Constellation Archive test celestial spectacle versus scholarly ritual.',
   foundry: 'My provisional lead is Jade Cloister, protecting the improved dungeon setting. Geode Vault is the strongest environmental departure; Ember Sanctum tests warmer, ceremonial stonework while keeping the physical spells.',
 };
-export function explorationBriefs(family: string | null, baselines = false): ComparisonBrief[] {
+export function explorationBriefs(family: string | null, baselines = true): ComparisonBrief[] {
   const f = explorationFamily(family), styles = explorationStyles(f, baselines), variants = explorationVariants(f, baselines);
   const cues = [
     'Follow blue’s fireballs hitting red at 9.25s and 11.18s, then red’s finish. Watch the projectile silhouette, release and retained fighter hit flash.',

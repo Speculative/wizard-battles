@@ -152,14 +152,15 @@ try {
   await page.getByRole('button', { name: 'Play excerpt C', exact: true }).click();
   const held = (await page.evaluate(() => window.comparison.states()))[1];
   await page.waitForFunction(() => window.comparison.states()[2].time > 8.1);
-  assert.deepEqual((await page.evaluate(() => window.comparison.states()))[1], held, 'switching clips pauses the previous one');
-  assert.equal((await page.evaluate(() => window.comparison.viewing())).panels.filter(p => p.playing).length, 1);
+  assert.ok((await page.evaluate(() => window.comparison.states()))[1].tick >= held.tick, 'playing another clip leaves the previous one running');
+  assert.equal((await page.evaluate(() => window.comparison.viewing())).panels.filter(p => p.playing).length, 2);
   await page.evaluate(() => window.comparison.pause());
   await page.getByRole('button', { name: 'Replay excerpt B', exact: true }).click();
   await page.evaluate(() => window.comparison.pause());
   assert.ok((await page.evaluate(() => window.comparison.states()))[1].time < 40.5);
   const b = page.locator('.panel').nth(1);
   await b.locator('.clip-time').evaluate(el => { (el as HTMLInputElement).value = '45.9'; el.dispatchEvent(new Event('input')); });
+  await b.locator('.clip-loop').uncheck();
   await page.getByRole('button', { name: 'Play excerpt B', exact: true }).click();
   await page.waitForFunction(() => !window.comparison.viewing().panels[1].playing);
   assert.equal((await page.evaluate(() => window.comparison.states()))[1].tick, 2760, 'excerpt stops at its own endpoint');
@@ -264,7 +265,7 @@ try {
   }
   if (!uiOnly) console.log('Complete-match browser/headless agreement verified for 72 matched cases, including fresh seeds.');
   assert.deepEqual(errors, []);
-  console.log(`Comparison checks passed (${production ? 'production' : 'development'}; Chromium ${browser.version()}): curated independent excerpts, exclusive playback, per-clip seek/loop/replay, evidence comments/progress/tabs, evidence note context, fresh-browser workspace recovery, save failure/retry, resize/enlarge, feedback export/import, queue decisions, invalid import, end hold, shared live scheduler.`);
+  console.log(`Comparison checks passed (${production ? 'production' : 'development'}; Chromium ${browser.version()}): curated independent excerpts, simultaneous playback, per-clip seek/loop/replay, evidence comments/progress/tabs, evidence note context, fresh-browser workspace recovery, save failure/retry, resize/enlarge, feedback export/import, queue decisions, invalid import, end hold, shared live scheduler.`);
 } finally {
   await browser.close();
   rmSync(feedbackDirectory, { recursive: true, force: true });

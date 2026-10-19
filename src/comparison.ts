@@ -22,16 +22,15 @@ import { validateFeedback, mergeFeedback, type Feedback, type EvidenceReference 
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 const params = new URLSearchParams(location.search);
 const artExploration = params.get('experiment') === ART_EXPLORATION_EXPERIMENT.id;
-const includeBaselines = params.get('baselines') === '1';
 const artRevision = params.get('experiment') === ART_REVISION_EXPERIMENT.id;
 const artFamilySelection = params.get('family');
 const artExperiment = artExploration || artRevision || params.get('experiment') === ART_EXPERIMENT.id;
-const artStyles = artExploration ? explorationStyles(artFamilySelection, includeBaselines) : artRevision ? revisionStyles(artFamilySelection) : ART_STYLES;
+const artStyles = artExploration ? explorationStyles(artFamilySelection) : artRevision ? revisionStyles(artFamilySelection) : ART_STYLES;
 const revisionExperiment = params.get('experiment') === REVISION_EXPERIMENT.id;
 const spellExperiment = artExperiment || revisionExperiment || params.get('experiment') === SPELL_EXPERIMENT.id;
 const EXPERIMENT = artExploration ? ART_EXPLORATION_EXPERIMENT : artRevision ? ART_REVISION_EXPERIMENT : artExperiment ? ART_EXPERIMENT : revisionExperiment ? REVISION_EXPERIMENT : spellExperiment ? SPELL_EXPERIMENT : MOVEMENT_EXPERIMENT;
-const VARIANTS = (artExploration ? explorationVariants(artFamilySelection, includeBaselines) : artRevision ? revisionVariants(artFamilySelection) : artExperiment ? ART_VARIANTS : revisionExperiment ? REVISION_VARIANTS : spellExperiment ? SPELL_VARIANTS : MOVEMENT_VARIANTS.map(v => ({ ...v, scenarioVariant: v.id, spellReadability: false }))).map(v => ({ ...v, artDirection: 'artDirection' in v ? v.artDirection as ArtDirection : undefined }));
-const COMPARISON_BRIEFS = artExploration ? explorationBriefs(artFamilySelection, includeBaselines) : artRevision ? revisionBriefs(artFamilySelection) : artExperiment ? ART_BRIEFS : revisionExperiment ? REVISION_BRIEFS : spellExperiment ? SPELL_BRIEFS : MOVEMENT_BRIEFS;
+const VARIANTS = (artExploration ? explorationVariants(artFamilySelection) : artRevision ? revisionVariants(artFamilySelection) : artExperiment ? ART_VARIANTS : revisionExperiment ? REVISION_VARIANTS : spellExperiment ? SPELL_VARIANTS : MOVEMENT_VARIANTS.map(v => ({ ...v, scenarioVariant: v.id, spellReadability: false }))).map(v => ({ ...v, artDirection: 'artDirection' in v ? v.artDirection as ArtDirection : undefined }));
+const COMPARISON_BRIEFS = artExploration ? explorationBriefs(artFamilySelection) : artRevision ? revisionBriefs(artFamilySelection) : artExperiment ? ART_BRIEFS : revisionExperiment ? REVISION_BRIEFS : spellExperiment ? SPELL_BRIEFS : MOVEMENT_BRIEFS;
 function comparisonBrief(scene: string, matchSeed: number, layout: number) {
   return layout === 0 ? COMPARISON_BRIEFS.find(b => b.scenario === scene && b.seed === matchSeed) : undefined;
 }
@@ -41,12 +40,12 @@ app.innerHTML = `
 <header><div><div class="eyebrow">Wizard Battles / Experiment room</div><h1>${EXPERIMENT.title}</h1></div><div id="build" class="muted"></div></header>
 <nav class="controls" role="tablist" aria-label="Experiment room"><button id="comparison-tab" role="tab" aria-selected="true" aria-controls="comparison-page">Comparison</button><button id="goals-tab" role="tab" aria-selected="false" aria-controls="goals-page" tabindex="-1">Goals</button></nav>
 <div id="comparison-page" role="tabpanel" aria-labelledby="comparison-tab">
-${artExploration ? `<p><strong>Round three: choose a promising branch within each family.</strong> Porcelain Lab and Paper Theater are cut; earlier rooms and comments remain intact. Photon is the benchmark, Observatory retains its colors and theme, and Atelier protects the improved dungeon setting.</p><nav class="controls" aria-label="Art families">${[['photon','Photon Chamber'],['observatory','Arcane Observatory'],['foundry','Obsidian Atelier']].map(([id,name]) => `<a aria-current="${explorationFamily(artFamilySelection) === id ? 'page' : 'false'}" href="?experiment=art-direction-v3&family=${id}">${name} · 3 branches</a>`).join(' · ')}</nav><p><a href="?experiment=art-direction-v3&family=${explorationFamily(artFamilySelection)}${includeBaselines ? '' : '&baselines=1'}">${includeBaselines ? 'Branches only' : 'Include retained baselines'}</a> · <a href="?experiment=art-direction-v2&family=photon">Photon v1 / v2 regression comparison</a> · <a href="?experiment=art-direction-v2">Round two and your comments</a> · <a href="/experiments/art-direction-v3/README.md">Design packet</a></p><p>Start with scenario 2, then check the duel and crowded opening. Play one excerpt at a time. Comments save to workspace; a pending save locks the room. Saving retains feedback; it does not start an agent dispatch. No branch is adopted.</p><div id="art-directions" class="art-directions"></div>` : artRevision ? '<p><strong>Round two: preserve what works, then judge the revisions.</strong> Photon remains the benchmark; Observatory has the strongest thematic appeal. All five stay in consideration. <a href="?experiment=art-direction-v2">Five revised directions</a> · <a href="?experiment=art-direction-v2&family=photon">Photon: unchanged / revised</a> · <a href="?experiment=art-direction-v2&family=observatory">Observatory: unchanged / revised</a> · <a href="?experiment=art-direction-v1">Round one and your original comments</a></p><p>Start with scenario 2, where you left feedback. Comments save to workspace; a pending save locks the room. Saving retains feedback, not a new agent dispatch.</p><div id="art-directions" class="art-directions"></div>' : artExperiment ? '<p><strong>My starting proposal: A / Porcelain Lab</strong> for a welcoming, physical training room. B / Photon Chamber is the strongest literal simulator. You can reject all five.</p><p>Five directions · Select a match below, then play each direction independently. <a href="?experiment=spell-readability-v2">Earlier hit-feedback comparison and comments</a>. Save per-clip reactions below each card; general notes can nominate a direction or say none works. Saving retains feedback; it does not start another agent run.</p><div id="art-directions" class="art-directions"></div>' : ''}
-${revisionExperiment ? '<p>Round 2 · A is the previous B; B and C are new alternatives. Play them one at a time. <a href="?experiment=spell-readability-v1">Previous round and comments</a>. After your feedback, the next decision is to adopt one approach, keep the previous cues, or park this direction.</p>' : ''}
+${artExploration ? `<p><strong>Round three: choose a promising branch within each family.</strong> Porcelain Lab and Paper Theater are cut; earlier rooms and comments remain intact. Photon is the benchmark, Observatory retains its colors and theme, and Atelier protects the improved dungeon setting.</p><nav class="controls" aria-label="Art families">${[['photon','Photon Chamber'],['observatory','Arcane Observatory'],['foundry','Obsidian Atelier']].map(([id,name]) => `<a aria-current="${explorationFamily(artFamilySelection) === id ? 'page' : 'false'}" href="?experiment=art-direction-v3&family=${id}">${name} · 3 branches</a>`).join(' · ')}</nav><p>Retained baselines appear alongside the branches. · <a href="?experiment=art-direction-v2&family=photon">Photon v1 / v2 regression comparison</a> · <a href="?experiment=art-direction-v2">Round two and your comments</a> · <a href="/experiments/art-direction-v3/README.md">Design packet</a></p><p>Start with scenario 2, then check the duel and crowded opening. All excerpts start looping; pause any card to inspect it. Comments save to workspace; a pending save locks the room. Saving retains feedback; it does not start an agent dispatch. No branch is adopted.</p><div id="art-directions" class="art-directions"></div>` : artRevision ? '<p><strong>Round two: preserve what works, then judge the revisions.</strong> Photon remains the benchmark; Observatory has the strongest thematic appeal. All five stay in consideration. <a href="?experiment=art-direction-v2">All revisions and retained baselines</a> · <a href="?experiment=art-direction-v2&family=photon">Photon: unchanged / revised</a> · <a href="?experiment=art-direction-v2&family=observatory">Observatory: unchanged / revised</a> · <a href="?experiment=art-direction-v1">Round one and your original comments</a></p><p>Start with scenario 2, where you left feedback. Comments save to workspace; a pending save locks the room. Saving retains feedback, not a new agent dispatch.</p><div id="art-directions" class="art-directions"></div>' : artExperiment ? '<p><strong>My starting proposal: A / Porcelain Lab</strong> for a welcoming, physical training room. B / Photon Chamber is the strongest literal simulator. You can reject all five.</p><p>Five directions · Select a match below, then play each direction independently. <a href="?experiment=spell-readability-v2">Earlier hit-feedback comparison and comments</a>. Save per-clip reactions below each card; general notes can nominate a direction or say none works. Saving retains feedback; it does not start another agent run.</p><div id="art-directions" class="art-directions"></div>' : ''}
+${revisionExperiment ? '<p>Round 2 · A is the previous B; B and C are new alternatives. Each excerpt loops independently until paused. <a href="?experiment=spell-readability-v1">Previous round and comments</a>. After your feedback, the next decision is to adopt one approach, keep the previous cues, or park this direction.</p>' : ''}
 <div id="presets" class="controls" aria-label="Recommended matches"></div>
 <div class="example-heading"><h2 id="example-title"></h2><p id="example-description"></p><p id="active-match" class="muted" role="status"></p></div>
 <div class="controls" aria-label="Comparison mode"><button id="show-evidence" aria-pressed="true">Selected evidence</button><button id="full-fight" aria-pressed="false">Full fights / context</button></div>
-<p id="evidence-help">Play one clip, then the other. Their clocks are independent; choosing a clip pauses the other.</p>
+<p id="evidence-help">Clips start looping independently. Pause any card to inspect it; playing another leaves it alone.</p>
 <details><summary>Custom match / display options</summary><div class="controls"><label>Scene <select id="scenario"><option value="duel">Duel · red / blue</option><option value="four-wizards">Four wizards</option></select></label>
 <label>Seed <input id="seed" type="number" min="0" max="4294967295" step="1" value="1"></label>
 <label>Layout <select id="rotation"><option value="0">Original</option><option value="1.5707963267948966">Quarter turn</option></select></label>
@@ -76,8 +75,10 @@ function blockWorkspace(message: string | null) {
   storageGate.hidden = message === null;
   if (message !== null) {
     $('#storage-gate-message').textContent = message;
-    window.comparison?.pause();
+    suspendForStorage();
     if (app.contains(document.activeElement)) $('#storage-reconnect').focus();
+  } else {
+    resumeAfterStorage();
   }
 }
 $('#panels').classList.toggle('two-panels', VARIANTS.length === 2);
@@ -90,7 +91,7 @@ for (const [i, variant] of VARIANTS.entries()) {
 if (artExperiment) {
   $('#panels').classList.add('art-panels');
   $('#evidence').textContent = `Presentation experiment: combat is held identical. No balance or pacing score is inferred. Captures and validation are retained in the ${EXPERIMENT.id} packet.`;
-  $('#evidence-help').textContent = 'Play one direction at a time. Use Enlarge for a closer look; every clip has its own clock, replay and comment form.';
+  $('#evidence-help').textContent = 'Directions start looping independently. Use Enlarge for a closer look and Previous / Next to compare; every clip has its own clock, replay and comment form.';
   for (const [i, style] of artStyles.entries()) {
     const article = document.createElement('article');
     const title = document.createElement('h3'); title.textContent = `${String.fromCharCode(65+i)} · ${artRevision || artExploration ? VARIANTS[i].name : style.name}`;
@@ -281,9 +282,11 @@ let mode: 'evidence' | 'full' = 'full';
 let focusedVariant: string | null = null;
 let accumulator = 0;
 let last: number | null = null;
+const allowAutoplay = params.get('capture') !== '1' && !params.has('time');
+let storagePlayback: { playing: boolean[]; paused: boolean } | null = null;
 const panels = VARIANTS.map((variant, index) => {
   const element = document.createElement('section'); element.className = 'panel';
-  element.innerHTML = `<div class="panel-head"><strong></strong><button aria-label="Enlarge panel ${String.fromCharCode(65 + index)}">Enlarge</button></div><div class="clip-caption"><h3></h3><p class="review-status" role="status"></p><p class="watch-for"></p><details><summary>Why this moment?</summary><p class="clip-reason"></p></details></div><div class="clip-controls"><button class="clip-play" aria-label="Play excerpt ${String.fromCharCode(65 + index)}">Play excerpt</button><button class="clip-replay" aria-label="Replay excerpt ${String.fromCharCode(65 + index)}">Replay</button><label>Clip time <input class="clip-time" aria-label="Excerpt time ${String.fromCharCode(65 + index)}" type="range" step="0.016666666666666666"></label><label><input class="clip-loop" aria-label="Loop excerpt ${String.fromCharCode(65 + index)}" type="checkbox"> Loop</label><button class="clip-full" aria-label="Full fight ${String.fromCharCode(65 + index)}">Full fight</button><output class="clip-clock"></output></div><canvas aria-label="Battle panel ${String.fromCharCode(65 + index)}"></canvas><footer></footer><section class="evidence-comment"><h3>Your comment on this evidence</h3><label>Comment<textarea class="comment-text" aria-label="Comment on evidence ${String.fromCharCode(65 + index)}" placeholder="What works here, what doesn't, or what are you unsure about?"></textarea></label><button class="save-comment" aria-label="Save evidence comment ${String.fromCharCode(65 + index)}">Save comment</button><p class="comment-save" role="status"></p><ol class="evidence-notes"></ol></section>`;
+  element.innerHTML = `<div class="panel-head"><strong></strong><button aria-label="Enlarge panel ${String.fromCharCode(65 + index)}">Enlarge</button></div><div class="enlarged-controls"><div><button class="previous-variant">← Previous variant</button> <button class="next-variant">Next variant →</button></div><p class="muted">← / → seek 0.5s · Space play/pause · , / . one tick · Ctrl+← / → previous/next · Tab comment · Ctrl+Enter submit</p></div><div class="clip-caption"><h3></h3><p class="review-status" role="status"></p><p class="watch-for"></p><details><summary>Why this moment?</summary><p class="clip-reason"></p></details></div><div class="clip-controls"><button class="clip-play" aria-label="Play excerpt ${String.fromCharCode(65 + index)}">Play excerpt</button><button class="clip-replay" aria-label="Replay excerpt ${String.fromCharCode(65 + index)}">Replay</button><label>Clip time <input class="clip-time" aria-label="Excerpt time ${String.fromCharCode(65 + index)}" type="range" step="0.016666666666666666"></label><label><input class="clip-loop" aria-label="Loop excerpt ${String.fromCharCode(65 + index)}" type="checkbox" checked> Loop</label><button class="clip-full" aria-label="Full fight ${String.fromCharCode(65 + index)}">Full fight</button><output class="clip-clock"></output></div><canvas aria-label="Battle panel ${String.fromCharCode(65 + index)}"></canvas><footer></footer><section class="evidence-comment"><h3>Your comment on this evidence</h3><label>Comment<textarea class="comment-text" aria-label="Comment on evidence ${String.fromCharCode(65 + index)}" placeholder="What works here, what doesn't, or what are you unsure about?"></textarea></label><button class="save-comment" aria-label="Save evidence comment ${String.fromCharCode(65 + index)}">Save comment</button><p class="comment-save" role="status"></p><ol class="evidence-notes"></ol></section>`;
   $('#panels').append(element);
   const canvas = element.querySelector('canvas')!;
   const gfx = new GameRenderer(canvas, { pixelRatio: 1, shadowMapSize: artExperiment ? 1024 : 512 }); const style = artStyle(variant.artDirection);
@@ -297,15 +300,18 @@ const panels = VARIANTS.map((variant, index) => {
   if (style?.revision === 2) revisedLighting(gfx.scene, style);
   const world = createScenario({ seed, scenario, rotation, variant: variant.scenarioVariant });
   const view = new BattleView(world, gfx.camera, { visualSeed: seed ^ 0x5f3759df, spellReadability: variant.spellReadability, artDirection: variant.artDirection }); gfx.scene.add(view.group);
-  const panel = { variant, element, gfx, world, view, finished: false, clip: undefined as EvidenceClip | undefined, cursor: 0, playing: false, accumulator: 0 };
+  const panel = { variant, element, gfx, world, view, finished: false, clip: undefined as EvidenceClip | undefined, cursor: 0, playing: false, autoplay: allowAutoplay, accumulator: 0 };
   element.querySelector<HTMLButtonElement>('.save-comment')!.onclick = () => saveEvidenceComment(panel);
   element.querySelector<HTMLTextAreaElement>('.comment-text')!.oninput = event => { const reference = panelReference(panel); if (reference) commentDrafts.set(evidenceKey(reference), (event.target as HTMLTextAreaElement).value); };
   element.querySelector<HTMLButtonElement>('.clip-play')!.onclick = () => playExcerpt(panel);
   element.querySelector<HTMLButtonElement>('.clip-replay')!.onclick = () => { if (panel.clip) seekPanel(panel, panel.clip.start); playExcerpt(panel, true); };
-  element.querySelector<HTMLInputElement>('.clip-time')!.oninput = event => { for (const other of panels) other.playing = false; seekPanel(panel, Number((event.target as HTMLInputElement).value)); focusedVariant = variant.id; render(); };
+  element.querySelector<HTMLInputElement>('.clip-time')!.oninput = event => inspectPanel(panel, Number((event.target as HTMLInputElement).value));
+  element.querySelector<HTMLButtonElement>('.previous-variant')!.onclick = () => moveVariant(panel, -1);
+  element.querySelector<HTMLButtonElement>('.next-variant')!.onclick = () => moveVariant(panel, 1);
   element.querySelector<HTMLButtonElement>('.clip-full')!.onclick = () => { showFullFights(); element.querySelector<HTMLButtonElement>('.panel-head button')!.click(); };
   element.querySelector('button')!.onclick = () => {
     const open = !element.classList.contains('selected'); document.querySelectorAll('.panel').forEach(e => e.classList.remove('selected'));
+    if (open) focusedVariant = variant.id;
     element.classList.toggle('selected', open); $('#panels').classList.toggle('enlarged', open); element.querySelector('button')!.textContent = open ? 'Restore' : 'Enlarge';
     document.querySelectorAll('.panel:not(.selected) .panel-head button').forEach(e => e.textContent = 'Enlarge'); render();
   };
@@ -352,6 +358,63 @@ function advance(count: number) {
   if (panels.every(p => p.finished) || elapsedTicks * SIMULATION_DT >= EXPERIMENT.maxSeconds) paused = true;
 }
 type Panel = typeof panels[number];
+function suspendForStorage() {
+  if (storagePlayback) return;
+  storagePlayback = { playing: panels.map(p => p.playing), paused };
+  paused = true;
+  for (const p of panels) p.playing = false;
+  render();
+}
+function resumeAfterStorage() {
+  if (!storagePlayback) return;
+  paused = storagePlayback.paused;
+  panels.forEach((p, i) => { p.playing = storagePlayback!.playing[i]; });
+  storagePlayback = null; last = null; render();
+}
+function inspectPanel(p: Panel, seconds: number) {
+  if (!p.clip || mode !== 'evidence') return;
+  p.autoplay = false;
+  seekPanel(p, Math.max(p.clip.start, Math.min(p.clip.end, seconds)));
+  focusedVariant = p.variant.id; render();
+}
+function moveVariant(p: Panel, direction: number) {
+  const visible = panels.filter(other => mode === 'full' || other.clip);
+  const next = visible[(visible.indexOf(p) + direction + visible.length) % visible.length];
+  if (next !== p) next.element.querySelector<HTMLButtonElement>('.panel-head button')!.click();
+  focusedVariant = next.variant.id;
+  next.element.querySelector<HTMLButtonElement>(direction > 0 ? '.next-variant' : '.previous-variant')!.focus({ preventScroll: true });
+  next.element.scrollIntoView({ block: 'start' });
+}
+document.addEventListener('keydown', event => {
+  if (app.inert || $('#comparison-page').hidden || !$('#panels').classList.contains('enlarged') || event.altKey || event.metaKey || event.isComposing) return;
+  const p = panels.find(p => p.element.classList.contains('selected'));
+  if (!p) return;
+  const target = event.target as HTMLElement;
+  const editing = target.matches('input, textarea, select, [contenteditable="true"]');
+  if (event.ctrlKey && event.key === 'Enter' && mode === 'evidence') {
+    event.preventDefault(); if (!event.repeat) void saveEvidenceComment(p); return;
+  }
+  if (event.ctrlKey && ['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+    event.preventDefault(); moveVariant(p, event.key === 'ArrowRight' ? 1 : -1); return;
+  }
+  if (event.key === 'Tab' && !event.shiftKey && mode === 'evidence' && !target.closest('.evidence-comment')) {
+    event.preventDefault(); p.element.querySelector<HTMLTextAreaElement>('.comment-text')!.focus(); return;
+  }
+  if (editing || event.ctrlKey || event.shiftKey) return;
+  if (event.key === ' ') {
+    event.preventDefault(); if (event.repeat) return;
+    if (mode === 'evidence') playExcerpt(p);
+    else $('#play').click();
+  } else if (['ArrowLeft', 'ArrowRight', ',', '.'].includes(event.key)) {
+    event.preventDefault();
+    const delta = event.key === ',' ? -SIMULATION_DT : event.key === '.' ? SIMULATION_DT : event.key === 'ArrowLeft' ? -.5 : .5;
+    if (mode === 'evidence') inspectPanel(p, p.cursor * SIMULATION_DT + delta);
+    else {
+      seek(Math.max(0, Math.min(EXPERIMENT.maxSeconds, elapsedTicks * SIMULATION_DT + delta)));
+      p.element.querySelector<HTMLButtonElement>('.panel-head button')!.click();
+    }
+  }
+});
 function advanceWorld(p: Panel, count: number) {
   for (let tick = 0; tick < count && !p.finished; tick++) {
     p.world.update(SIMULATION_DT); p.view.recordTick();
@@ -388,13 +451,14 @@ function showEvidence() {
     p.element.querySelector('.watch-for')!.textContent = p.clip.watchFor;
     p.element.querySelector('.clip-reason')!.textContent = p.clip.why;
     seekPanel(p, p.clip.start);
+    p.playing = p.autoplay;
   }
   renderEvidenceFeedback(); render();
 }
 function playExcerpt(p: Panel, replay = false) {
   if (mode !== 'evidence' || !p.clip) return;
   const play = replay || !p.playing;
-  for (const other of panels) other.playing = false;
+  if (!play) p.autoplay = false;
   if (p.cursor >= Math.round(p.clip.end / SIMULATION_DT)) seekPanel(p, p.clip.start);
   p.playing = play; focusedVariant = p.variant.id; last = null; render();
 }
@@ -509,7 +573,7 @@ const comparison = {
   viewing() { return { mode, focusedVariant, panels: panels.map(p => ({ variant: p.variant.id, playing: p.playing, cursor: p.cursor * SIMULATION_DT, clip: p.clip })) }; },
   ready: () => feedbackReady,
   step(count = 1) { if (mode === 'evidence') showFullFights(); paused = true; advance(count); render(); return states(); },
-  pause() { paused = true; for (const p of panels) p.playing = false; render(); }, play() { if (mode === 'evidence') showFullFights(); paused = false; last = null; render(); },
+  pause() { storagePlayback = null; paused = true; for (const p of panels) { p.playing = false; p.autoplay = false; } render(); }, play() { if (mode === 'evidence') showFullFights(); paused = false; last = null; render(); },
   feedback() { return structuredClone(feedback); },
 };
 declare global { const __BUILD_SOURCE__: string; interface Window { comparison: typeof comparison } }
@@ -545,6 +609,7 @@ if (params.has('time')) seek(Number(params.get('time')));
 function tick(now: number) {
   if (last === null) last = now;
   const dt = Math.max(0, Math.min(.1, (now - last) / 1000)) * Number($<HTMLSelectElement>('#speed').value);
+  if (app.inert) { last = now; requestAnimationFrame(tick); return; }
   if (mode === 'evidence') {
     const advancing = panels.some(p => p.playing);
     for (const p of panels) if (p.playing && p.clip) {

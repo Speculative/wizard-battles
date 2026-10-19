@@ -91,3 +91,10 @@ input[type=file] { max-width: 100%; min-width: 0; }
 #storage-gate[hidden] { display: none; }
 #storage-gate > div { max-width: 620px; padding: 28px; border: 2px solid #e6b780; border-radius: 12px; background: #1b1e27; }
 #storage-gate button { margin: 8px 0; }
+
+.enlarged-controls { display: none; padding: 12px 14px; border-top: 1px solid #343846; }
+.enlarged-controls p { margin: 8px 0 0; font-size: 12px; }
+.panels.enlarged .panel.selected .enlarged-controls { display: block; }
+.panel-head { gap: 12px; }
+
+.feedback-row > * { min-width: 0; max-width: 100%; }

@@ -30,7 +30,7 @@ try {
   assert.ok(seeded.ok);
   const page = await browser.newPage({ viewport: { width: 1440, height: 1050 } });
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
-  const url = new URL(`compare.html?experiment=${SPELL_EXPERIMENT.id}`, server.resolvedUrls!.local[0]);
+  const url = new URL(`compare.html?capture=1&experiment=${SPELL_EXPERIMENT.id}`, server.resolvedUrls!.local[0]);
   await page.goto(url.href); await page.waitForFunction(() => !!window.comparison);
   await page.evaluate(() => window.comparison.ready());
   await page.waitForFunction(() => document.querySelectorAll('#reviews > details > summary').length >= 3);
@@ -55,7 +55,7 @@ try {
     await page.waitForTimeout(200);
     await page.getByRole('button', { name: 'Play excerpt B', exact: true }).click();
     const switching = await page.evaluate(() => window.comparison.viewing());
-    assert.equal(switching.panels[0].playing, false); assert.equal(switching.panels[1].playing, true);
+    assert.equal(switching.panels[0].playing, true); assert.equal(switching.panels[1].playing, true);
     await page.evaluate(() => window.comparison.pause());
     const before = await page.evaluate(() => window.comparison.states());
     await page.getByLabel('Excerpt time B', { exact: true }).focus();
@@ -85,6 +85,7 @@ try {
   const fresh = await browser.newPage(); await fresh.goto(url.href); await fresh.waitForFunction(() => !!window.comparison);
   await fresh.evaluate(() => window.comparison.ready());
   assert.ok((await fresh.evaluate(() => window.comparison.feedback())).notes.some(n => n.evidence?.id === note.evidence!.id));
+  await fresh.getByRole('button', { name: SPELL_BRIEFS[0].title, exact: true }).click();
   assert.match(await fresh.locator('.panel:nth-child(2) .review-status').innerText(), /Commented/); await fresh.close();
   await page.getByRole('button', { name: 'Full fight B', exact: true }).click();
   await page.evaluate(() => new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
