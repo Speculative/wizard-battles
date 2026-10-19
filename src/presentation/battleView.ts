@@ -11,7 +11,7 @@ import { seededRandom } from '../random';
 import { StatusDisplay } from '../statusDisplay';
 import { createTelegraph } from './telegraph';
 import { glow, ring, disposeObject } from './primitives';
-import { artStyle, fighterColor, styleFigure, artProjectile, artShard, type ArtDirection } from './artDirection';
+import { artStyle, artFamily, fighterColor, styleFigure, artProjectile, artShard, type ArtDirection } from './artDirection';
 import { preparationPointer, semanticCue, revisedSemanticCue, type SpellReadability } from './spellCues';
 
 interface View { group: THREE.Group; update(): void; dispose(): void }
@@ -107,9 +107,9 @@ export class BattleView {
   private makeContestant(c: Contestant): View {
     const group = new THREE.Group();
     const revised = typeof this.options.spellReadability === 'string';
-    const body = new THREE.Mesh(new THREE.SphereGeometry(c.radius, this.options.artDirection === 'paper' ? 8 : 24, this.options.artDirection === 'paper' ? 6 : 16), new THREE.MeshToonMaterial({ color: c.color }));
+    const body = new THREE.Mesh(new THREE.SphereGeometry(c.radius, artFamily(artStyle(this.options.artDirection)) === 'paper' ? 8 : 24, artFamily(artStyle(this.options.artDirection)) === 'paper' ? 6 : 16), new THREE.MeshToonMaterial({ color: c.color }));
     body.castShadow = true;
-    const hat = new THREE.Mesh(new THREE.ConeGeometry(c.radius * 1.05, c.radius * 1.7, this.options.artDirection === 'paper' ? 6 : 16), new THREE.MeshToonMaterial({ color: c.color }));
+    const hat = new THREE.Mesh(new THREE.ConeGeometry(c.radius * 1.05, c.radius * 1.7, artFamily(artStyle(this.options.artDirection)) === 'paper' ? 6 : 16), new THREE.MeshToonMaterial({ color: c.color }));
     hat.position.y = c.radius * 1.5;
     const brim = new THREE.Mesh(new THREE.CylinderGeometry(c.radius * 1.3, c.radius * 1.3, 3, 24), new THREE.MeshToonMaterial({ color: c.color }));
     brim.position.y = c.radius * 0.8;
@@ -132,7 +132,7 @@ export class BattleView {
     group.add(figure, charge, track, timer, status.group);
     const contact = style ? new THREE.Mesh(new THREE.CircleGeometry(c.radius*1.15, 32), new THREE.ShaderMaterial({
       transparent: true, depthWrite: false,
-      uniforms: { tint: { value: new THREE.Color(style.id === 'photon' ? color : 0x14202b) }, strength: { value: style.id === 'photon' ? 0.24 : 0.18 } },
+      uniforms: { tint: { value: new THREE.Color(artFamily(style) === 'photon' ? color : 0x14202b) }, strength: { value: artFamily(style) === 'photon' ? 0.24 : 0.18 } },
       vertexShader: 'varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
       fragmentShader: 'varying vec2 vUv; uniform vec3 tint; uniform float strength; void main(){float a=1.0-smoothstep(0.05,0.5,length(vUv-0.5));gl_FragColor=vec4(tint,a*strength);}',
     })) : undefined;
@@ -146,7 +146,7 @@ export class BattleView {
       const reaction = hit ? Math.max(0, 1 - (this.world.time - hit.t) / 0.2) : 0;
       for (const mesh of [body, hat, brim]) {
         const mat = mesh.material as THREE.MeshToonMaterial | THREE.MeshStandardMaterial;
-        mat.emissive.setHex(reaction ? 0xffd6a0 : color); mat.emissiveIntensity = reaction * 0.85 + (style?.id === 'photon' ? 0.22 : 0);
+        mat.emissive.setHex(reaction ? 0xffd6a0 : color); mat.emissiveIntensity = reaction * 0.85 + (artFamily(style) === 'photon' ? 0.22 : 0);
       }
       figure.scale.set(1 + reaction * 0.12, 1 - reaction * 0.16, 1 + reaction * 0.12);
       figure.rotation.y = -Math.atan2(c.facing.z, c.facing.x);
@@ -204,13 +204,13 @@ export class BattleView {
     const trail: THREE.Mesh[] = [];
     if (this.options.trails) for (let i = 0; i < 7; i++) {
       const r = s.spec.radius * (s.spec.visual.trailScale ?? 0.7);
-      const geometry = style?.id === 'paper' ? new THREE.PlaneGeometry(r*1.7, r*1.7) : style?.id === 'photon' ? new THREE.OctahedronGeometry(r*0.7) : new THREE.SphereGeometry(r, 8, 6);
+      const geometry = artFamily(style) === 'paper' ? new THREE.PlaneGeometry(r*1.7, r*1.7) : artFamily(style) === 'photon' ? new THREE.OctahedronGeometry(r*0.7) : new THREE.SphereGeometry(r, 8, 6);
       const node = new THREE.Mesh(geometry, glow(style ? (shape.kind === 'fire-spheres' ? style.fire : style.ice) : s.spec.visual.trailColor, 0.3));
       trail.push(node); group.add(node);
     }
     const telegraph = s.spec.telegraph ? createTelegraph(style ? { ...s.spec.telegraph, color: shape.kind === 'fire-spheres' ? style.fire : style.ice } : s.spec.telegraph) : null;
     if (style && telegraph) telegraph.mesh.traverse(node => {
-      if (node instanceof THREE.Mesh && node.material instanceof THREE.MeshBasicMaterial && style.id !== 'photon') node.material.blending = THREE.NormalBlending;
+      if (node instanceof THREE.Mesh && node.material instanceof THREE.MeshBasicMaterial && artFamily(style) !== 'photon') node.material.blending = THREE.NormalBlending;
     });
     const pointer = preparationPointer(style ? fighterColor(style, s.caster.id) : s.caster.color);
     group.add(pointer);
@@ -245,8 +245,8 @@ export class BattleView {
         if (sample) {
           trail[i].position.set(sample.x, sample.y, sample.z);
           trail[i].scale.setScalar(1 - i / 8);
-          if (style?.id === 'paper') { trail[i].quaternion.copy(this.camera.quaternion); trail[i].rotateZ(this.world.time*4+i); }
-          if (style?.id === 'photon') trail[i].scale.set(1.8*(1-i/8), 0.3, 0.3);
+          if (artFamily(style) === 'paper') { trail[i].quaternion.copy(this.camera.quaternion); trail[i].rotateZ(this.world.time*4+i); }
+          if (artFamily(style) === 'photon') trail[i].scale.set(1.8*(1-i/8), 0.3, 0.3);
           (trail[i].material as THREE.MeshBasicMaterial).opacity = (s.spec.visual.trailOpacity ?? 0.3) * (1 - i / 8);
         }
       }
@@ -348,7 +348,7 @@ export class BattleView {
       for (let i = 0; i < 18; i++) {
         const angle = random() * Math.PI * 2;
         const speed = 40 + random() * Math.max(70, Number(meta.radius ?? 30) * 2);
-        const mesh = new THREE.Mesh(style?.id === 'paper' ? new THREE.BoxGeometry(5, 9, 1) : style?.id === 'photon' ? new THREE.OctahedronGeometry(3) : new THREE.TetrahedronGeometry(2 + random() * 5), glow(color, 0.7));
+        const mesh = new THREE.Mesh(artFamily(style) === 'paper' ? new THREE.BoxGeometry(5, 9, 1) : artFamily(style) === 'photon' ? new THREE.OctahedronGeometry(3) : new THREE.TetrahedronGeometry(2 + random() * 5), glow(color, 0.7));
         particles.push({ mesh, x: p.x, y: p.y ?? 8, z: p.z, vx: Math.cos(angle) * speed, vy: 40 + random() * 90, vz: Math.sin(angle) * speed });
         group.add(mesh);
       }

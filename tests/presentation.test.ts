@@ -172,11 +172,12 @@ test('revised emitted shots replace their parent release pulse', () => {
   view.dispose();
 });
 
-import { ART_STYLES } from '../src/presentation/artDirection';
-test('five art directions preserve combat, reconstruct and release resources', () => {
-  const worlds = Array.from({ length: 6 }, () => createScenario({ scenario: 'four-wizards', seed: 1, variant: 'burst' }));
+import { ART_STYLES, ART_REVISION_STYLES } from '../src/presentation/artDirection';
+test('both art rounds preserve combat, reconstruct and release resources', () => {
+  const allStyles = [...ART_STYLES, ...ART_REVISION_STYLES];
+  const worlds = Array.from({ length: allStyles.length + 1 }, () => createScenario({ scenario: 'four-wizards', seed: 1, variant: 'burst' }));
   const camera = new THREE.OrthographicCamera();
-  const views = worlds.map((world, i) => new BattleView(world, camera, { spellReadability: 'reaction', artDirection: ART_STYLES[i-1]?.id, trails: false }));
+  const views = worlds.map((world, i) => new BattleView(world, camera, { spellReadability: 'reaction', artDirection: allStyles[i-1]?.id, trails: false }));
   for (let tick = 0; tick < 600; tick++) {
     worlds.forEach(world => world.update(SIMULATION_DT)); views.forEach(view => view.recordTick());
     if (tick % 7 === 0) views.forEach(view => view.render());
@@ -185,7 +186,7 @@ test('five art directions preserve combat, reconstruct and release resources', (
   const rng = worlds[0].random(); worlds.slice(1).forEach(world => assert.equal(world.random(), rng));
   for (const [i, view] of views.entries()) {
     view.render(); const before = visuals(view); view.render(); assert.deepEqual(visuals(view), before);
-    const restored = new BattleView(worlds[i], camera, { spellReadability: 'reaction', artDirection: ART_STYLES[i-1]?.id, trails: false });
+    const restored = new BattleView(worlds[i], camera, { spellReadability: 'reaction', artDirection: allStyles[i-1]?.id, trails: false });
     // Trail sampling has its own cadence check above; reconstruct held shapes and cues.
     restored.render(); assert.deepEqual(visuals(restored), before);
     const geometries = new Set<THREE.BufferGeometry>(), disposed = new Set<THREE.BufferGeometry>();

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { SimulationEvent } from '../world';
-import type { ArtStyle } from './artDirection';
+import { artFamily, type ArtStyle } from './artDirection';
 import { glow, ring } from './primitives';
 
 export type SpellReadability = boolean | 'rings' | 'reaction';
@@ -78,7 +78,7 @@ export function revisedSemanticCue(event: SimulationEvent, mode: 'rings' | 'reac
     group.quaternion.copy(camera.quaternion);
     const count = damage ? 7 : 4;
     for (let i = 0; i < count; i++) {
-      const spark = new THREE.Mesh(new THREE.PlaneGeometry(damage ? 5 : style?.id === 'paper' ? 7 : 3, damage ? 18 : style?.id === 'paper' ? 7 : 12), glow(damage ? 0xfff0c2 : style?.fireCore ?? 0xffba4a));
+      const spark = new THREE.Mesh(new THREE.PlaneGeometry(damage ? 5 : artFamily(style) === 'paper' ? 7 : 3, damage ? 18 : artFamily(style) === 'paper' ? 7 : 12), glow(damage ? 0xfff0c2 : style?.fireCore ?? 0xffba4a));
       spark.name = damage ? 'hit-spark' : 'release-spark';
       // Small sparks stay readable at the body surface instead of clipping into it.
       (spark.material as THREE.MeshBasicMaterial).depthTest = false;

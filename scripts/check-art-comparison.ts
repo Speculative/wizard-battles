@@ -4,26 +4,31 @@ import { preview } from 'vite';
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { revisionBriefs, revisionVariants } from '../src/artDirectionRevision';
 import { ART_BRIEFS, ART_VARIANTS } from '../src/artDirectionExperiment';
 import { createScenario, SIMULATION_DT } from '../src/scenario';
 
+const revision = process.argv.includes('--revision');
+const briefs = revision ? revisionBriefs(null) : ART_BRIEFS;
+const variants = revision ? revisionVariants(null) : ART_VARIANTS;
+const experimentId = revision ? 'art-direction-v2' : 'art-direction-v1';
 const feedbackDir = mkdtempSync(join(tmpdir(), 'art-comparison-'));
 process.env.WIZARD_FEEDBACK_DIR = feedbackDir;
 const server = await preview({ preview: { host: '127.0.0.1', port: 0 }, logLevel: 'error' });
 const browser = await chromium.launch({ args: ['--no-sandbox', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const errors: string[] = [];
-const out = 'runs-comparison-check/art-direction-v1'; mkdirSync(out, {recursive:true});
+const out = `runs-comparison-check/${experimentId}`; mkdirSync(out, {recursive:true});
 const rounded = (x: unknown) => JSON.parse(JSON.stringify(x, (_key,value) => typeof value === 'number' ? Math.round(value*1e7)/1e7 : value));
 try {
   const page = await browser.newPage({viewport:{width:1440,height:1050}});
   page.on('pageerror', e => errors.push(e.message));
-  const url = new URL('compare.html?experiment=art-direction-v1',server.resolvedUrls!.local[0]).href;
+  const url = new URL(`compare.html?experiment=${experimentId}`,server.resolvedUrls!.local[0]).href;
   await page.goto(url); await page.waitForFunction(() => !!window.comparison); await page.evaluate(() => window.comparison.ready());
-  assert.deepEqual((await page.evaluate(() => window.comparison.metadata)).alternatives.map(v=>v.id), ART_VARIANTS.map(v=>v.id));
+  assert.deepEqual((await page.evaluate(() => window.comparison.metadata)).alternatives.map(v=>v.id), variants.map(v=>v.id));
   assert.equal(await page.locator('.art-directions article').count(),5);
-  assert.match(await page.locator('#comparison-page').innerText(),/starting proposal: A/);
+  assert.match(await page.locator('#comparison-page').innerText(),revision ? /Photon remains the benchmark/ : /starting proposal: A/);
   assert.equal(await page.getByRole('combobox',{name:'Preference',exact:true}).locator('option').count(),8);
-  for (const brief of ART_BRIEFS) {
+  for (const brief of briefs) {
     await page.getByRole('button',{name:brief.title,exact:true}).click();
     const viewing = await page.evaluate(() => window.comparison.viewing());
     for (const [i,clip] of brief.clips.entries()) {
@@ -43,19 +48,20 @@ try {
     await page.getByRole('button',{name:'Replay excerpt E',exact:true}).click(); await page.evaluate(() => window.comparison.pause());
     assert.deepEqual((await page.evaluate(() => window.comparison.states())).slice(0,4),before.slice(0,4));
   }
-  await page.getByRole('button',{name:ART_BRIEFS[0].title,exact:true}).click();
+  await page.getByRole('button',{name:briefs[0].title,exact:true}).click();
   await page.getByLabel('Comment on evidence E',{exact:true}).fill('Automated recovery check for fifth direction.');
   await page.getByRole('button',{name:'Save evidence comment E',exact:true}).click();
   await page.waitForFunction(() => document.querySelectorAll('.comment-save')[4].textContent!.startsWith('Saved to workspace'));
   const note = (await page.evaluate(() => window.comparison.feedback())).notes.at(-1)!;
-  assert.equal(note.evidence!.id,ART_BRIEFS[0].clips[4].id); assert.equal(note.experiment,'art-direction-v1');
+  assert.equal(note.evidence!.id,briefs[0].clips[4].id); assert.equal(note.experiment,experimentId);
   const fresh = await browser.newPage(); await fresh.goto(url); await fresh.waitForFunction(() => !!window.comparison); await fresh.evaluate(() => window.comparison.ready());
+  await fresh.getByRole('button',{name:briefs[0].title,exact:true}).click();
   assert.match(await fresh.locator('.review-status').nth(4).innerText(),/Commented/); await fresh.close();
   // A direction link must reveal its target even when another card is enlarged.
   await page.getByRole('button',{name:'Enlarge panel A',exact:true}).click();
-  await page.getByRole('button',{name:'View Obsidian Foundry',exact:true}).click();
+  await page.getByRole('button',{name:revision ? 'View Obsidian Atelier · round 2' : 'View Obsidian Foundry',exact:true}).click();
   assert.equal(await page.locator('.panel:visible').count(),1);
-  assert.match(await page.locator('.panel:visible .panel-head strong').innerText(),/Obsidian Foundry/);
+  assert.match(await page.locator('.panel:visible .panel-head strong').innerText(),revision ? /Obsidian Atelier/ : /Obsidian Foundry/);
   await page.getByRole('button',{name:'Enlarge panel E',exact:true}).click();
   // Exercise geometry projection on enlarged, restored, narrow and paused canvases.
   for (const width of [1440,780]) {
@@ -77,9 +83,31 @@ try {
     const expected = world.contestants.map(c=>({id:c.id,hp:c.hp,alive:c.alive,position:{...c.position},velocity:{...c.velocity}}));
     for(const state of states) assert.deepEqual(rounded(state.contestants),rounded(expected),`${scenario}/${seed}/${state.variant}`);
   }
+  if (revision) {
+    // Paired views retain the original renderer and share revised-card comments
+    // with the main room, without inheriting round-one reviewed labels.
+    for (const [family,index] of [['photon',1],['observatory',2]] as const) {
+      const pairUrl = `${url}&family=${family}`;
+      await page.goto(pairUrl); await page.locator('#storage-gate').waitFor({state:'hidden'});
+      const metadata = await page.evaluate(()=>window.comparison.metadata);
+      assert.deepEqual(metadata.alternatives.map(v=>v.artDirection),[family,`${family}-v2`]);
+      assert.match(await page.locator('.panel-head strong').first().innerText(),/round 1 unchanged/);
+      assert.match(await page.locator('.panel-head strong').nth(1).innerText(),/round 2/);
+      assert.equal(await page.locator('.review-status').nth(1).innerText(),'Not reviewed');
+      await page.getByLabel('Comment on evidence B',{exact:true}).fill(`${family} revised-card linkage check`);
+      await page.getByRole('button',{name:'Save evidence comment B',exact:true}).click();
+      await page.locator('#storage-gate').waitFor({state:'hidden'});
+      const pairNote=(await page.evaluate(()=>window.comparison.feedback())).notes.at(-1)!;
+      assert.equal(pairNote.evidence!.variant,`${family}-v2`);
+      await page.goto(url);await page.locator('#storage-gate').waitFor({state:'hidden'});
+      assert.match(await page.locator('.review-status').nth(index).innerText(),/Commented/);
+      const sourceNotes=await page.evaluate(()=>window.comparison.feedback().notes);
+      assert.equal(sourceNotes.filter(n=>n.text===`${family} revised-card linkage check`).length,1);
+    }
+  }
   assert.deepEqual(errors,[]);
   writeFileSync(`${out}/result.json`,JSON.stringify({source:await page.evaluate(()=>window.comparison.metadata.source),passed:true,checks:['15 evidence identities','exclusive playback','fifth-panel scrub/replay independence','workspace comment recovery','wide/narrow enlargement','25 complete browser/headless fights'],browser:await browser.version()},null,2));
-  console.log('Art comparison passed: 15 clips, independent controls, fifth-direction comment recovery, responsive enlargement and 25 complete browser/headless fights.');
+  console.log(`${experimentId} comparison passed: 15 clips, independent controls, fifth-direction comment recovery, responsive enlargement and 25 complete browser/headless fights.`);
 } finally {
   await browser.close(); await new Promise<void>((resolve,reject)=>server.httpServer.close(e=>e?reject(e):resolve()));
   rmSync(feedbackDir,{recursive:true,force:true});

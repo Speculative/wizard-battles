@@ -222,3 +222,30 @@ browser/headless fights. Focus a retained capture on one direction with
 `npm run capture:comparison -- --experiment art-direction-v1 --variant porcelain`
 plus the usual scenario, seed, time/duration and output flags. The selected
 direction is recorded in the manifest; its full panel fills the capture.
+
+## Art direction revision
+
+`compare.html?experiment=art-direction-v2` keeps all five candidates and starts
+on the owner's reviewed scenario 2. The first round and its feedback remain at
+`art-direction-v1`. Source-identified revision geometry lives separately in
+`src/presentation/artDirectionRevision.ts`; old styles are unchanged.
+
+Photon is the existing benchmark, with Observatory the thematic challenger.
+The revision tests ceramic lighting/material depth, a restrained Photon cleanup,
+robed Observatory fighters with the liked hats/colors, explicit folded-card
+construction, and a less industrial Obsidian Atelier retaining mineral spells.
+No candidate is adopted or cut. Gameplay, camera, rapid-fire timing and the
+chosen fighter hit reactions are held constant.
+
+Use `&family=photon` or `&family=observatory` for a dedicated unchanged/revised
+pair. These show the actual first-round renderer, not a recreation. Revised
+cards share evidence IDs and comments with their counterpart in the five-way
+room; baseline observations in these pairs do not overwrite original feedback.
+All new cards have fresh round-two IDs. The three content-selected moments keep
+their first-round fight bounds because the gameplay and relevant events match.
+
+After building, run `npx tsx scripts/check-art-comparison.ts --revision` for
+controls, responsive enlargement, paired/main feedback linkage and complete
+browser/headless fights. `scripts/inspect-art-revision.ts` captures the sampled
+intersection, crowd and duel images used in the presentation review. The retained
+packet and shareable MP4s live under `public/experiments/art-direction-v2/`.

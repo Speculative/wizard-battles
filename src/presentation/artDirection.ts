@@ -1,10 +1,12 @@
 import * as THREE from 'three';
+import { revisedArena, revisedFigure, revisedProjectile, revisedShard } from './artDirectionRevision';
 import { ARENA } from '../config';
 import { ring, glow } from './primitives';
 
-export type ArtDirection = 'porcelain' | 'photon' | 'observatory' | 'paper' | 'foundry';
+export type ArtFamily = 'porcelain' | 'photon' | 'observatory' | 'paper' | 'foundry';
+export type ArtDirection = ArtFamily | `${ArtFamily}-v2`;
 export interface ArtStyle {
-  id: ArtDirection; name: string; vision: string; fit: string;
+  id: ArtDirection; family?: ArtFamily; revision?: 2; name: string; vision: string; fit: string;
   background: number; floor: number; wall: number; line: number; accent: number;
   fire: number; fireCore: number; ice: number; iceCore: number;
   fighters: number[]; roughness: number; metalness: number;
@@ -41,7 +43,18 @@ export const ART_STYLES: ArtStyle[] = [
     fire: 0xff7624, fireCore: 0xffe6a0, ice: 0x428dab, iceCore: 0xb5edff,
     fighters: [0xca5841, 0x448eaf, 0x5c9d80, 0xd6ac4d], roughness: 0.65, metalness: 0.65 },
 ];
-export function artStyle(id?: ArtDirection): ArtStyle | undefined { return ART_STYLES.find(s => s.id === id); }
+export const ART_REVISION_STYLES: ArtStyle[] = ART_STYLES.map(base => {
+  const updates: Record<string, Partial<ArtStyle>> = {
+    porcelain: { vision: 'Celadon ceramic atelier: directional warm light, shaded ivory alcoves, glazed trainees and cobalt crystals with luminous edges.', fit: 'A physical practice room with warmth and material depth. The light floor remains the difficult spell-readability case.', background: 0xb6c9c5, floor: 0xe6dfc9, wall: 0xbed0c3, line: 0x76988b, accent: 0x547f78, ice: 0x286c9f, iceCore: 0xa6e7fa },
+    photon: { vision: 'Light-made simulator, refined: translucent trainees, high-contrast plasma needles and quieter calibration brackets. Preserve the round-one identity.', fit: 'Still the most literal simulator. This is a restrained revision; judge whether fewer competing lines actually improve on the original.' },
+    observatory: { vision: 'A vaulted academy practice room: robed geometric scholars, familiar colored hats, brass orreries and aquamarine crystal magic.', fit: 'A magical training room with the strongest academy theme. Robes replace spherical bodies; judge whether this better belongs with the geometric spell language.' },
+    paper: { vision: 'A cut-and-fold teaching stage: thick card panels, bent mounting tabs, creased polygon trainees, folded spells and a warm theatrical key light.', fit: 'A deliberate tabletop teaching model. Keep the low-poly figures while making paper construction tangible instead of simply flatly lit.', background: 0xb1bda5, floor: 0xe9d5af, wall: 0xc6cfae, accent: 0x6f8e77 },
+    foundry: { vision: 'Obsidian Atelier: a mineral practice sanctuary with carved stone bays, jade crystals and the retained dense molten projectiles. No factory fittings.', fit: 'Preserves the liked physical spells while testing a quieter, less industrial setting. Decide whether the revised mood fits everyday training.', name: 'Obsidian Atelier', background: 0x1a292b, floor: 0x354b49, wall: 0x344c4b, accent: 0xa8af86, roughness: 0.6, metalness: 0.18 },
+  };
+  return { ...base, ...updates[base.id], family: base.id as ArtFamily, id: `${base.id}-v2` as ArtDirection, revision: 2 };
+});
+export function artFamily(style?: ArtStyle): ArtFamily | undefined { return style?.family ?? style?.id as ArtFamily | undefined; }
+export function artStyle(id?: ArtDirection): ArtStyle | undefined { return [...ART_STYLES, ...ART_REVISION_STYLES].find(s => s.id === id); }
 export function fighterColor(style: ArtStyle, id: string): number {
   return style.fighters[Math.max(0, ['red', 'blue', 'green', 'yellow'].indexOf(id))];
 }
@@ -59,6 +72,7 @@ function line(group: THREE.Group, points: number[], color: number, opacity = 1) 
 
 /** Room geometry is presentation only. The world keeps its exact square bounds. */
 export function buildArtArena(style: ArtStyle): THREE.Group {
+  if (style.revision === 2) return revisedArena(style);
   const group = new THREE.Group(); group.name = `art-room:${style.id}`;
   const { width: w, depth: d, height: h } = ARENA;
   box(group, style, style.floor, [w, 22, d], [0, -13, 0]);
@@ -149,6 +163,7 @@ export function buildArtArena(style: ArtStyle): THREE.Group {
 }
 
 export function styleFigure(figure: THREE.Group, style: ArtStyle, id: string): void {
+  if (style.revision === 2) return revisedFigure(figure, style, id);
   const color = fighterColor(style, id);
   for (const node of figure.children) if (node instanceof THREE.Mesh && node.material instanceof THREE.MeshToonMaterial) {
     node.material.dispose(); node.material = surface(style, color);
@@ -178,6 +193,7 @@ function energy(style: ArtStyle, color: number, opacity = 1): THREE.MeshBasicMat
 
 /** +X is travel direction. Shape, layering and motion distinguish the visions. */
 export function artProjectile(style: ArtStyle, radius: number, ice: boolean) {
+  if (style.revision === 2) return revisedProjectile(style, radius, ice);
   const group = new THREE.Group();
   const color = ice ? style.ice : style.fire, core = ice ? style.iceCore : style.fireCore;
   const mesh = (geo: THREE.BufferGeometry, color: number, opacity = 1) => {
@@ -229,6 +245,7 @@ export function artProjectile(style: ArtStyle, radius: number, ice: boolean) {
 }
 
 export function artShard(style: ArtStyle) {
+  if (style.revision === 2) return revisedShard(style);
   const group = new THREE.Group();
   const body = new THREE.Mesh(new THREE.OctahedronGeometry(22), surface(style, style.ice)); body.scale.set(0.7,3,0.7); group.add(body);
   const core = new THREE.Mesh(new THREE.OctahedronGeometry(13), energy(style, style.iceCore)); core.scale.set(0.7,3.8,0.7); core.position.z = 8; group.add(core);
