@@ -1,0 +1,52 @@
+{
+  "experiment": "art-direction-v1",
+  "scenario": "four-wizards",
+  "seed": 19,
+  "rotation": 0,
+  "gameplay": "burst",
+  "start": 5.8,
+  "end": 9.8,
+  "fps": 30,
+  "files": [
+    {
+      "file": "A-Porcelain-Lab-Scenario-2.mp4",
+      "sha256": "fac0bba36e88abf743fb75dc0fac14187f7a907588941ed2d8ced0220bb03327",
+      "sourceCapture": "../media/intersection-porcelain/capture.json",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "width": 1384,
+      "height": 828
+    },
+    {
+      "file": "B-Photon-Chamber-Scenario-2.mp4",
+      "sha256": "282103f4d836a54c59bc217f858b942b3ca6f6c86cb87ccfbe05ab2be3a81f6d",
+      "sourceCapture": "../media/intersection-photon/capture.json",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "width": 1384,
+      "height": 828
+    },
+    {
+      "file": "C-Arcane-Observatory-Scenario-2.mp4",
+      "sha256": "8a29ecbca431e056ca0d37a3bdac8a5317624329bda46f9e165186dd2ce24421",
+      "sourceCapture": "../media/intersection-observatory/capture.json",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "width": 1384,
+      "height": 828
+    },
+    {
+      "file": "D-Paper-Theater-Scenario-2.mp4",
+      "sha256": "5da6ac0cb8ffe93a9d4ac6804d4a1d12a4156201140e959cd7bea81dbe61eb8c",
+      "sourceCapture": "../media/intersection-paper/capture.json",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "width": 1384,
+      "height": 828
+    },
+    {
+      "file": "E-Obsidian-Foundry-Scenario-2.mp4",
+      "sha256": "760d55b0694eaaffae2505c9964eec57fb726e025530569bda5825aa089bf761",
+      "sourceCapture": "../media/intersection-foundry/capture.json",
+      "source": "sha256:2d538a3a44e6bba3d14d08ef28b42ac7b22583fb5ab33e2b605144f495258141",
+      "width": 1384,
+      "height": 828
+    }
+  ]
+}

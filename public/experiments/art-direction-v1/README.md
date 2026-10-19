@@ -54,6 +54,10 @@ selected inspected frames):
 | Paper Theater | [clip](media/duel-paper/clip.mp4) | [clip](media/intersection-paper/clip.mp4) | [clip](media/crowd-paper/clip.mp4) |
 | Obsidian Foundry | [clip](media/duel-foundry/clip.mp4) | [clip](media/intersection-foundry/clip.mp4) | [clip](media/crowd-foundry/clip.mp4) |
 
+Scenario 2 is also available as a [sharing ZIP](scenario-2/Wizard-Battles-Scenario-2-All-5.zip)
+with five clearly named MP4s, viewing notes and a source/hash manifest. These are
+the same 5.8–9.8s excerpts above, copied without re-encoding.
+
 The capture manifests retain exact source, scene, seed, rotation, focused visual
 direction, 1/60s simulation step, visual seed derivation (seed XOR 0x5f3759df),
 browser and viewport. Nonfocused panels are retained as state context in the raw
