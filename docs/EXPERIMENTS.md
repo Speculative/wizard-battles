@@ -4,7 +4,23 @@ For the repeatable preparation and handoff process, follow the
 [experiment-comparison skill](../.agents/skills/experiment-comparison/SKILL.md).
 This document covers the current tools, formats and delivered examples.
 
-Run `npm run dev` and open **http://localhost:5173/compare.html**. The ordinary single-battle page remains at `/`.
+For owner viewing, run `npm run dev:server -- start` and open
+**http://localhost:5173/compare.html**. This starts a detached Vite process with
+no dispatch-owned terminal or pipes. It survives the launching command and agent
+dispatch; it lasts until stopped, crashed, or the container stops. Agents manage
+it with `npm run dev:server -- status`, `stop`, and `restart`. Status checks the
+process identity and workspace health; logs and PID/token state live in ignored
+`runs-server/`. Port 5173 is strict: a conflict fails instead of silently serving
+another port. Do not use a foreground tool-session server for owner handoffs.
+`npm run dev` remains available for temporary interactive development.
+
+The server controller is Linux-specific (it verifies `/proc` identity before
+signaling a process). If a controller is killed while holding
+`runs-server/controller.lock`, inspect processes before removing the stale lock.
+For isolated lifecycle checks, `WIZARD_SERVER_DIR` and `WIZARD_DEV_PORT` override
+its state directory and port; `WIZARD_FEEDBACK_DIR` overrides feedback storage.
+Container shutdown still stops the service; start it again after container
+startup. An already-open page rendering battles is not proof the server is up. The ordinary single-battle page remains at `/`.
 
 The first experiment, `movement-pacing-v1`, compares baseline (A), measured commitments (B), and bursts/resets (C). These are configuration packages applied to every fighter; abilities and tactics stay the same. The hypothesis concerns anticipating pressure/commitment/escape, not maximizing activity. All three can fail. The two scenes use the existing asymmetric kits, so a red win is not a general balance result.
 
@@ -24,13 +40,30 @@ These are selected arguments, not representative samples or proof that other var
 
 **Full fights / context** returns to the shared three-panel player; each evidence card also opens its own full fight enlarged. Shared play/pause, restart, speed, single-second stepping and seeking remain available there. All unfinished worlds advance the same number of ticks, and completed fights hold their final state. Query parameters `capture=1` or `time` open the full-fight view for reproducible capture. Custom setups apply on change and have no evidence excerpts unless specifically curated.
 
-Each evidence card has a comment form and its own comment history. **Not reviewed** changes to **Commented** once a nonempty comment is recorded; preset buttons show how many of their pieces have comments (for example, 1/2). This means the owner has opined, not that they like the result. Inline save status distinguishes a workspace save from a failed save. Comments recover from workspace snapshots in a fresh browser. Unsaved card drafts survive preset/tab switches in the current page, but are not durable until saved.
+Each evidence card has a comment form and its own comment history. **Not reviewed** changes to **Commented** only after the server confirms persistence of a nonempty comment; preset buttons show how many of their pieces have comments (for example, 1/2). This means the owner has opined, not that they like the result. A successful POST is acknowledged only after the snapshot file and directory are synced to disk. Browser-only or pending submissions do not mark evidence reviewed. Inline save status identifies the workspace receipt. Comments recover from workspace snapshots in a fresh browser. Unsaved card drafts survive preset/tab switches in the current page, but are not durable until saved.
 
 Attached notes carry an optional `evidence` reference: stable clip `id`, `revision`, brief ID, variant and exact bounds. Matching also checks experiment, scene, seed and rotation. UI-only source updates preserve comment history; change the clip revision whenever its depicted gameplay materially changes, and reselect/inspect it as usual. Different bounds/revisions do not inherit a reviewed status. Older and general viewing notes remain in the general notes area, without marking individual evidence as reviewed.
 
 A timestamped note saves experiment, exact source hash, scenario, seed, rotation, panel identities and each panel’s actual held time. New notes also retain viewing mode, brief ID, focused variant, and each excerpt’s bounds. In evidence mode there is no shared fight time; `time` records the focused panel’s actual time (or zero if none was focused), while `panelTimes` retains every panel’s time. Older notes without this optional context remain compatible. Preferences include unsure, no meaningful difference, and none works. With `npm run dev` or `npm run preview`, feedback automatically saves append-only JSON snapshots to **`runs-feedback/` in the workspace**, through `/api/feedback`. Each contains `savedAt` and the full `feedback` object. The status beside the notes shows the saved file or an explicit failure. Existing notes in this browser migrate automatically when the updated viewer opens at the same origin. A fresh browser loads merged workspace feedback. Concurrent browsers retain both sets of notes and expectation histories; the newest history entry determines current wording/decision. An open page loads other browsers’ saves on reload. Files are ignored by Git, survive server restarts, and remain agent-readable; archive them separately when moving workspaces. `WIZARD_FEEDBACK_DIR` can override the storage directory (used for isolated checks).
 
-**Feedback saves and backups**, available below either tab, contains the workspace status, retry, export and import controls. Browser localStorage remains a backup. **Export feedback JSON** makes another agent-readable copy; imports merge histories and distinct notes without replacing newer edits with older ones. Static-only hosting has no workspace API and explicitly reports that saves are browser-only; it needs a backend to provide durable saves. Invalid imports are rejected without changing current feedback.
+The room starts locked until workspace storage is reachable. A two-second
+heartbeat with a four-second request timeout checks storage availability; lost
+connectivity locks the entire room and pauses playback. Returning to a hidden tab
+also checks storage before resuming. There can be a short interval between a
+server outage and detection: a submission in that interval locks the page while
+saving and stays pending on failure. Only an explicit persistence receipt unlocks
+that submission. Failed submissions are kept in browser backup when available,
+can be exported from the lock screen, and retry on reconnection without creating
+duplicate notes. Typed drafts are not autosaved; pressing **Save comment** is the
+persistence boundary. Do not report a pending comment as reviewed or agent-readable.
+
+Before a revision dispatch changes candidates, verify the feedback actually
+exists in accessible workspace snapshots or an owner-provided export. Identify
+the file, count and evidence context, and summarize the comments being acted on.
+Resolve missing intake before starting visual revisions. A saved browser backup
+alone is not a completed agent handoff.
+
+**Feedback saves and backups**, available below either tab, contains the workspace status, retry, export and import controls. Browser localStorage remains a backup. **Export feedback JSON** makes another agent-readable copy; imports merge histories and distinct notes without replacing newer edits with older ones. Static-only hosting has no workspace API, so the experiment room remains locked; owner viewing requires the feedback backend. Invalid imports are rejected without changing current feedback.
 
 The separate **Goals** tab contains **What you want from battles** and shows all goals by default, with counts for approved goals and proposals needing review. The initial seven are already approved; no repeat approval is needed. These decisions describe what the owner cares about, not whether the current build satisfies it. Use viewing notes for a reaction to a particular fight, and this list for qualities to preserve or improve across experiments.
 
@@ -64,6 +97,8 @@ npm run check:comparison
 npm run check:comparison -- --production
 # UI/storage changes only, skipping unchanged full-match checks:
 npm run check:comparison -- --ui-only
+# Real server shutdown/restart, pending saves and browser recovery:
+npx tsx scripts/check-feedback-connection.ts
 ```
 
 The comparison browser check verifies content-selected evidence, independent seek/replay/loop, exclusive clip playback, evidence note context, per-piece comments/progress and recovery, Comparison/Goals tabs, preset changes, fresh-browser workspace recovery, save failure/retry, headless agreement (unless `--ui-only`), resize/enlargement independence, synchronized live ticks, finished holds, feedback persistence/export/import, invalid imports, and expectation decisions. The existing `check:browser` checks the single-battle view.

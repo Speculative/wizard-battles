@@ -15,7 +15,8 @@
     "experiment": "tsx scripts/experiment.ts",
     "check:comparison": "tsx scripts/check-comparison.ts",
     "capture:comparison": "tsx scripts/capture-comparison.ts",
-    "check:spell-comparison": "tsx scripts/check-spell-comparison.ts"
+    "check:spell-comparison": "tsx scripts/check-spell-comparison.ts",
+    "dev:server": "node scripts/dev-server.mjs"
   },
   "devDependencies": {
     "@duckdb/node-api": "^1.5.2-r.1",

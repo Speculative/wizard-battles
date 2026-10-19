@@ -82,6 +82,7 @@ try {
   assert.deepEqual(await page.evaluate(() => window.comparison.feedback()), feedback);
   await page.getByRole('tab', { name: 'Goals', exact: true }).click();
   await page.getByRole('button', { name: 'Propose expectation' }).click();
+  await page.locator('#storage-gate').waitFor({ state: 'hidden' });
   const expectation = page.locator('.expectation').first();
   await expectation.getByLabel('Expectation', { exact: true }).fill('I can follow the opening');
   await expectation.getByLabel('Target (free text)').fill('No fixed numeric threshold');
@@ -234,9 +235,9 @@ try {
   await page.getByRole('button', { name: 'Save evidence comment B', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('#save-status')!.textContent!.startsWith('Workspace save failed'));
   assert.match(await page.locator('.panel').nth(1).locator('.comment-save').innerText(), /Workspace save failed/);
-  assert.deepEqual(errors.splice(0), ['Failed to load resource: the server responded with a status of 503 (Service Unavailable)']);
+  assert.ok(errors.splice(0).every(e => e.includes('503 (Service Unavailable)')));
   await page.unroute('**/api/feedback');
-  await page.getByRole('button', { name: 'Retry workspace save', exact: true }).click();
+  await page.getByRole('button', { name: 'Reconnect and save pending feedback', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('#save-status')!.textContent!.startsWith('Saved to runs-feedback/'));
   await page.waitForFunction(() => document.querySelectorAll('.comment-save')[1].textContent === 'Saved to workspace.');
   await page.locator('#panels').screenshot({ path: `${output}/evidence-comments.png` });

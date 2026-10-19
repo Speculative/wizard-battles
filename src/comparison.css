@@ -86,3 +86,8 @@ input[type=file] { max-width: 100%; min-width: 0; }
 .panels.art-panels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .panels.art-panels.enlarged { grid-template-columns: 1fr; }
 @media(max-width: 900px) { .panels.art-panels { grid-template-columns: 1fr; } }
+
+#storage-gate { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; padding: 24px; background: rgba(10, 12, 18, .97); }
+#storage-gate[hidden] { display: none; }
+#storage-gate > div { max-width: 620px; padding: 28px; border: 2px solid #e6b780; border-radius: 12px; background: #1b1e27; }
+#storage-gate button { margin: 8px 0; }

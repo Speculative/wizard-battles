@@ -82,7 +82,15 @@ not replace the prepared comparison requested here.
 
 Retain viewing feedback outside browser-only storage. Show actual save success
 or failure, and preserve the chosen evidence, focused alternative, individual
-panel times and source identity. Keep older feedback readable. Attach comments to the selected evidence in the
+panel times and source identity. Keep older feedback readable. For owner
+handoffs, use the detached server
+controller (`npm run dev:server -- start|status|restart|stop`) documented in the
+tooling guide, not a dispatch-owned foreground server. A running battle in an
+already-open tab does not establish server availability. Require workspace
+persistence acknowledgement for submitted comments; lock the room when storage
+is unreachable. Before visual revisions, verify agent-readable feedback intake
+from actual snapshots or an exported file and summarize it. Resolve missing
+intake before changing candidates. Attach comments to the selected evidence in the
 interface, show which pieces the owner has commented on, and show progress across
 comparisons. Use stable evidence IDs with explicit revisions; changed footage or
 bounds must not inherit a reviewed label accidentally. Keep general notes separate

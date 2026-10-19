@@ -54,6 +54,23 @@ ${revisionExperiment ? '<p>Round 2 · A is the previous B; B and C are new alter
 <p>Edit a goal and <strong>Save edits</strong> to refine it. For a new proposal, <strong>Approve</strong> keeps it as a goal; <strong>Decline</strong> says it is not something you want. <strong>Remove</strong> retires a goal and <strong>Reopen</strong> asks to review it again. History is kept.</p>
 <p class="muted">Targets are optional and can be plain language. For example: “Separate duels should sometimes collide in four-way battles.” Use comments and viewing notes on the Comparison tab for reactions to specific fights; use this list for qualities you want us to preserve or improve across experiments. Changes use the same workspace save and browser backup as your notes.</p><p id="expectation-counts" role="status"></p>
 <div class="controls"><label>Show <select id="filter"><option value="all">All goals / history</option><option value="unreviewed">Needs your review</option><option value="approved">Approved goals</option><option value="declined">Declined proposals</option><option value="removed">Removed goals</option></select></label><button id="add-expectation">Propose expectation</button></div><div id="expectations"></div></section><details id="feedback-tools"><summary>Feedback saves and backups</summary><p id="save-status" role="status">Checking workspace saves…</p><div class="controls"><button id="retry-save">Retry workspace save</button><button id="export">Export feedback JSON</button><label>Import JSON <input id="import" type="file" accept="application/json"></label></div></details><p id="notice" class="notice" role="status"></p>`;
+const storageGate = document.createElement('section');
+storageGate.id = 'storage-gate';
+storageGate.setAttribute('role', 'dialog');
+storageGate.setAttribute('aria-modal', 'true');
+storageGate.setAttribute('aria-labelledby', 'storage-gate-title');
+storageGate.innerHTML = `<div><h2 id="storage-gate-title">Experiment room paused</h2><p id="storage-gate-message" role="alert">Connecting to workspace storage…</p><p>Comments are complete only after the workspace confirms the save.</p><button id="storage-reconnect">Reconnect and save pending feedback</button> <button id="storage-export">Export feedback backup</button></div>`;
+document.body.append(storageGate);
+app.inert = true;
+function blockWorkspace(message: string | null) {
+  app.inert = message !== null;
+  storageGate.hidden = message === null;
+  if (message !== null) {
+    $('#storage-gate-message').textContent = message;
+    window.comparison?.pause();
+    if (app.contains(document.activeElement)) $('#storage-reconnect').focus();
+  }
+}
 $('#panels').classList.toggle('two-panels', VARIANTS.length === 2);
 const preference = $<HTMLSelectElement>('#preference');
 for (const option of Array.from(preference.options)) if (['A', 'B', 'C'].includes(option.value)) option.remove();
@@ -93,29 +110,90 @@ function saveBrowser() {
 }
 let saveQueue: Promise<boolean | void> = Promise.resolve();
 let saveRevision = 0;
+let savedRevision = 0;
+let saving = false;
+let checkingConnection = false;
+let initialLoadComplete = false;
+const confirmedNotes = new Set<string>();
+const pendingComments = new Map<string, string>();
+function confirmedFeedbackNotes() { return feedback.notes.filter(n => confirmedNotes.has(JSON.stringify(n))); }
+async function workspaceRequest(path: string, options: RequestInit = {}) {
+  const response = await fetch(path, { ...options, cache: 'no-store', signal: AbortSignal.timeout(4000) });
+  if (!response.ok) throw new Error(`Workspace returned HTTP ${response.status}`);
+  return response.json();
+}
 function persist() {
   const revision = ++saveRevision;
+  const snapshot = structuredClone(feedback);
   const browserSaved = saveBrowser();
+  saving = true;
+  blockWorkspace('Saving feedback to the workspace. Please wait for confirmation…');
   $('#save-status').textContent = 'Saving to workspace…';
   saveQueue = saveQueue.then(async () => {
     await feedbackReady;
-    const response = await fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(feedback) });
-    if (!response.ok) throw new Error('Workspace save unavailable');
-    const saved = await response.json();
+    const saved = await workspaceRequest('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(snapshot) });
+    if (saved.persisted !== true || typeof saved.file !== 'string' || typeof saved.savedAt !== 'string') throw new Error('Workspace did not confirm persistence');
+    savedRevision = revision;
+    for (const n of snapshot.notes) confirmedNotes.add(JSON.stringify(n));
     if (revision !== saveRevision) return true;
+    for (const [key, text] of pendingComments) {
+      if (commentDrafts.get(key)?.trim() === text) commentDrafts.delete(key);
+      commentSaves.set(key, 'Saved to workspace.');
+    }
+    pendingComments.clear();
+    saving = false;
     $('#save-status').textContent = `Saved to ${saved.file} at ${new Date(saved.savedAt).toLocaleTimeString()}. Browser backup ${browserSaved ? 'saved' : 'unavailable'}.`;
+    renderNotes();
+    blockWorkspace(null);
     return true;
-  }).catch(() => { $('#save-status').textContent = browserSaved ? 'Workspace save failed. This change is only in this browser. Retry or export JSON to keep a separate copy.' : 'Save failed in both workspace and browser. Export JSON now to keep this change.'; return false; });
+  }).catch(error => {
+    if (revision === saveRevision) {
+      saving = false;
+      const message = `Workspace save failed (${(error as Error).message}). Feedback is pending; this page is locked until it can be saved. ${browserSaved ? 'A browser backup was saved.' : 'Browser backup is unavailable; export a backup before closing.'}`;
+      $('#save-status').textContent = message;
+      for (const key of pendingComments.keys()) commentSaves.set(key, 'Workspace save failed. Pending confirmation.');
+      renderEvidenceFeedback();
+      blockWorkspace(message);
+    }
+    return false;
+  });
   return saveQueue;
 }
-$('#retry-save').onclick = async () => {
-  const saved = await persist();
-  if (saved) for (const [key, status] of commentSaves) if (status.startsWith('Workspace save failed')) commentSaves.set(key, 'Saved to workspace.');
-  renderEvidenceFeedback();
-};
+async function checkConnection() {
+  if (!initialLoadComplete || checkingConnection || saving) return;
+  checkingConnection = true;
+  const recovering = !storageGate.hidden;
+  const revision = saveRevision;
+  try {
+    const health = await workspaceRequest('/api/feedback/health');
+    if (saving || revision !== saveRevision) return;
+    if (health.service !== 'wizard-battles-feedback' || health.storage !== 'workspace') throw new Error('Workspace storage is unavailable');
+    let needsSave = savedRevision < saveRevision;
+    if (recovering) {
+      const saved = await workspaceRequest('/api/feedback');
+      validateFeedback(saved.feedback);
+      if (saving || revision !== saveRevision) return;
+      for (const n of saved.feedback.notes) confirmedNotes.add(JSON.stringify(n));
+      const merged = mergeFeedback(feedback, saved.feedback);
+      if (JSON.stringify(merged) !== JSON.stringify(feedback)) {
+        feedback = merged; renderNotes(); renderExpectations();
+      }
+      needsSave ||= JSON.stringify(feedback) !== JSON.stringify(saved.feedback);
+      saveBrowser();
+    }
+    if (needsSave) await persist();
+    else blockWorkspace(null);
+  } catch {
+    if (saving || revision !== saveRevision) return;
+    blockWorkspace('Workspace storage is disconnected. The experiment room is locked; reconnect to continue. Any unconfirmed feedback is still pending.');
+  } finally { checkingConnection = false; }
+}
+$('#retry-save').onclick = () => { void persist(); };
+$('#storage-reconnect').onclick = () => { void checkConnection(); };
+$('#storage-export').onclick = () => { $('#export').click(); };
 function renderNotes() {
   $('#notes-list').replaceChildren();
-  for (const n of feedback.notes.filter(n => !n.evidence && n.experiment === EXPERIMENT.id)) {
+  for (const n of confirmedFeedbackNotes().filter(n => !n.evidence && n.experiment === EXPERIMENT.id)) {
     const li = document.createElement('li');
     const context = n.viewing?.mode === 'evidence'
       ? `evidence ${n.viewing.briefId} · ${n.viewing.clips.map(c => `${c.variant} at ${(n.panelTimes[n.variants.indexOf(c.variant)] ?? 0).toFixed(1)}s`).join(' / ')} · focused ${n.viewing.focusedVariant ?? 'none'}`
@@ -353,7 +431,7 @@ function renderEvidenceFeedback() {
   for (const p of panels) {
     const reference = panelReference(p);
     if (!reference) continue;
-    const notes = notesForEvidence(feedback.notes, scope(), reference);
+    const notes = notesForEvidence(confirmedFeedbackNotes(), scope(), reference);
     const status = p.element.querySelector<HTMLElement>('.review-status')!;
     status.textContent = notes.length ? `Commented · ${notes.length} ${notes.length === 1 ? 'comment' : 'comments'}` : 'Not reviewed';
     status.classList.toggle('commented', notes.length > 0);
@@ -366,7 +444,7 @@ function renderEvidenceFeedback() {
     }
   }
   for (const brief of presets) {
-    const reviewed = brief.clips.filter(clip => notesForEvidence(feedback.notes, { experiment: EXPERIMENT.id, scenario: brief.scenario, seed: brief.seed, rotation: 0 }, evidenceReference(brief.id, clip)).length > 0).length;
+    const reviewed = brief.clips.filter(clip => notesForEvidence(confirmedFeedbackNotes(), { experiment: EXPERIMENT.id, scenario: brief.scenario, seed: brief.seed, rotation: 0 }, evidenceReference(brief.id, clip)).length > 0).length;
     const button = document.querySelector<HTMLButtonElement>(`#presets button[data-preset="${brief.id}"]`);
     if (!button) continue;
     let badge = button.querySelector('span');
@@ -388,10 +466,8 @@ async function saveEvidenceComment(p: Panel) {
   if (!text) { commentSaves.set(key, 'Write a comment first.'); renderEvidenceFeedback(); return; }
   focusedVariant = p.variant.id;
   feedback.notes.push(makeNote(text, 'unsure', reference));
-  commentDrafts.delete(key); commentSaves.set(key, 'Comment recorded · saving to workspace…'); renderNotes();
-  const saved = await persist();
-  commentSaves.set(key, saved ? 'Saved to workspace.' : 'Workspace save failed. Browser backup only if available; retry under Feedback saves and backups.');
-  renderEvidenceFeedback();
+  pendingComments.set(key, text); commentSaves.set(key, 'Saving to workspace…'); renderEvidenceFeedback();
+  await persist();
 }
 function selectTab(tab: 'comparison' | 'goals') {
   const comparisonActive = tab === 'comparison';
@@ -431,16 +507,29 @@ renderExpectations(); renderNotes(); render();
 let migrateBrowser = false;
 const feedbackReady = (async () => {
   try {
-    const response = await fetch('/api/feedback');
-    if (!response.ok) throw new Error('Workspace unavailable');
-    const saved = await response.json(); validateFeedback(saved.feedback);
+    const saved = await workspaceRequest('/api/feedback'); validateFeedback(saved.feedback);
+    for (const n of saved.feedback.notes) confirmedNotes.add(JSON.stringify(n));
     feedback = mergeFeedback(feedback, saved.feedback);
     migrateBrowser = JSON.stringify(feedback) !== JSON.stringify(saved.feedback) && (feedback.notes.length > 0 || feedback.expectations.some(e => e.history.length > (initialExpectations().find(i => i.id === e.id)?.history.length ?? 0)));
     saveBrowser(); renderNotes(); renderExpectations();
     $('#save-status').textContent = `Workspace connected · ${saved.location}. Existing browser notes will also be saved here.`;
-  } catch { $('#save-status').textContent = 'Workspace storage unavailable. Notes remain in this browser; export JSON for a separate copy.'; }
+  } catch {
+    $('#save-status').textContent = 'Workspace storage unavailable. Reconnect before reviewing or commenting.';
+    blockWorkspace('Workspace storage is unavailable. The experiment room is locked. Reconnect to continue, or export a feedback backup.');
+  }
 })();
-void feedbackReady.then(() => { if (migrateBrowser) persist(); });
+void feedbackReady.then(() => { initialLoadComplete = true; if (migrateBrowser) void persist(); else void checkConnection(); });
+// Bound outage detection even when the page was loaded before the server stopped.
+setInterval(() => { void checkConnection(); }, 2000);
+window.addEventListener('offline', () => blockWorkspace('Connection lost. Reconnect before continuing.'));
+window.addEventListener('online', () => { void checkConnection(); });
+window.addEventListener('focus', () => { void checkConnection(); });
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    blockWorkspace('Checking workspace storage before resuming…');
+    void checkConnection();
+  }
+});
 if (params.has('time')) seek(Number(params.get('time')));
 function tick(now: number) {
   if (last === null) last = now;

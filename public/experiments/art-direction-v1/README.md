@@ -145,3 +145,13 @@ poster/end frames, encoded clips and complete frame-state manifests.
 successful isolated rerun of the prior spell-revision check after a timed
 assertion failed under concurrent capture load. This is not an unresolved
 application failure.
+
+## Owner feedback retained for the revision round
+
+The [original October 19 export](owner-feedback/2026-10-19.json) retains 15 owner
+comments with their evidence IDs, source and fight times (Porcelain 2, Photon 4,
+Observatory 5, Paper 2, Foundry 2). It was recovered after the viewing server
+stopped and workspace saves failed, then imported into append-only workspace
+feedback and verified by a fresh API read. The original root export was preserved.
+All five candidates remain; no direction has been adopted. Preserve unchanged
+Photon and Observatory for explicit comparisons against the next revisions.
