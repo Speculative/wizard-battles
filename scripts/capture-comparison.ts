@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 const args = process.argv.slice(2);
 const flags = new Map<string, string>();
 for (let i = 0; i < args.length; i += 2) {
-  if (!['--experiment', '--scenario', '--seed', '--rotation', '--time', '--duration', '--fps', '--out', '--variant'].includes(args[i]) || !args[i + 1]) throw new Error(`Unknown/incomplete option ${args[i]}`);
+  if (!['--experiment', '--scenario', '--seed', '--rotation', '--time', '--duration', '--fps', '--out', '--variant', '--family', '--baselines'].includes(args[i]) || !args[i + 1]) throw new Error(`Unknown/incomplete option ${args[i]}`);
   flags.set(args[i].slice(2), args[i + 1]);
 }
 const numeric = (key: string, fallback: number) => Number(flags.get(key) ?? fallback);
@@ -20,7 +20,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1050 }, deviceScaleFactor: 1 });
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   const url = new URL('compare.html?capture=1', server.resolvedUrls!.local[0]);
-  for (const key of ['experiment', 'scenario', 'seed', 'rotation']) if (flags.has(key)) url.searchParams.set(key, flags.get(key)!);
+  for (const key of ['experiment', 'scenario', 'seed', 'rotation', 'family', 'baselines']) if (flags.has(key)) url.searchParams.set(key, flags.get(key)!);
   await page.goto(url.href); await page.waitForFunction(() => !!window.comparison);
   await page.evaluate(time => window.comparison.seek(time), start);
   const variant = flags.get('variant');

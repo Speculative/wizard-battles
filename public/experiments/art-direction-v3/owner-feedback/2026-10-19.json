@@ -1,0 +1,2577 @@
+{
+  "savedAt": "2026-10-19T05:46:04.643Z",
+  "feedback": {
+    "schema": "wizard-battles-feedback-v1",
+    "expectations": [
+      {
+        "id": "WB-E001",
+        "text": "Battles are visually interesting and enjoyable to watch.",
+        "target": "",
+        "notes": "",
+        "decision": "approved",
+        "provenance": "Explicit owner statements on sfmb-mnnj, 2026-10-17.",
+        "history": [
+          {
+            "at": "2026-10-17T20:31:05Z",
+            "decision": "approved",
+            "text": "Battles are visually interesting and enjoyable to watch.",
+            "target": "",
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "id": "WB-E002",
+        "text": "Pacing may ebb and flow to build and release tension; quiet duration alone is not a defect.",
+        "target": "",
+        "notes": "",
+        "decision": "approved",
+        "provenance": "Explicit owner statements on sfmb-mnnj, 2026-10-17.",
+        "history": [
+          {
+            "at": "2026-10-17T20:31:05Z",
+            "decision": "approved",
+            "text": "Pacing may ebb and flow to build and release tension; quiet duration alone is not a defect.",
+            "target": "",
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "id": "WB-E003",
+        "text": "Art is generated programmatically, without requiring externally authored art assets.",
+        "target": "",
+        "notes": "",
+        "decision": "approved",
+        "provenance": "Explicit owner statements on sfmb-mnnj, 2026-10-17.",
+        "history": [
+          {
+            "at": "2026-10-17T20:31:05Z",
+            "decision": "approved",
+            "text": "Art is generated programmatically, without requiring externally authored art assets.",
+            "target": "",
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "id": "WB-E004",
+        "text": "I can anticipate a consequential exchange and understand why its outcome occurred.",
+        "target": "",
+        "notes": "",
+        "decision": "approved",
+        "provenance": "Agent proposal on nezw-rsmt, provisionally approved by owner 2026-10-17T20:31:05Z. Priority unresolved.",
+        "history": [
+          {
+            "at": "2026-10-17T19:05:04Z",
+            "decision": "unreviewed",
+            "text": "I can anticipate a consequential exchange and understand why its outcome occurred.",
+            "target": "",
+            "notes": ""
+          },
+          {
+            "at": "2026-10-17T20:31:05Z",
+            "decision": "approved",
+            "text": "I can anticipate a consequential exchange and understand why its outcome occurred.",
+            "target": "",
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "id": "WB-E005",
+        "text": "I can recognize who has the initiative and feel pressure, escape, and momentum changes.",
+        "target": "",
+        "notes": "",
+        "decision": "approved",
+        "provenance": "Agent proposal on nezw-rsmt, provisionally approved by owner 2026-10-17T20:31:05Z. Priority unresolved.",
+        "history": [
+          {
+            "at": "2026-10-17T19:05:04Z",
+            "decision": "unreviewed",
+            "text": "I can recognize who has the initiative and feel pressure, escape, and momentum changes.",
+            "target": "",
+            "notes": ""
+          },
+          {
+            "at": "2026-10-17T20:31:05Z",
+            "decision": "approved",
+            "text": "I can recognize who has the initiative and feel pressure, escape, and momentum changes.",
+            "target": "",
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "id": "WB-E006",
+        "text": "Fighters have visible identities or habits that let me form expectations and pick favorites.",
+        "target": "",
+        "notes": "",
+        "decision": "approved",
+        "provenance": "Agent proposal on nezw-rsmt, provisionally approved by owner 2026-10-17T20:31:05Z. Priority unresolved.",
+        "history": [
+          {
+            "at": "2026-10-17T19:05:04Z",
+            "decision": "unreviewed",
+            "text": "Fighters have visible identities or habits that let me form expectations and pick favorites.",
+            "target": "",
+            "notes": ""
+          },
+          {
+            "at": "2026-10-17T20:31:05Z",
+            "decision": "approved",
+            "text": "Fighters have visible identities or habits that let me form expectations and pick favorites.",
+            "target": "",
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "id": "WB-E007",
+        "text": "Surprises develop from established abilities or habits, making an earlier exchange newly meaningful.",
+        "target": "",
+        "notes": "",
+        "decision": "approved",
+        "provenance": "Agent proposal on nezw-rsmt, provisionally approved by owner 2026-10-17T20:31:05Z. Priority unresolved.",
+        "history": [
+          {
+            "at": "2026-10-17T19:05:04Z",
+            "decision": "unreviewed",
+            "text": "Surprises develop from established abilities or habits, making an earlier exchange newly meaningful.",
+            "target": "",
+            "notes": ""
+          },
+          {
+            "at": "2026-10-17T20:31:05Z",
+            "decision": "approved",
+            "text": "Surprises develop from established abilities or habits, making an earlier exchange newly meaningful.",
+            "target": "",
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "id": "WB-Pb288bfb5-7381-4b05-a57e-1add82e61844",
+        "text": "The battle is a visually appealing spectacle with beautiful, coherent, intentional art direction",
+        "target": "",
+        "notes": "",
+        "decision": "approved",
+        "provenance": "Proposed in the comparison interface; owner decision pending.",
+        "history": [
+          {
+            "at": "2026-10-18T20:59:04.171Z",
+            "decision": "unreviewed",
+            "text": "The battle is a visually appealing spectacle with beautiful, coherent, intentional art direction",
+            "target": "",
+            "notes": ""
+          },
+          {
+            "at": "2026-10-18T20:59:17.677Z",
+            "decision": "approved",
+            "text": "The battle is a visually appealing spectacle with beautiful, coherent, intentional art direction",
+            "target": "",
+            "notes": ""
+          }
+        ]
+      }
+    ],
+    "notes": [
+      {
+        "at": "2026-10-18T05:47:47.839Z",
+        "experiment": "movement-pacing-v1",
+        "source": "sha256:c818e1626474c535cf8c552ee5a650ae70f70eda3c9a4b65857abc9d6a45f55f",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 6.216666666666667,
+        "panelTimes": [
+          6.21666666666665,
+          6.21666666666665,
+          6.21666666666665
+        ],
+        "variants": [
+          "baseline",
+          "measured",
+          "burst"
+        ],
+        "preference": "C",
+        "text": "C is easily the best one, especially in the duels. B is easily the worst, especially for the strafing duels that happen in some seeds. I also like how in the 4 wizard combat, while A and B split into paired duels, C has them eventually intersect and interact, which adds a lot more interest."
+      },
+      {
+        "at": "2026-10-18T08:46:16.087Z",
+        "experiment": "spell-readability-v1",
+        "source": "sha256:3eab2014d6c60f477cec56e5c2dcd020401aee2aa4c66082121e8664fd219c60",
+        "scenario": "duel",
+        "seed": 7,
+        "rotation": 0,
+        "time": 12.216666666666853,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "spell-duel-hit-miss",
+          "focusedVariant": "cues",
+          "clips": [
+            {
+              "variant": "current",
+              "start": 8.3,
+              "end": 12.6
+            },
+            {
+              "variant": "cues",
+              "start": 8.3,
+              "end": 12.6
+            }
+          ]
+        },
+        "panelTimes": [
+          12.216666666666853,
+          12.216666666666853
+        ],
+        "variants": [
+          "current",
+          "cues"
+        ],
+        "preference": "unsure",
+        "text": "This is obviously more readable, though I worry it's stylistically less attractive. Does Blue's second fireball not land? I see something that looks like the hit cross, but it's maybe on the side of red facing away from the camera and is slightly clipping through red's body?",
+        "evidence": {
+          "id": "spell-duel7-cues",
+          "revision": 1,
+          "briefId": "spell-duel-hit-miss",
+          "variant": "cues",
+          "start": 8.3,
+          "end": 12.6
+        }
+      },
+      {
+        "at": "2026-10-18T08:48:26.741Z",
+        "experiment": "spell-readability-v1",
+        "source": "sha256:3eab2014d6c60f477cec56e5c2dcd020401aee2aa4c66082121e8664fd219c60",
+        "scenario": "duel",
+        "seed": 7,
+        "rotation": 0,
+        "time": 12.216666666666853,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "spell-duel-hit-miss",
+          "focusedVariant": "current",
+          "clips": [
+            {
+              "variant": "current",
+              "start": 8.3,
+              "end": 12.6
+            },
+            {
+              "variant": "cues",
+              "start": 8.3,
+              "end": 12.6
+            }
+          ]
+        },
+        "panelTimes": [
+          12.216666666666853,
+          12.216666666666853
+        ],
+        "variants": [
+          "current",
+          "cues"
+        ],
+        "preference": "unsure",
+        "text": "I initially thought this read okay, but after comparing with B, I think the light color of red's translucent blue attack wedge is very hard to see. You can always look at the health bars, but you don't feel the impact. Blue's fireballs are felt a little more due to the splash particles on impact. This is maybe a sign that we don't want to just add symbols to denote impacts, but visually make the spell effects louder on impact. You can imagine the simplest possible version of this is blue flashing red when melee'd by red (sort of the visual equivalent of an \"oof\" hurt sound), but we can probably do better than that.",
+        "evidence": {
+          "id": "spell-duel7-current",
+          "revision": 1,
+          "briefId": "spell-duel-hit-miss",
+          "variant": "current",
+          "start": 8.3,
+          "end": 12.6
+        }
+      },
+      {
+        "at": "2026-10-18T08:50:58.501Z",
+        "experiment": "spell-readability-v1",
+        "source": "sha256:3eab2014d6c60f477cec56e5c2dcd020401aee2aa4c66082121e8664fd219c60",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "spell-intersection",
+          "focusedVariant": "current",
+          "clips": [
+            {
+              "variant": "current",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "cues",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          5.799999999999985
+        ],
+        "variants": [
+          "current",
+          "cues"
+        ],
+        "preference": "unsure",
+        "text": "Blue's ice shard is low-contrast, making it hard to see against the light colored grid. The fluid way that red goes from killing green (and green disappearing) to accelerating into yellow's spread shot reads a little weirdly -- were they charging through green at the end right as it disappeared and happened to run in, or did they switch targets?",
+        "evidence": {
+          "id": "spell-four19-current",
+          "revision": 1,
+          "briefId": "spell-intersection",
+          "variant": "current",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-18T08:53:50.794Z",
+        "experiment": "spell-readability-v1",
+        "source": "sha256:3eab2014d6c60f477cec56e5c2dcd020401aee2aa4c66082121e8664fd219c60",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "spell-intersection",
+          "focusedVariant": "cues",
+          "clips": [
+            {
+              "variant": "current",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "cues",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "current",
+          "cues"
+        ],
+        "preference": "unsure",
+        "text": "The hit rings do help, especially on red tanking yellow's spread shot. Red has two hit rings just prior to eliminating green and it's not clear to me where they came from. Did green fire a point-blank shot that we don't see? I think I'm generally a fan of the hit ring idea even if we need to tweak its implementation.",
+        "evidence": {
+          "id": "spell-four19-cues",
+          "revision": 1,
+          "briefId": "spell-intersection",
+          "variant": "cues",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-18T08:54:25.978Z",
+        "experiment": "spell-readability-v1",
+        "source": "sha256:3eab2014d6c60f477cec56e5c2dcd020401aee2aa4c66082121e8664fd219c60",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "spell-intersection",
+          "focusedVariant": "cues",
+          "clips": [
+            {
+              "variant": "current",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "cues",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "current",
+          "cues"
+        ],
+        "preference": "unsure",
+        "text": "Oh, I'm understanding now that the rings show both for when a player is hit and when they are casting/attacking? That's a little confusing.",
+        "evidence": {
+          "id": "spell-four19-cues",
+          "revision": 1,
+          "briefId": "spell-intersection",
+          "variant": "cues",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-18T08:56:59.170Z",
+        "experiment": "spell-readability-v1",
+        "source": "sha256:3eab2014d6c60f477cec56e5c2dcd020401aee2aa4c66082121e8664fd219c60",
+        "scenario": "four-wizards",
+        "seed": 1,
+        "rotation": 0,
+        "time": 3.899999999999991,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "spell-crowded-opening",
+          "focusedVariant": "cues",
+          "clips": [
+            {
+              "variant": "current",
+              "start": 0.1,
+              "end": 3.9
+            },
+            {
+              "variant": "cues",
+              "start": 0.1,
+              "end": 3.9
+            }
+          ]
+        },
+        "panelTimes": [
+          3.899999999999991,
+          3.899999999999991
+        ],
+        "variants": [
+          "current",
+          "cues"
+        ],
+        "preference": "unsure",
+        "text": "I do like the rapid fire pulses on yellow, they juice the gatling feeling a bit more. There's something a bit unsatisfying about the black ring just being present on blue/green when they're in casting startup frames. Maybe if we added a fade in to it?",
+        "evidence": {
+          "id": "spell-four1-cues",
+          "revision": 1,
+          "briefId": "spell-crowded-opening",
+          "variant": "cues",
+          "start": 0.1,
+          "end": 3.9
+        }
+      },
+      {
+        "at": "2026-10-18T08:57:23.811Z",
+        "experiment": "spell-readability-v1",
+        "source": "sha256:3eab2014d6c60f477cec56e5c2dcd020401aee2aa4c66082121e8664fd219c60",
+        "scenario": "four-wizards",
+        "seed": 1,
+        "rotation": 0,
+        "time": 3.899999999999991,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "spell-crowded-opening",
+          "focusedVariant": "current",
+          "clips": [
+            {
+              "variant": "current",
+              "start": 0.1,
+              "end": 3.9
+            },
+            {
+              "variant": "cues",
+              "start": 0.1,
+              "end": 3.9
+            }
+          ]
+        },
+        "panelTimes": [
+          3.899999999999991,
+          3.899999999999991
+        ],
+        "variants": [
+          "current",
+          "cues"
+        ],
+        "preference": "unsure",
+        "text": "Coming back to this after watching B, it does feel less satisfying/impactful without the circles.",
+        "evidence": {
+          "id": "spell-four1-current",
+          "revision": 1,
+          "briefId": "spell-crowded-opening",
+          "variant": "current",
+          "start": 0.1,
+          "end": 3.9
+        }
+      },
+      {
+        "at": "2026-10-18T20:52:58.018Z",
+        "experiment": "spell-readability-v2",
+        "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+        "scenario": "duel",
+        "seed": 7,
+        "rotation": 0,
+        "time": 12.216666666666853,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "revision-spell-duel-hit-miss",
+          "focusedVariant": "rings",
+          "clips": [
+            {
+              "variant": "cues",
+              "start": 8.3,
+              "end": 12.6
+            },
+            {
+              "variant": "rings",
+              "start": 8.3,
+              "end": 12.6
+            },
+            {
+              "variant": "reaction",
+              "start": 8.3,
+              "end": 12.6
+            }
+          ]
+        },
+        "panelTimes": [
+          12.216666666666853,
+          12.216666666666853,
+          12.216666666666853
+        ],
+        "variants": [
+          "cues",
+          "rings",
+          "reaction"
+        ],
+        "preference": "unsure",
+        "text": "I think the circle for hit damage makes things a little too visually busy, and obscures the meaning of the circle when casting",
+        "evidence": {
+          "id": "v2-duel-7-rings",
+          "revision": 1,
+          "briefId": "revision-spell-duel-hit-miss",
+          "variant": "rings",
+          "start": 8.3,
+          "end": 12.6
+        }
+      },
+      {
+        "at": "2026-10-18T20:53:15.194Z",
+        "experiment": "spell-readability-v2",
+        "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+        "scenario": "duel",
+        "seed": 7,
+        "rotation": 0,
+        "time": 12.216666666666853,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "revision-spell-duel-hit-miss",
+          "focusedVariant": "reaction",
+          "clips": [
+            {
+              "variant": "cues",
+              "start": 8.3,
+              "end": 12.6
+            },
+            {
+              "variant": "rings",
+              "start": 8.3,
+              "end": 12.6
+            },
+            {
+              "variant": "reaction",
+              "start": 8.3,
+              "end": 12.6
+            }
+          ]
+        },
+        "panelTimes": [
+          12.216666666666853,
+          12.216666666666853,
+          12.216666666666853
+        ],
+        "variants": [
+          "cues",
+          "rings",
+          "reaction"
+        ],
+        "preference": "unsure",
+        "text": "The flash is maybe a little *too* busy, but this one is definitely the most legible of the 3",
+        "evidence": {
+          "id": "v2-duel-7-reaction",
+          "revision": 1,
+          "briefId": "revision-spell-duel-hit-miss",
+          "variant": "reaction",
+          "start": 8.3,
+          "end": 12.6
+        }
+      },
+      {
+        "at": "2026-10-18T20:54:38.714Z",
+        "experiment": "spell-readability-v2",
+        "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "revision-spell-intersection",
+          "focusedVariant": "reaction",
+          "clips": [
+            {
+              "variant": "cues",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "rings",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "reaction",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          8.85000000000002,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "cues",
+          "rings",
+          "reaction"
+        ],
+        "preference": "unsure",
+        "text": "This is both easily legible and less busy than the rings",
+        "evidence": {
+          "id": "v2-four-wizards-19-reaction",
+          "revision": 1,
+          "briefId": "revision-spell-intersection",
+          "variant": "reaction",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-18T20:56:35.373Z",
+        "experiment": "spell-readability-v2",
+        "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+        "scenario": "four-wizards",
+        "seed": 1,
+        "rotation": 0,
+        "time": 3.899999999999991,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "revision-spell-crowded-opening",
+          "focusedVariant": "reaction",
+          "clips": [
+            {
+              "variant": "cues",
+              "start": 0.1,
+              "end": 3.9
+            },
+            {
+              "variant": "rings",
+              "start": 0.1,
+              "end": 3.9
+            },
+            {
+              "variant": "reaction",
+              "start": 0.1,
+              "end": 3.9
+            }
+          ]
+        },
+        "panelTimes": [
+          3.899999999999991,
+          3.899999999999991,
+          3.899999999999991
+        ],
+        "variants": [
+          "cues",
+          "rings",
+          "reaction"
+        ],
+        "preference": "unsure",
+        "text": "We added outlines to make blue's ice attacks read more easily. The fireballs are also dark in color, or have outlines? This works for legibility but everything looks dirty and unappealing"
+      },
+      {
+        "at": "2026-10-18T20:57:28.760Z",
+        "experiment": "spell-readability-v2",
+        "source": "sha256:33d49827dade184e43953362b60bf729b1123c9b9492b504b242a6e7d2d351ad",
+        "scenario": "four-wizards",
+        "seed": 1,
+        "rotation": 0,
+        "time": 3.899999999999991,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "revision-spell-crowded-opening",
+          "focusedVariant": "reaction",
+          "clips": [
+            {
+              "variant": "cues",
+              "start": 0.1,
+              "end": 3.9
+            },
+            {
+              "variant": "rings",
+              "start": 0.1,
+              "end": 3.9
+            },
+            {
+              "variant": "reaction",
+              "start": 0.1,
+              "end": 3.9
+            }
+          ]
+        },
+        "panelTimes": [
+          3.899999999999991,
+          3.899999999999991,
+          3.899999999999991
+        ],
+        "variants": [
+          "cues",
+          "rings",
+          "reaction"
+        ],
+        "preference": "unsure",
+        "text": "Yeah I think flash/sparks on hit is the winner. It's both less noisy and more legible",
+        "evidence": {
+          "id": "v2-four-wizards-1-reaction",
+          "revision": 1,
+          "briefId": "revision-spell-crowded-opening",
+          "variant": "reaction",
+          "start": 0.1,
+          "end": 3.9
+        }
+      },
+      {
+        "at": "2026-10-19T03:17:02.596Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 6.899999999999981,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "porcelain",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          6.899999999999981,
+          8.683333333333344,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "The big ice crystal probably looks the worst in this one",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-porcelain",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "porcelain",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:18:33.507Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 7.016666666666647,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "observatory",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          6.899999999999981,
+          8.683333333333344,
+          7.016666666666647,
+          7.016666666666647,
+          7.016666666666647
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "Compared to Porcelain Lab, the slight glow at the edge of the crystal and the contrast vs. the darker background makes this ice crystal look a lot better",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-observatory",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "observatory",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:19:06.710Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 7.999999999999977,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "observatory",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          6.899999999999981,
+          8.683333333333344,
+          7.999999999999977,
+          7.016666666666647,
+          7.016666666666647
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "I'm a big fan of the geometric, explicitly magic aesthetic of this version overall",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-observatory",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "observatory",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:20:23.919Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "paper",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          6.899999999999981,
+          8.683333333333344,
+          7.999999999999977,
+          9.800000000000066,
+          7.016666666666647
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "This one is probably my least favorite overall. I do like the low-poly spheres for the players, but this one doesn't really read like \"paper\" to me, more like \"flatly lit basic blender donut\". There's something that feels \"3D game tutorial\" in a bad way about it.",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-paper",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "paper",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:21:24.572Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 8.683333333333344,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "photon",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          6.899999999999981,
+          8.683333333333344,
+          7.999999999999977,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "This one is easily my favorite of the batch. I like how high contrast the players and spells are vs. the background. I like the explicitly TRON-like arena & light-based spells.",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-photon",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "photon",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:22:02.189Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 7.333333333333313,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "photon",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          6.899999999999981,
+          7.333333333333313,
+          7.999999999999977,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "Spell projectile shapes feel more interesting here, probably owing to how different they are from all of the others",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-photon",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "photon",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:23:37.135Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 6.049999999999984,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "photon",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          6.899999999999981,
+          6.049999999999984,
+          7.999999999999977,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "I also like how the TRON aesthetic legitimizes the spectator aid visuals (targeting cones, facing arrows) and makes them plausibly diagetic",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-photon",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "photon",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:24:40.276Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "foundry",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          5.799999999999985,
+          9.800000000000066,
+          9.783333333333399,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "These are probably the second best spell projectiles after Photon Chamber",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-foundry",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "foundry",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:25:13.532Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "foundry",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          5.799999999999985,
+          9.800000000000066,
+          9.783333333333399,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "This one is visually coherent and quite interesting, probably the second best executed overall, but probably not the direction I want to go. Too industrial for me.",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-foundry",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "foundry",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:25:49.885Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "observatory",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          5.799999999999985,
+          9.800000000000066,
+          9.783333333333399,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "I would love to figure out what we can do to make me like this one more.",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-observatory",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "observatory",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:27:21.573Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 6.26666666666665,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "photon",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          5.799999999999985,
+          6.26666666666665,
+          5.799999999999985,
+          5.799999999999985,
+          5.799999999999985
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "I also *love* the translucency of the players in this one! Justified by the TRON aesthetic and really sells the \"everything is made of light\" concept.",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-photon",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "photon",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:27:58.872Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 5.799999999999985,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "porcelain",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          5.799999999999985,
+          7.499999999999979,
+          5.799999999999985,
+          5.799999999999985,
+          5.799999999999985
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "This one follows my original design the best. I can't put my finger on why it doesn't work well. I think the uniform lighting might have something to do with it. This one is and Paper Theater have the same problem, whatever that problem is. A \"beginner's 3D\" feeling.",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-porcelain",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "porcelain",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:30:44.744Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 5.799999999999985,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "observatory",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          5.799999999999985,
+          5.799999999999985,
+          5.799999999999985,
+          5.799999999999985,
+          5.799999999999985
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "The players being spheres probably clashes the most in this one?",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-observatory",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "observatory",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:31:43.065Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 5.799999999999985,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "observatory",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          5.799999999999985,
+          5.799999999999985,
+          5.799999999999985,
+          5.799999999999985,
+          5.799999999999985
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "I do really like how the player colors look and how the hats are rendered",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-observatory",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "observatory",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T03:32:47.977Z",
+        "experiment": "art-direction-v1",
+        "source": "sha256:b660aa196a4cc93d6b15c1989a2edeaa488159cc5f74ff380203d1b1dd059682",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-spell-intersection",
+          "focusedVariant": "paper",
+          "clips": [
+            {
+              "variant": "porcelain",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          5.799999999999985,
+          5.799999999999985,
+          5.799999999999985,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain",
+          "photon",
+          "observatory",
+          "paper",
+          "foundry"
+        ],
+        "preference": "unsure",
+        "text": "In a second iteration I'd want to see either more explicitly paper or a different non-paper take on what this concept values.",
+        "evidence": {
+          "id": "art-v1-four-wizards-19-paper",
+          "revision": 1,
+          "briefId": "art-spell-intersection",
+          "variant": "paper",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:34:44.875Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "photon-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "The loss of the grid lines on the walls make them hard to see",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-photon-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "photon-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:35:29.066Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "photon-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "I think we added latitude/longitude mesh style lines to the players? It looks a bit noisy.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-photon-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "photon-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:36:29.420Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 6.966666666666647,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "observatory-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          6.966666666666647,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "The big ice crystal looks cool here",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-observatory-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "observatory-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:36:51.404Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 7.333333333333313,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "porcelain-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          7.333333333333313,
+          9.800000000000066,
+          6.966666666666647,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "I don't like fireballs being shiny pellets",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-porcelain-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "porcelain-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:39:35.187Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "paper-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          5.949999999999984,
+          9.700000000000061,
+          6.966666666666647,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "I think we took the low poly thing too far here. The players read as D20s instead of low-poly spheres, owing to the bright edges them read as sharp folds.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-paper-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "paper-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:40:43.926Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "foundry-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          5.949999999999984,
+          9.700000000000061,
+          6.966666666666647,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "This one is the most strongly improved and is a competitor for second best now. The overhaul makes it look more like a fight in a large dungeon boss room. The wall/corner decorations help a lot with that, as well as the change in palette.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-foundry-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "foundry-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:41:54.429Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "observatory-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          5.949999999999984,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "The robed wizards is a potential direction we could explore. I don't love it yet, but I could see it eventually becoming good. This is promising, but it needs more work.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-observatory-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "observatory-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:42:31.778Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "porcelain-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "Porcelain was an interesting experiment but I think we cut this one. It's just not the right material for what we're doing here.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-porcelain-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "porcelain-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:43:24.911Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "paper-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "The \"paper\" concept shows okay in the walls/floor now, but not on the players.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-paper-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "paper-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:43:45.244Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "paper-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "I think we cut this one. I haven't seen enough improvement to convince me that this direction is worth pursuing.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-paper-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "paper-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:44:26.631Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "photon-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "This one is still the strongest. I actually need to see a comparison with Photon Chamber v1 to see what the differences are because I have the sense that some things got a little worse.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-photon-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "photon-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:45:13.080Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "photon-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "No walls might not be the worst thing. Gives it a floating-in-space, Smash Bros Final Destination appeal. I'd consider that a divergent thread of exploration.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-photon-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "photon-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      {
+        "at": "2026-10-19T05:46:04.621Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "observatory-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "I still really like the colors and theming of this one. We should keep it and explore more",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-observatory-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "observatory-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      }
+    ]
+  }
+}

@@ -1,12 +1,14 @@
 import * as THREE from 'three';
 import { revisedArena, revisedFigure, revisedProjectile, revisedShard } from './artDirectionRevision';
+import { explorationArena, explorationFigure, explorationProjectile, explorationShard, type ArtBranch } from './artExplorations';
+import { ART_EXPLORATION_STYLES } from './artExplorationStyles';
 import { ARENA } from '../config';
 import { ring, glow } from './primitives';
 
 export type ArtFamily = 'porcelain' | 'photon' | 'observatory' | 'paper' | 'foundry';
-export type ArtDirection = ArtFamily | `${ArtFamily}-v2`;
+export type ArtDirection = ArtFamily | `${ArtFamily}-v2` | `photon-${'calibration' | 'vector' | 'wave'}` | `observatory-${'armillary' | 'astral' | 'archive'}` | `foundry-${'cloister' | 'geode' | 'ember'}`;
 export interface ArtStyle {
-  id: ArtDirection; family?: ArtFamily; revision?: 2; name: string; vision: string; fit: string;
+  id: ArtDirection; family?: ArtFamily; revision?: 2 | 3; branch?: ArtBranch; name: string; vision: string; fit: string;
   background: number; floor: number; wall: number; line: number; accent: number;
   fire: number; fireCore: number; ice: number; iceCore: number;
   fighters: number[]; roughness: number; metalness: number;
@@ -54,7 +56,7 @@ export const ART_REVISION_STYLES: ArtStyle[] = ART_STYLES.map(base => {
   return { ...base, ...updates[base.id], family: base.id as ArtFamily, id: `${base.id}-v2` as ArtDirection, revision: 2 };
 });
 export function artFamily(style?: ArtStyle): ArtFamily | undefined { return style?.family ?? style?.id as ArtFamily | undefined; }
-export function artStyle(id?: ArtDirection): ArtStyle | undefined { return [...ART_STYLES, ...ART_REVISION_STYLES].find(s => s.id === id); }
+export function artStyle(id?: ArtDirection): ArtStyle | undefined { return [...ART_STYLES, ...ART_REVISION_STYLES, ...ART_EXPLORATION_STYLES].find(s => s.id === id); }
 export function fighterColor(style: ArtStyle, id: string): number {
   return style.fighters[Math.max(0, ['red', 'blue', 'green', 'yellow'].indexOf(id))];
 }
@@ -72,6 +74,7 @@ function line(group: THREE.Group, points: number[], color: number, opacity = 1) 
 
 /** Room geometry is presentation only. The world keeps its exact square bounds. */
 export function buildArtArena(style: ArtStyle): THREE.Group {
+  if (style.revision === 3) return explorationArena(style);
   if (style.revision === 2) return revisedArena(style);
   const group = new THREE.Group(); group.name = `art-room:${style.id}`;
   const { width: w, depth: d, height: h } = ARENA;
@@ -163,6 +166,7 @@ export function buildArtArena(style: ArtStyle): THREE.Group {
 }
 
 export function styleFigure(figure: THREE.Group, style: ArtStyle, id: string): void {
+  if (style.revision === 3) return explorationFigure(figure, style, id);
   if (style.revision === 2) return revisedFigure(figure, style, id);
   const color = fighterColor(style, id);
   for (const node of figure.children) if (node instanceof THREE.Mesh && node.material instanceof THREE.MeshToonMaterial) {
@@ -193,6 +197,7 @@ function energy(style: ArtStyle, color: number, opacity = 1): THREE.MeshBasicMat
 
 /** +X is travel direction. Shape, layering and motion distinguish the visions. */
 export function artProjectile(style: ArtStyle, radius: number, ice: boolean) {
+  if (style.revision === 3) return explorationProjectile(style, radius, ice);
   if (style.revision === 2) return revisedProjectile(style, radius, ice);
   const group = new THREE.Group();
   const color = ice ? style.ice : style.fire, core = ice ? style.iceCore : style.fireCore;
@@ -245,6 +250,7 @@ export function artProjectile(style: ArtStyle, radius: number, ice: boolean) {
 }
 
 export function artShard(style: ArtStyle) {
+  if (style.revision === 3) return explorationShard(style);
   if (style.revision === 2) return revisedShard(style);
   const group = new THREE.Group();
   const body = new THREE.Mesh(new THREE.OctahedronGeometry(22), surface(style, style.ice)); body.scale.set(0.7,3,0.7); group.add(body);

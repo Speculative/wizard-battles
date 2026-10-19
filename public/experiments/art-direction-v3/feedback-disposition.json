@@ -1,0 +1,890 @@
+{
+  "intake": "owner-feedback/2026-10-19.json",
+  "commentCount": 13,
+  "dispositions": [
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:34:44.875Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "photon-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "The loss of the grid lines on the walls make them hard to see",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-photon-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "photon-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Restore visible wall grid in Calibration Hall; independently test explicit wallless Vector Deck. Retain Photon v1/v2 links and renderers."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:35:29.066Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "photon-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "I think we added latitude/longitude mesh style lines to the players? It looks a bit noisy.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-photon-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "photon-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Remove sphere wireframe meshes from all Photon branches; use sparse contour bands, angular core, or rounded light nuclei instead."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:36:29.420Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 6.966666666666647,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "observatory-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          6.966666666666647,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "The big ice crystal looks cool here",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-observatory-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "observatory-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Preserve aquamarine crystal scale, bright facet edge/core and orbital treatment in all academy branches."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:36:51.404Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 7.333333333333313,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "porcelain-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          7.333333333333313,
+          9.800000000000066,
+          6.966666666666647,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "I don't like fireballs being shiny pellets",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-porcelain-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "porcelain-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Cut Porcelain from the active lineup, as explicitly requested; preserve earlier media/comments."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:39:35.187Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "paper-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          5.949999999999984,
+          9.700000000000061,
+          6.966666666666647,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "I think we took the low poly thing too far here. The players read as D20s instead of low-poly spheres, owing to the bright edges them read as sharp folds.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-paper-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "paper-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Cut Paper from the active lineup, as explicitly requested; do not extrapolate sharp paper folds into all fighters."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:40:43.926Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "foundry-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          5.949999999999984,
+          9.700000000000061,
+          6.966666666666647,
+          9.800000000000066,
+          9.800000000000066
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "This one is the most strongly improved and is a competitor for second best now. The overhaul makes it look more like a fight in a large dungeon boss room. The wall/corner decorations help a lot with that, as well as the change in palette.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-foundry-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "foundry-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Preserve the dungeon setting and physical spell recipe, branching into carved jade, raw geode cavity and volcanic stone sanctum."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:41:54.429Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "observatory-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          5.949999999999984,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "The robed wizards is a potential direction we could explore. I don't love it yet, but I could see it eventually becoming good. This is promising, but it needs more work.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-observatory-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "observatory-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Develop shoulder/face/belt shapes in Armillary Hall and slim book-bearing scholars in Archive; Astral Terrace independently revisits celestial spheres."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:42:31.778Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "porcelain-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "Porcelain was an interesting experiment but I think we cut this one. It's just not the right material for what we're doing here.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-porcelain-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "porcelain-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Cut Porcelain from the active lineup; retain historical rooms and evidence."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:43:24.911Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "paper-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "The \"paper\" concept shows okay in the walls/floor now, but not on the players.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-paper-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "paper-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Cut Paper from the active lineup; retain historical rooms and evidence."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:43:45.244Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "paper-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "I think we cut this one. I haven't seen enough improvement to convince me that this direction is worth pursuing.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-paper-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "paper-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Cut Paper from the active lineup; retain historical rooms and evidence."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:44:26.631Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "photon-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "This one is still the strongest. I actually need to see a comparison with Photon Chamber v1 to see what the differences are because I have the sense that some things got a little worse.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-photon-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "photon-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Keep Photon as benchmark and expose unchanged v1 and v2 alongside all three Photon branches via baselines=1; retain dedicated v1/v2 comparison."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:45:13.080Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "photon-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "No walls might not be the worst thing. Gives it a floating-in-space, Smash Bros Final Destination appeal. I'd consider that a divergent thread of exploration.",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-photon-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "photon-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Build Vector Deck as a floating square simulation platform with visible bounds, distant stars and no walls."
+    },
+    {
+      "ownerComment": {
+        "at": "2026-10-19T05:46:04.621Z",
+        "experiment": "art-direction-v2",
+        "source": "sha256:59a0d1eea0a681fb5ed5e9a0290d14cb0cac44d0e5814ef23d78e5fe9f0f87a2",
+        "scenario": "four-wizards",
+        "seed": 19,
+        "rotation": 0,
+        "time": 9.800000000000066,
+        "viewing": {
+          "mode": "evidence",
+          "briefId": "art-v2-spell-intersection",
+          "focusedVariant": "observatory-v2",
+          "clips": [
+            {
+              "variant": "porcelain-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "photon-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "observatory-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "paper-v2",
+              "start": 5.8,
+              "end": 9.8
+            },
+            {
+              "variant": "foundry-v2",
+              "start": 5.8,
+              "end": 9.8
+            }
+          ]
+        },
+        "panelTimes": [
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          9.800000000000066,
+          7.816666666666644
+        ],
+        "variants": [
+          "porcelain-v2",
+          "photon-v2",
+          "observatory-v2",
+          "paper-v2",
+          "foundry-v2"
+        ],
+        "preference": "unsure",
+        "text": "I still really like the colors and theming of this one. We should keep it and explore more",
+        "evidence": {
+          "id": "art-v2-four-wizards-19-observatory-v2",
+          "revision": 1,
+          "briefId": "art-v2-spell-intersection",
+          "variant": "observatory-v2",
+          "start": 5.8,
+          "end": 9.8
+        }
+      },
+      "designerAction": "Protect the plum/brass/aquamarine palette and astronomical research theme in all three academy branches."
+    }
+  ]
+}

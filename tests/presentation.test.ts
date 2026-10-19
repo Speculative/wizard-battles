@@ -172,9 +172,10 @@ test('revised emitted shots replace their parent release pulse', () => {
   view.dispose();
 });
 
+import { ART_EXPLORATION_STYLES } from '../src/presentation/artExplorationStyles';
 import { ART_STYLES, ART_REVISION_STYLES } from '../src/presentation/artDirection';
-test('both art rounds preserve combat, reconstruct and release resources', () => {
-  const allStyles = [...ART_STYLES, ...ART_REVISION_STYLES];
+test('all art rounds preserve combat, reconstruct and release resources', () => {
+  const allStyles = [...ART_STYLES, ...ART_REVISION_STYLES, ...ART_EXPLORATION_STYLES];
   const worlds = Array.from({ length: allStyles.length + 1 }, () => createScenario({ scenario: 'four-wizards', seed: 1, variant: 'burst' }));
   const camera = new THREE.OrthographicCamera();
   const views = worlds.map((world, i) => new BattleView(world, camera, { spellReadability: 'reaction', artDirection: allStyles[i-1]?.id, trails: false }));
