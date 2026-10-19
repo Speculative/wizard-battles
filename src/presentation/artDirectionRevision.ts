@@ -26,6 +26,10 @@ export function revisedArena(s:ArtStyle):T.Group {
   const f=family(s);
   box(g,s.floor,[1000,22,1000],[0,-13,0],f==='porcelain'?.23:.8);
   box(g,s.wall,[1000,350,14],[0,175,-507]);box(g,s.wall,[14,350,1000],[-507,175,0]);
+  if (f === 'photon') for (const roomSurface of g.children as T.Mesh[]) {
+    (roomSurface.material as T.Material).dispose();
+    roomSurface.material = mat(roomSurface === g.children[0] ? s.floor : s.wall, s.roughness, s.metalness);
+  }
   // All dressing stays outside the gameplay surface or sits flush with it.
   if(f==='porcelain') {
     // Celadon alcoves, warm ceramic ribs and a quiet inlaid practice circle.
