@@ -40,7 +40,7 @@ try {
     const page = await browser.newPage({ viewport: { width: 960, height: 540 }, deviceScaleFactor: 1 });
     page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
-    const url = new URL(server.resolvedUrls!.local[0]);
+    const url = new URL('watch.html', server.resolvedUrls!.local[0]);
     for (const [key, value] of Object.entries({ ...config, capture: 1 })) url.searchParams.set(key, String(value));
     await page.goto(url.href);
     await page.waitForFunction(() => !!(window as any).battle);

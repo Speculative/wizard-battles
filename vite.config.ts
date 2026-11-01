@@ -7,5 +7,5 @@ export default defineConfig({
   plugins: [feedbackServer()],
   base: "./",
   define: { __BUILD_SOURCE__: JSON.stringify(sourceIdentity()) },
-  build: { rollupOptions: { input: { main: "index.html", compare: "compare.html" } } },
+  build: { rollupOptions: { input: { main: "index.html", watch: "watch.html", compare: "compare.html" } } },
 });

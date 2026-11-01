@@ -32,7 +32,7 @@ const output = resolve(flags.get('out') ?? `runs-experiment/${new Date().toISOSt
 mkdirSync(dirname(output), { recursive: true }); mkdirSync(output);
 const provenance = { source: sourceIdentity(), commit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), createdAt: new Date().toISOString(), dt: EXPERIMENT.dt, maxSeconds, seeds, scenarios: EXPERIMENT.scenarios, rotations: EXPERIMENT.rotations, node: process.version, sampleHz: 10 };
 writeFileSync(join(output, 'provenance.json'), JSON.stringify(provenance, null, 2));
-const sourceFiles = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--', 'src', 'scripts', 'package.json', 'package-lock.json', 'vite.config.ts', 'index.html', 'compare.html', 'tsconfig.json'], { encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+const sourceFiles = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--', 'src', 'scripts', 'package.json', 'package-lock.json', 'vite.config.ts', 'index.html', 'watch.html', 'compare.html', 'tsconfig.json'], { encoding: 'utf8' }).trim().split('\n').filter(Boolean);
 for (const file of new Set(sourceFiles)) { const dest = join(output, 'source', file); mkdirSync(dirname(dest), { recursive: true }); copyFileSync(file, dest); }
 const runs: ReturnType<typeof summarizeRun>[] = [];
 for (const scenario of EXPERIMENT.scenarios) for (const seed of seeds) for (const rotation of EXPERIMENT.rotations) for (const variant of VARIANTS) {

@@ -2,7 +2,7 @@
 
 Keep TypeScript + Three.js: the simulation uses plain numeric state with no renderer; Three.js remains a presentation dependency and supplies practical WebGL screenshots/video without an engine migration.
 
-Start `npm run dev`, then open `http://localhost:5173/?scenario=four-wizards&seed=1&variant=baseline&capture=1&time=8`. Capture mode pauses at the nearest 1/60-second simulation tick and uses pixel ratio 1. Live mode uses the same fixed simulation step with a wall-time accumulator. `effects=0`, `trails=0`, and `visualSeed=42` change presentation only. Unknown scenarios or variants fail explicitly.
+Start `npm run dev`, then open `http://localhost:5173/watch.html?scenario=four-wizards&seed=1&variant=baseline&capture=1&time=8`. Capture mode pauses at the nearest 1/60-second simulation tick and uses pixel ratio 1. Live mode uses the same fixed simulation step with a wall-time accumulator. `effects=0`, `trails=0`, and `visualSeed=42` change presentation only. Unknown scenarios or variants fail explicitly.
 
 The browser exposes `window.battle`:
 

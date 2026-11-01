@@ -24,7 +24,7 @@ const width = number('width', 1280), height = number('height', 720);
 if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) throw new Error('width and height must be positive integers');
 const output = resolve(flags.get('out') ?? `captures/seed-${flags.get('seed') ?? 1}`);
 await mkdir(output, { recursive: true });
-const url = new URL(flags.get('url') ?? 'http://127.0.0.1:5173');
+const url = new URL(flags.get('url') ?? 'http://127.0.0.1:5173/watch.html');
 url.searchParams.set('capture', '1');
 url.searchParams.set('time', String(time));
 for (const key of ['scenario', 'seed', 'variant', 'visualSeed', 'rotation', 'effects', 'trails']) if (flags.has(key)) url.searchParams.set(key, flags.get(key)!);

@@ -1,16 +1,20 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wizard Battles</title>
-    <link rel="stylesheet" href="/src/style.css" />
-  </head>
-  <body>
-    <div id="arena-container">
-      <canvas id="arena"></canvas>
-    </div>
-    <a class="experiment-link" href="./compare.html">Experiment room ↗</a>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wizard Battles · Experiments</title>
+  <link rel="stylesheet" href="/src/portal.css" />
+</head>
+<body>
+  <main>
+    <header><p class="eyebrow">Wizard Battles</p><h1>The experiment library</h1>
+      <p>Explore the ideas shaping our battles. Each room brings together the alternatives, selected fight excerpts and saved feedback.</p>
+      <a class="watch" href="./watch.html">Watch a match right now ↗</a>
+    </header>
+    <div id="experiments"></div>
+    <footer>Earlier rounds stay available with their original comparisons and comments.</footer>
+  </main>
+  <script type="module" src="/src/portal.ts"></script>
+</body>
 </html>
