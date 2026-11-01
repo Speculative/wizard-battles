@@ -13,11 +13,12 @@ try {
   await page.goto(base);
   await page.getByRole('heading', { name: 'The experiment library' }).waitFor();
   const links = await page.locator('h3 a').evaluateAll(nodes => nodes.map(node => (node as HTMLAnchorElement).href));
-  const published = (await readdir('public/experiments', { withFileTypes: true })).filter(entry => entry.isDirectory()).map(entry => entry.name).sort();
-  assert.deepEqual(links.map(link => new URL(link).searchParams.get('experiment')).sort(), published);
+  const metadata = await Promise.all((await readdir('src/experiments')).filter(file => file.endsWith('.ts')).map(async file =>
+    (await import(`../src/experiments/${file}`)).default));
+  assert.deepEqual([...links].sort(), metadata.map(entry => new URL(entry.href, base).href).sort());
   for (const link of links) {
     await page.goto(link);
-    await page.waitForFunction(() => !!(window as any).comparison);
+    if (new URL(link).pathname.endsWith('/compare.html')) await page.waitForFunction(() => !!(window as any).comparison);
     assert.ok(await page.locator('h1').textContent());
     await page.getByRole('link', { name: 'Wizard Battles / All experiments' }).click();
     await page.getByRole('heading', { name: 'The experiment library' }).waitFor();
